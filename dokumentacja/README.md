@@ -1,0 +1,11 @@
+* Zrobienie minimum 3 plansz,
+* Layout układu wież,
+* Modele jednostek/wież,
+* Zaprogramowanie jednostek/wież,
+* Menu,
+* Ustawienia,
+* Logo Gry,
+* Interface,
+* ustalenie cen jednostek,
+* dodanie buffów,
+* rozplanowanie wsparcia powietrznego;
