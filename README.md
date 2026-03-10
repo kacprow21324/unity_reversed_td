@@ -48,4 +48,4 @@ Dostępne warianty wozów bojowych, z których gracz komponuje swoją falę uder
 
 * Jakub Błażko
 * Michał Lepak
-*
+* Kacper Woszczyło
