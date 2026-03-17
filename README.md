@@ -47,5 +47,6 @@ Dostępne warianty wozów bojowych, z których gracz komponuje swoją falę uder
 ### Autorzy:
 
 * Jakub Błażko
+* Adrian Witów
 * Michał Lepak
 * Kacper Woszczyło
