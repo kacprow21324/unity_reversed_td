@@ -50,3 +50,4 @@ Dostępne warianty wozów bojowych, z których gracz komponuje swoją falę uder
 * Adrian Witów
 * Michał Lepak
 * Kacper Woszczyło
+* Magdalena Czyżewska
