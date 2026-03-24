@@ -13,7 +13,7 @@ Projekt w silniku Unity odwraca klasyczne założenia Tower Defense, oddając gr
 
 ---
 
-## DOKUMENTACJA PROJEKTU:
+### Dokumentacja:
 [GDD.pdf](./dokumentacja/GDD.pdf)
 
 ---
