@@ -14,7 +14,7 @@ Projekt w silniku Unity odwraca klasyczne założenia Tower Defense, oddając gr
 ---
 
 ## DOKUMENTACJA PROJEKTU:
-[GDD.pdf](https://github.com/kacprow21324/unity_reversed_td/dokumentacja/GDD.pdf)
+[GDD.pdf](./dokumentacja/GDD.pdf)
 
 ---
 
