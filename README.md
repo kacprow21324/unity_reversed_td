@@ -13,8 +13,12 @@ Projekt w silniku Unity odwraca klasyczne założenia Tower Defense, oddając gr
 
 ---
 
-### Dokumentacja:
-[GDD.pdf](./dokumentacja/GDD.pdf)
+### DOKUMENTACJA PROJEKTU:
+
+| Nazwa Dokumentu | Opis | Odnośnik |
+| :--- | :--- | :---: |
+| **Game Design Document** | Pełna koncepcja gry, mechaniki i świat przedstawiony. | [PDF](./dokumentacja/GDD.pdf) |
+| **Milestones** | Szczegółowy harmonogram prac i kamienie milowe. | [PDF](./dokumentacja/milstone.pdf) |
 
 ---
 
