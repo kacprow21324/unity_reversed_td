@@ -582,7 +582,7 @@ GameObject:
   - component: {fileID: 539123206}
   - component: {fileID: 539123205}
   m_Layer: 0
-  m_Name: teren3
+  m_Name: teren4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
