@@ -49,7 +49,6 @@ public class WiezaAtak : MonoBehaviour
 
         if (skryptPocisku != null)
         {
-            // Mówimy pociskowi, jaki jest jego cel
             skryptPocisku.UstawCel(cel);
         }
     }

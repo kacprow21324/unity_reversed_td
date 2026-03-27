@@ -24,4 +24,9 @@ public class pojazd : MonoBehaviour
     {
         Destroy(gameObject);
     }
+
+    public float PobierzAktualneHP()
+    {
+        return aktualneHp;
+    }
 }

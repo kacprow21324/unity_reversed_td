@@ -38,7 +38,7 @@ public class Pocisk : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
      
-        if (other.gameObject.layer == LayerMask.NameToLayer("Wrog"))
+        if (other.gameObject.layer == LayerMask.NameToLayer("POJAZD"))
         {
            
             pojazd p = other.GetComponent<pojazd>();
