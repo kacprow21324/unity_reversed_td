@@ -4,7 +4,19 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/mapy/menu.unity
+    guid: 945383e05436f544f925cc7eb02ee1d9
+  - enabled: 1
+    path: Assets/mapy/teren1/teren1.unity
+    guid: 09bdf0253bacdb9418d8183b6d937bb5
+  - enabled: 1
+    path: Assets/mapy/teren2/teren2.unity
+    guid: 41f360aa4c1596646a2e81980d2b0f71
+  - enabled: 1
+    path: Assets/mapy/teren3/teren3.unity
+    guid: fb93af33144e70943a995a43dc578ba6
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   m_UseUCBPForAssetBundles: 0
