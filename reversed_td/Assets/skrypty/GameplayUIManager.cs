@@ -47,7 +47,7 @@ public class GameplayUIManager : MonoBehaviour
                 if (config.vehicles[i].icon != null)
                     vehicleSlots[i].iconImage.sprite = config.vehicles[i].icon;
 
-                // --- NOWE: Podpiêcie klikniêcia przycisku ---
+                // --- NOWE: Podpiï¿½cie klikniï¿½cia przycisku ---
                 int index = i;
                 int cost = config.vehicles[i].cost;
                 vehicleSlots[i].button.onClick.AddListener(() =>
@@ -71,6 +71,12 @@ public class GameplayUIManager : MonoBehaviour
         UpdateGoldDisplay();
     }
 
+    public void AddGold(int amount)
+    {
+        _currentGold += amount;
+        UpdateGoldDisplay();
+    }
+
     public bool TrySpendGold(int amount)
     {
         if (_currentGold >= amount)
@@ -79,11 +85,11 @@ public class GameplayUIManager : MonoBehaviour
             UpdateGoldDisplay();
             return true; // Udany zakup
         }
-        return false; // Brak œrodków
+        return false; // Brak ï¿½rodkï¿½w
     }
 
     private void UpdateGoldDisplay()
     {
-        goldText.text = "Z³oto: " + _currentGold;
+        goldText.text = "Zï¿½oto: " + _currentGold;
     }
 }
