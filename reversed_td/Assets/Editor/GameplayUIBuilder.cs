@@ -127,7 +127,7 @@ public class GameplayUIBuilder : EditorWindow
         csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         scroll.content = contentRt;
 
-        uiManager.queueContent = contentRt;
+        uiManager.attackQueueContainer = contentRt;
 
         // ── Panel Statystyk + Start (79-100%) ────────────────────────────
         var statsGO = MakeArea("StatsPanel", bottomGO.transform,
@@ -142,7 +142,7 @@ public class GameplayUIBuilder : EditorWindow
         statsVLG.childForceExpandWidth  = true;
         statsVLG.childAlignment      = TextAnchor.MiddleCenter;
 
-        uiManager.phaseText = MakeStatText("PhaseText",  statsGO.transform, "◉ PLANOWANIE", 16f, C_Green);
+        uiManager.phaseText = MakeStatText("PhaseText",  statsGO.transform, "PLANOWANIE", 16f, C_Green);
         uiManager.roundText = MakeStatText("RoundText",  statsGO.transform, "Runda: 1",     15f, C_Text);
         uiManager.goldText  = MakeStatText("GoldText",   statsGO.transform, "Złoto: 200",   18f, C_Gold);
 
@@ -201,13 +201,14 @@ public class GameplayUIBuilder : EditorWindow
         nmTxtRt.offsetMin = new Vector2(8f, 4f);
         nmTxtRt.offsetMax = new Vector2(-8f, -4f);
         var nmTxt = nmTxtGO.AddComponent<TextMeshProUGUI>();
-        nmTxt.text      = "✕  Brak złota!";
+        nmTxt.text      = "Brak zlota";
         nmTxt.fontSize  = 22f;
         nmTxt.fontStyle = FontStyles.Bold;
         nmTxt.color     = Color.white;
         nmTxt.alignment = TextAlignmentOptions.Center;
 
-        uiManager.noMoneyText = nmTxt;
+        uiManager.noMoneyText  = nmTxt;
+        uiManager.noMoneyPanel = noMoneyGO;
         noMoneyGO.SetActive(false);
 
         // ── Zapisz ──────────────────────────────────────────────────────

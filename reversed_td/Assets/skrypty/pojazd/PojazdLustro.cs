@@ -76,7 +76,7 @@ public class PojazdLustro : pojazd
 
     WiezaBaza ZnajdzNajblizszeWieze()
     {
-        WiezaBaza[] wiezy = FindObjectsOfType<WiezaBaza>();
+        WiezaBaza[] wiezy = FindObjectsByType<WiezaBaza>(FindObjectsSortMode.None);
         WiezaBaza najblisza = null;
         float minDyst = float.MaxValue;
 

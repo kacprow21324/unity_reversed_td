@@ -36,27 +36,45 @@ public class GameplayUIManager : MonoBehaviour
     public TextMeshProUGUI roundText;
     public TextMeshProUGUI phaseText;
 
-    [Header("Sklep – sloty pojazdów")]
+    [Header("Tekst HUD")]
+    [SerializeField] private string prefixZloto = "Zloto: ";
+    [SerializeField] private string prefixRunda = "Runda: ";
+
+    [Header("Tekst Faz")]
+    [SerializeField] private string labelPlanowanie = "PLANOWANIE";
+    [SerializeField] private string labelAtak       = "ATAK";
+    [SerializeField] private Color  colorPlanowanie = new Color(0.25f, 0.9f, 0.45f);
+    [SerializeField] private Color  colorAtak       = new Color(1f,    0.4f, 0.15f);
+
+    [Header("Sklep - sloty pojazdow")]
     public VehicleUISlot[] vehicleSlots = new VehicleUISlot[5];
 
     [Header("Panel Kolejki")]
-    public Transform queueContent;         // Content ScrollRect-a
+    public Transform  attackQueueContainer;
+    public GameObject queueButtonPrefab;
 
     [Header("Kontrolki")]
-    public Button startButton;
+    public Button          startButton;
     public TextMeshProUGUI startButtonText;
-    public TextMeshProUGUI noMoneyText;    // migający napis „Brak złota!"
+    [SerializeField] private string labelStartPusty    = "START";
+    [SerializeField] private string labelStartZKolejka = "START ({0})";
+
+    [Header("Informacja - Brak Zlota")]
+    public TextMeshProUGUI noMoneyText;
+    public GameObject      noMoneyPanel;
+    [SerializeField] private string noMoneyMessage  = "Brak zlota";
+    [SerializeField] private float  noMoneyDuration = 1.5f;
 
     // ── Stan wewnętrzny ──────────────────────────────────────────────────
 
-    private int _currentGold;
-    private int _currentRound = 1;
-    private bool _isPlanning = true;
+    private int  _currentGold;
+    private int  _currentRound    = 1;
+    private bool _isPlanning      = true;
     private bool _spawningComplete = false;
-    private int _activeVehicles = 0;
+    private int  _activeVehicles  = 0;
 
-    private readonly List<QueueEntry>   _queue       = new List<QueueEntry>();
-    private readonly List<GameObject>   _queueItems  = new List<GameObject>();
+    private readonly List<QueueEntry>  _queue      = new List<QueueEntry>();
+    private readonly List<GameObject>  _queueItems = new List<GameObject>();
     private Coroutine _noMoneyCoroutine;
 
     // ── Unity lifecycle ──────────────────────────────────────────────────
@@ -64,7 +82,7 @@ public class GameplayUIManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        Time.timeScale = 0f;   // Pauza na starcie → Faza Planowania
+        Time.timeScale = 0f;
     }
 
     void Start()
@@ -72,16 +90,43 @@ public class GameplayUIManager : MonoBehaviour
         if (config == null) { Debug.LogError("UIManager: brak GameConfig!"); return; }
 
         _currentGold = config.startingGold;
+
+        BuildNoMoneyTextIfMissing();
+
         RefreshHUD();
         SetupShopButtons();
 
         if (startButton != null)
             startButton.onClick.AddListener(OnStartClicked);
 
-        if (noMoneyText != null)
-            noMoneyText.gameObject.SetActive(false);
-
         SyncStartButton();
+    }
+
+    void BuildNoMoneyTextIfMissing()
+    {
+        if (noMoneyText != null) return;
+
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (canvas == null) return;
+
+        var go = new GameObject("NoMoneyText");
+        go.transform.SetParent(canvas.transform, false);
+
+        var rt               = go.AddComponent<RectTransform>();
+        rt.anchorMin         = new Vector2(0.5f, 0.5f);
+        rt.anchorMax         = new Vector2(0.5f, 0.5f);
+        rt.pivot             = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition  = Vector2.zero;
+        rt.sizeDelta         = new Vector2(420f, 90f);
+
+        noMoneyText           = go.AddComponent<TextMeshProUGUI>();
+        noMoneyText.text      = noMoneyMessage;
+        noMoneyText.color     = Color.red;
+        noMoneyText.fontSize  = 40f;
+        noMoneyText.fontStyle = FontStyles.Bold;
+        noMoneyText.alignment = TextAlignmentOptions.Center;
+
+        go.SetActive(false);
     }
 
     // ══ FAZY ══════════════════════════════════════════════════════════════
@@ -113,6 +158,9 @@ public class GameplayUIManager : MonoBehaviour
         _activeVehicles   = 0;
         _currentRound++;
 
+        if (GameStatistics.Instance != null)
+            GameStatistics.Instance.wavesSurvived++;
+
         Time.timeScale = 0f;
 
         foreach (var s in vehicleSlots)
@@ -131,6 +179,9 @@ public class GameplayUIManager : MonoBehaviour
         int cost = config.vehicles[index].cost;
         if (!TrySpendGold(cost)) { FlashNoMoney(); return; }
 
+        if (GameStatistics.Instance != null)
+            GameStatistics.Instance.totalGoldSpent += cost;
+
         var entry = new QueueEntry { vehicleIndex = index, cost = cost };
         _queue.Add(entry);
         BuildQueueItem(entry);
@@ -141,85 +192,39 @@ public class GameplayUIManager : MonoBehaviour
 
     void BuildQueueItem(QueueEntry entry)
     {
-        if (queueContent == null) return;
+        if (attackQueueContainer == null || queueButtonPrefab == null) return;
 
-        var item = new GameObject("QI");
-        item.transform.SetParent(queueContent, false);
+        var btn = Instantiate(queueButtonPrefab, attackQueueContainer);
 
-        // Wymagany przez VerticalLayoutGroup
-        var le = item.AddComponent<LayoutElement>();
-        le.preferredHeight  = 48f;
-        le.flexibleWidth    = 1f;
-        le.minHeight        = 40f;
+        var txt = btn.GetComponentInChildren<TextMeshProUGUI>();
+        if (txt != null)
+        {
+            string vName = config.vehicles[entry.vehicleIndex].vehicleName;
+            txt.text = vName.Length > 0 ? vName[0].ToString() : "?";
+        }
 
-        var bg = item.AddComponent<Image>();
-        bg.color = new Color(0.15f, 0.2f, 0.28f, 1f);
+        var button = btn.GetComponent<Button>();
+        if (button != null)
+            button.onClick.AddListener(() => OnRefundQueueItem(entry, btn));
 
-        // Nazwa pojazdu
-        var nameGO = new GameObject("N");
-        nameGO.transform.SetParent(item.transform, false);
-        var nameRt = nameGO.AddComponent<RectTransform>();
-        nameRt.anchorMin = new Vector2(0f, 0f);
-        nameRt.anchorMax = new Vector2(0.77f, 1f);
-        nameRt.offsetMin = new Vector2(8f, 3f);
-        nameRt.offsetMax = new Vector2(-2f, -3f);
-        var nameTxt = nameGO.AddComponent<TextMeshProUGUI>();
-        nameTxt.text             = config.vehicles[entry.vehicleIndex].vehicleName;
-        nameTxt.fontSize         = 14f;
-        nameTxt.enableAutoSizing = true;
-        nameTxt.fontSizeMin      = 8f;
-        nameTxt.fontSizeMax      = 14f;
-        nameTxt.color            = Color.white;
-        nameTxt.alignment        = TextAlignmentOptions.MidlineLeft;
-        nameTxt.overflowMode     = TextOverflowModes.Ellipsis;
-
-        // Przycisk cofnięcia (X)
-        var undoGO = new GameObject("U");
-        undoGO.transform.SetParent(item.transform, false);
-        var undoRt = undoGO.AddComponent<RectTransform>();
-        undoRt.anchorMin = new Vector2(0.77f, 0.1f);
-        undoRt.anchorMax = new Vector2(1f,    0.9f);
-        undoRt.offsetMin = new Vector2(3f,  0f);
-        undoRt.offsetMax = new Vector2(-4f, 0f);
-        var undoBg  = undoGO.AddComponent<Image>();
-        undoBg.color = new Color(0.65f, 0.1f, 0.1f, 1f);
-        var undoBtn = undoGO.AddComponent<Button>();
-        undoBtn.targetGraphic = undoBg;
-        var undoColors = undoBtn.colors;
-        undoColors.highlightedColor = new Color(0.85f, 0.2f, 0.2f);
-        undoColors.pressedColor     = new Color(0.45f, 0.05f, 0.05f);
-        undoBtn.colors = undoColors;
-
-        var undoTxtGO = new GameObject("T");
-        undoTxtGO.transform.SetParent(undoGO.transform, false);
-        var undoTxtRt = undoTxtGO.AddComponent<RectTransform>();
-        undoTxtRt.anchorMin = Vector2.zero;
-        undoTxtRt.anchorMax = Vector2.one;
-        undoTxtRt.offsetMin = Vector2.zero;
-        undoTxtRt.offsetMax = Vector2.zero;
-        var undoTxt = undoTxtGO.AddComponent<TextMeshProUGUI>();
-        undoTxt.text      = "✕";
-        undoTxt.fontSize  = 18f;
-        undoTxt.color     = Color.white;
-        undoTxt.alignment = TextAlignmentOptions.Center;
-        undoTxt.fontStyle = FontStyles.Bold;
-
-        undoBtn.onClick.AddListener(() => UndoQueueEntry(entry, item));
-
-        _queueItems.Add(item);
+        _queueItems.Add(btn);
     }
 
-    void UndoQueueEntry(QueueEntry entry, GameObject item)
+    void OnRefundQueueItem(QueueEntry entry, GameObject btn)
     {
         if (!_isPlanning) return;
 
         int idx = _queue.IndexOf(entry);
         if (idx < 0) return;
 
-        AddGold(entry.cost);    // Zwrot złota
         _queue.RemoveAt(idx);
-        _queueItems.Remove(item);
-        Destroy(item);
+        AddGold(entry.cost);
+
+        if (GameStatistics.Instance != null)
+            GameStatistics.Instance.totalGoldSpent -= entry.cost;
+
+        _queueItems.Remove(btn);
+        Destroy(btn);
         SyncStartButton();
     }
 
@@ -232,13 +237,8 @@ public class GameplayUIManager : MonoBehaviour
 
     // ══ SPAWNER – callbacki ═══════════════════════════════════════════════
 
-    /// Wywoływane przez VehicleSpawner za każdym razem gdy instancjonuje pojazd.
-    public void OnVehicleSpawned()
-    {
-        _activeVehicles++;
-    }
+    public void OnVehicleSpawned() => _activeVehicles++;
 
-    /// Wywoływane przez pojazd.Smierc() i FinishLine gdy pojazd opuszcza grę.
     public void OnVehicleRemoved()
     {
         if (_isPlanning) return;
@@ -246,7 +246,6 @@ public class GameplayUIManager : MonoBehaviour
         CheckRoundEnd();
     }
 
-    /// Wywoływane przez VehicleSpawner po ostatnim spawnie.
     public void OnSpawningComplete()
     {
         _spawningComplete = true;
@@ -259,7 +258,7 @@ public class GameplayUIManager : MonoBehaviour
             EnterPlanning();
     }
 
-    // ══ ZŁOTO ═════════════════════════════════════════════════════════════
+    // ══ ZLOTO ═════════════════════════════════════════════════════════════
 
     public bool TrySpendGold(int amount)
     {
@@ -281,31 +280,22 @@ public class GameplayUIManager : MonoBehaviour
         UpdateGoldDisplay();
     }
 
-    // ══ BRAK ZŁOTA – miganie ══════════════════════════════════════════════
+    // ══ BRAK ZLOTA ════════════════════════════════════════════════════════
 
     void FlashNoMoney()
     {
         if (_noMoneyCoroutine != null) StopCoroutine(_noMoneyCoroutine);
-        _noMoneyCoroutine = StartCoroutine(FlashCoroutine());
+        _noMoneyCoroutine = StartCoroutine(NoMoneyCoroutine());
     }
 
-    IEnumerator FlashCoroutine()
+    IEnumerator NoMoneyCoroutine()
     {
         if (noMoneyText == null) yield break;
-
-        bool visible = true;
-        float elapsed = 0f;
-        const float interval = 0.18f;
-        const float total    = 1.8f;
-
-        while (elapsed < total)
-        {
-            noMoneyText.gameObject.SetActive(visible);
-            visible = !visible;
-            yield return new WaitForSecondsRealtime(interval); // działa przy timeScale=0
-            elapsed += interval;
-        }
-        noMoneyText.gameObject.SetActive(false);
+        noMoneyText.text = noMoneyMessage;
+        GameObject toggleTarget = noMoneyPanel != null ? noMoneyPanel : noMoneyText.gameObject;
+        toggleTarget.SetActive(true);
+        yield return new WaitForSecondsRealtime(noMoneyDuration);
+        toggleTarget.SetActive(false);
     }
 
     // ══ START ═════════════════════════════════════════════════════════════
@@ -323,7 +313,9 @@ public class GameplayUIManager : MonoBehaviour
         startButton.interactable = canStart;
 
         if (startButtonText != null)
-            startButtonText.text = _queue.Count > 0 ? $"START  ({_queue.Count})" : "START";
+            startButtonText.text = _queue.Count > 0
+                ? string.Format(labelStartZKolejka, _queue.Count)
+                : labelStartPusty;
     }
 
     // ══ HUD ═══════════════════════════════════════════════════════════════
@@ -337,6 +329,7 @@ public class GameplayUIManager : MonoBehaviour
 
             slot.nameText.text = config.vehicles[i].vehicleName;
             slot.costText.text = $"{config.vehicles[i].cost} Z";
+
             if (config.vehicles[i].icon != null && slot.iconImage != null)
                 slot.iconImage.sprite = config.vehicles[i].icon;
 
@@ -354,12 +347,12 @@ public class GameplayUIManager : MonoBehaviour
 
     void UpdateGoldDisplay()
     {
-        if (goldText != null) goldText.text = $"Złoto: {_currentGold}";
+        if (goldText != null) goldText.text = prefixZloto + _currentGold;
     }
 
     void UpdateRoundDisplay()
     {
-        if (roundText != null) roundText.text = $"Runda: {_currentRound}";
+        if (roundText != null) roundText.text = prefixRunda + _currentRound;
     }
 
     void UpdatePhaseDisplay()
@@ -367,13 +360,13 @@ public class GameplayUIManager : MonoBehaviour
         if (phaseText == null) return;
         if (_isPlanning)
         {
-            phaseText.text  = "◉ PLANOWANIE";
-            phaseText.color = new Color(0.25f, 0.9f, 0.45f);
+            phaseText.text  = labelPlanowanie;
+            phaseText.color = colorPlanowanie;
         }
         else
         {
-            phaseText.text  = "▶ ATAK";
-            phaseText.color = new Color(1f, 0.4f, 0.15f);
+            phaseText.text  = labelAtak;
+            phaseText.color = colorAtak;
         }
     }
 }

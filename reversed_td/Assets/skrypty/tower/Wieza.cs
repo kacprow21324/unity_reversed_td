@@ -48,6 +48,8 @@ public abstract class WiezaBaza : MonoBehaviour
     void Zniszcz()
     {
         OnZniszcz();
+        string nazwaWiezy = gameObject.name.Replace("(Clone)", "").Trim();
+        GameStatistics.Instance?.RegisterDestroyedTower(nazwaWiezy);
         if (GameplayUIManager.Instance != null)
             GameplayUIManager.Instance.AddGold(nagrodaZlota);
         gameObject.SetActive(false);

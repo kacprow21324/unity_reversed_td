@@ -70,7 +70,6 @@ public class FreeFlyCamera : MonoBehaviour
     private float _pitch;
     private float _targetYaw;
     private float _targetPitch;
-    private bool _isFlying = false;
 
     // Kursor
     private CursorLockMode _previousLockState;
@@ -106,8 +105,6 @@ public class FreeFlyCamera : MonoBehaviour
         // Aktywacja trybu lotu
         if (Input.GetMouseButtonDown(1))
         {
-            _isFlying = true;
-
             if (hideCursorOnFly)
             {
                 _previousLockState = Cursor.lockState;
@@ -120,8 +117,6 @@ public class FreeFlyCamera : MonoBehaviour
         // Dezaktywacja
         if (Input.GetMouseButtonUp(1))
         {
-            _isFlying = false;
-
             if (hideCursorOnFly)
             {
                 Cursor.lockState = _previousLockState;

@@ -29,6 +29,7 @@ public class VehicleSpawner : MonoBehaviour
             if (idx >= 0 && idx < vehiclePrefabs.Length && vehiclePrefabs[idx] != null)
             {
                 Instantiate(vehiclePrefabs[idx], spawnPoint.position, spawnPoint.rotation);
+                GameStatistics.Instance?.RegisterDeployedUnit(vehiclePrefabs[idx].name);
                 GameplayUIManager.Instance?.OnVehicleSpawned();
             }
             yield return new WaitForSeconds(1.5f);

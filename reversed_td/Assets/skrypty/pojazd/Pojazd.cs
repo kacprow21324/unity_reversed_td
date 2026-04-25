@@ -24,7 +24,7 @@ public class pojazd : MonoBehaviour
         aktualneHp = maxHp;
         _agent = GetComponent<NavMeshAgent>();
 
-        FinishLine meta = FindObjectOfType<FinishLine>();
+        FinishLine meta = FindFirstObjectByType<FinishLine>();
         if (meta != null)
             _agent.SetDestination(meta.transform.position);
         else
