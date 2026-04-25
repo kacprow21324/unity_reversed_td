@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1742726714569716499}
   - component: {fileID: 5061913165560458875}
   - component: {fileID: 1590635669165990156}
-  - component: {fileID: 1227324810900621381}
+  - component: {fileID: -774487256017353198}
   m_Layer: 0
   m_Name: WCANON 1
   m_TagString: Untagged
@@ -116,7 +116,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &1227324810900621381
+--- !u!114 &-774487256017353198
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -125,18 +125,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 3902478201630670631}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7c5f5a2574468747b37b1aea23dec2c, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e990ad7ecbb8ca4fb221087349bbc80, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WiezaAtak
-  zasieg: 20
-  szybkoscAtaku: 1
+  m_EditorClassIdentifier: Assembly-CSharp::WiezaArmatnia
+  maxHP: 80
+  nagrodaZlota: 50
+  zasieg: 18
+  czasPrzeladowania: 4
   warstwaWroga:
     serializedVersion: 2
     m_Bits: 128
-  prefabPocisku: {fileID: 8372783012883140579, guid: 0504259f7651f26429bd8eda5465f2bc, type: 3}
+  prefabPocisku: {fileID: 8372783012883140579, guid: a78a77135562dea4db0f9dcf7ea1eab5, type: 3}
   punktStrzalu: {fileID: 7245579346427353010}
-  maxHP: 100
-  nagrodaZlota: 50
 --- !u!1 &4596339487029444765
 GameObject:
   m_ObjectHideFlags: 0

@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 7993581436316584255}
   - component: {fileID: 2656269680039746084}
   - component: {fileID: 5449450969697462770}
-  - component: {fileID: 1594196310183049220}
+  - component: {fileID: -3501385740412981298}
   m_Layer: 0
   m_Name: WPLAZMOWA
   m_TagString: Untagged
@@ -147,7 +147,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &1594196310183049220
+--- !u!114 &-3501385740412981298
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,15 +156,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 7671744355922239443}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7c5f5a2574468747b37b1aea23dec2c, type: 3}
+  m_Script: {fileID: 11500000, guid: bc3ec12050c168d4d8ab98ee675690f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WiezaAtak
-  zasieg: 20
-  szybkoscAtaku: 1
+  m_EditorClassIdentifier: Assembly-CSharp::WiezaPlazmowa
+  maxHP: 90
+  nagrodaZlota: 50
+  zasieg: 10
+  obrazeniaBazowe: 4
+  tickRate: 0.15
+  mnoznikRastu: 0.3
+  maxMnoznik: 4
   warstwaWroga:
     serializedVersion: 2
     m_Bits: 128
-  prefabPocisku: {fileID: 8372783012883140579, guid: 0504259f7651f26429bd8eda5465f2bc, type: 3}
   punktStrzalu: {fileID: 4053118933871898601}
-  maxHP: 100
-  nagrodaZlota: 50

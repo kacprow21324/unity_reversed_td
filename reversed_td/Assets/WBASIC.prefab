@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8950173191989546779}
   - component: {fileID: 5552292435469724230}
   - component: {fileID: 6239834969971031815}
-  - component: {fileID: 8838174716303852763}
+  - component: {fileID: -8436270263764577605}
   m_Layer: 0
   m_Name: WBASIC
   m_TagString: Untagged
@@ -116,7 +116,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &8838174716303852763
+--- !u!114 &-8436270263764577605
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -125,11 +125,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 297420494903486130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7c5f5a2574468747b37b1aea23dec2c, type: 3}
+  m_Script: {fileID: 11500000, guid: 0878927e5c20ecc41988e5f4b65eec68, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WiezaAtak
-  zasieg: 20
-  szybkoscAtaku: 1
+  m_EditorClassIdentifier: Assembly-CSharp::WiezaPodstawowa
+  maxHP: 100
+  nagrodaZlota: 50
+  zasieg: 12
+  szybkoscAtaku: 1.5
+  obrazenia: 20
   warstwaWroga:
     serializedVersion: 2
     m_Bits: 128

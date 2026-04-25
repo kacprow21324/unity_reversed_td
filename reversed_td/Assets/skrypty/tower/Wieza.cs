@@ -1,27 +1,18 @@
 using UnityEngine;
 using TMPro;
 
-public class WiezaAtak : MonoBehaviour
+// Bazowa klasa dla wszystkich wież – zarządza HP, wyświetlaczem i nagrodą złota.
+public abstract class WiezaBaza : MonoBehaviour
 {
-    [Header("Ustawienia Wieży")]
-    public float zasieg = 10f;
-    public float szybkoscAtaku = 1f;
-    public LayerMask warstwaWroga;
-
-    [Header("Ustawienia Pocisku")]
-    public GameObject prefabPocisku;
-    public Transform punktStrzalu;
-
-    [Header("Zdrowie")]
+    [Header("Zdrowie Wieży")]
     public float maxHP = 100f;
     public int nagrodaZlota = 50;
 
-    private float currentHP;
-    private float licznikAtaku = 0f;
+    protected float currentHP;
     private TextMeshPro _hpText;
     private Transform _kamera;
 
-    void Start()
+    protected virtual void Start()
     {
         _kamera = Camera.main?.transform;
         CreateHPDisplay();
@@ -29,18 +20,14 @@ public class WiezaAtak : MonoBehaviour
         UpdateHPDisplay();
     }
 
-    void OnEnable()
+    protected virtual void OnEnable()
     {
         currentHP = maxHP;
         UpdateHPDisplay();
     }
 
-    void Update()
+    protected virtual void Update()
     {
-        licznikAtaku -= Time.deltaTime;
-        if (licznikAtaku <= 0f)
-            SzukajIAtakuj();
-
         if (_hpText != null && _kamera != null)
             _hpText.transform.rotation = _kamera.rotation;
     }
@@ -50,10 +37,7 @@ public class WiezaAtak : MonoBehaviour
         currentHP = Mathf.Max(currentHP - amount, 0f);
 
         if (_hpText != null)
-        {
-            float ratio = currentHP / maxHP;
-            _hpText.color = Color.Lerp(Color.red, Color.green, ratio);
-        }
+            _hpText.color = Color.Lerp(Color.red, Color.green, currentHP / maxHP);
 
         UpdateHPDisplay();
 
@@ -61,40 +45,19 @@ public class WiezaAtak : MonoBehaviour
             Zniszcz();
     }
 
-    void SzukajIAtakuj()
-    {
-        Collider[] wrogowieWZasiegu = Physics.OverlapSphere(transform.position, zasieg, warstwaWroga);
-
-        if (wrogowieWZasiegu.Length > 0)
-        {
-            Transform cel = wrogowieWZasiegu[0].transform;
-            if (prefabPocisku != null && punktStrzalu != null)
-                Strzelaj(cel);
-
-            licznikAtaku = 1f / szybkoscAtaku;
-        }
-    }
-
-    void Strzelaj(Transform cel)
-    {
-        Debug.Log("Wieża strzela do: " + cel.name);
-        GameObject nowyPociskGO = Instantiate(prefabPocisku, punktStrzalu.position, punktStrzalu.rotation);
-        Pocisk skryptPocisku = nowyPociskGO.GetComponent<Pocisk>();
-        if (skryptPocisku != null)
-            skryptPocisku.UstawCel(cel);
-    }
-
     void Zniszcz()
     {
+        OnZniszcz();
         if (GameplayUIManager.Instance != null)
             GameplayUIManager.Instance.AddGold(nagrodaZlota);
-
         gameObject.SetActive(false);
     }
 
+    protected virtual void OnZniszcz() { }
+
     void CreateHPDisplay()
     {
-        GameObject hpObj = new GameObject("HP_Display");
+        var hpObj = new GameObject("HP_Display");
         hpObj.transform.SetParent(transform);
         hpObj.transform.localPosition = new Vector3(0f, 2.5f, 0f);
         hpObj.transform.localRotation = Quaternion.identity;
@@ -109,12 +72,6 @@ public class WiezaAtak : MonoBehaviour
     void UpdateHPDisplay()
     {
         if (_hpText == null) return;
-        _hpText.text = $"{currentHP}/{maxHP} HP";
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, zasieg);
+        _hpText.text = $"{currentHP:0}/{maxHP:0} HP";
     }
 }
