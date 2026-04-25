@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +13,8 @@ public class pojazd : MonoBehaviour
     public float pancerz = 8f;
 
     // Wóz Tank ustawia tę flagę – wieże go preferują jako cel.
-    [HideInInspector] public bool maTaunt = false;
+    [HideInInspector] public bool maTaunt       = false;
+    [HideInInspector] public bool isInvulnerable = false;
 
     protected float aktualneHp;
     protected float _debuffMnoznik = 1f;
@@ -49,6 +51,8 @@ public class pojazd : MonoBehaviour
 
     public virtual void OdejmijHp(float obrazenia, bool przebijaPancerz = false)
     {
+        if (isInvulnerable) return;
+
         float skuteczne = przebijaPancerz
             ? obrazenia
             : Mathf.Max(1f, obrazenia - pancerz);
@@ -69,6 +73,32 @@ public class pojazd : MonoBehaviour
     public float PobierzAktualneHP()
     {
         return aktualneHp;
+    }
+
+    public void AktywujTarcze(float czas)
+    {
+        StartCoroutine(TarczaKoroutyna(czas));
+    }
+
+    IEnumerator TarczaKoroutyna(float czas)
+    {
+        isInvulnerable = true;
+        yield return new WaitForSeconds(czas);
+        isInvulnerable = false;
+    }
+
+    public void DoladujPredkosc(float mnoznik, float czas)
+    {
+        if (_agent == null) return;
+        StartCoroutine(BoostKoroutyna(mnoznik, czas));
+    }
+
+    IEnumerator BoostKoroutyna(float mnoznik, float czas)
+    {
+        float original = _agent.speed;
+        _agent.speed *= mnoznik;
+        yield return new WaitForSeconds(czas);
+        _agent.speed = original;
     }
 
     // Pomocnik dla wież: zwraca pojazd priorytetyzując taunterów.
