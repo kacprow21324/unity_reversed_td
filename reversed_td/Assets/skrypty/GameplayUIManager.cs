@@ -100,6 +100,8 @@ public class GameplayUIManager : MonoBehaviour
             startButton.onClick.AddListener(OnStartClicked);
 
         SyncStartButton();
+
+        TowerSpawner.Instance?.GenerateTowers(_currentRound);
     }
 
     void BuildNoMoneyTextIfMissing()
@@ -158,6 +160,8 @@ public class GameplayUIManager : MonoBehaviour
         _activeVehicles   = 0;
         _currentRound++;
 
+        TowerSpawner.Instance?.GenerateTowers(_currentRound);
+
         if (GameStatistics.Instance != null)
             GameStatistics.Instance.wavesSurvived++;
 
@@ -200,7 +204,7 @@ public class GameplayUIManager : MonoBehaviour
         if (txt != null)
         {
             string vName = config.vehicles[entry.vehicleIndex].vehicleName;
-            txt.text = vName.Length > 0 ? vName[0].ToString() : "?";
+            txt.text = string.IsNullOrEmpty(vName) ? "?" : vName;
         }
 
         var button = btn.GetComponent<Button>();
