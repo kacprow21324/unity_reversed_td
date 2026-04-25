@@ -62,6 +62,7 @@ public class pojazd : MonoBehaviour
 
     protected virtual void Smierc()
     {
+        GameplayUIManager.Instance?.OnVehicleRemoved();
         Destroy(gameObject);
     }
 

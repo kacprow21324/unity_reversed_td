@@ -46,7 +46,6 @@ public class PojazdKamikaze : pojazd
     {
         _eksplodowal = true;
 
-        // Obrażenia AoE wszystkim wieżom w promieniu wybuchu
         Collider[] wZasiegu = Physics.OverlapSphere(transform.position, promienWybuchu);
         foreach (var c in wZasiegu)
         {
@@ -54,7 +53,7 @@ public class PojazdKamikaze : pojazd
             w?.TakeDamage(obrazeniaWybuchu);
         }
 
-        Destroy(gameObject);
+        Smierc(); // Notyfikuje UIManager i niszczy obiekt
     }
 
     void OnDrawGizmosSelected()
