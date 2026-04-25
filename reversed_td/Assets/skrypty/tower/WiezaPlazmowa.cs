@@ -74,13 +74,8 @@ public class WiezaPlazmowa : WiezaBaza
                 }
                 _aktualnycel = null;
 
-                // Szukaj nowego celu
-                Collider[] wrogowie = Physics.OverlapSphere(transform.position, zasieg, warstwaWroga);
-                foreach (var w in wrogowie)
-                {
-                    pojazd p = w.GetComponent<pojazd>();
-                    if (p != null) { _aktualnycel = p; break; }
-                }
+                // Szukaj nowego celu z priorytetem dla tauntera (Czołg)
+                _aktualnycel = pojazd.ZnajdzCelWZasiegu(transform.position, zasieg, warstwaWroga);
 
                 if (_aktualnycel != null)
                     _wiazkaCoroutine = StartCoroutine(Wiazka());

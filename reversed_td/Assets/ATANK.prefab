@@ -209,8 +209,8 @@ GameObject:
   - component: {fileID: 7941943614219743035}
   - component: {fileID: 6509011415652090366}
   - component: {fileID: 2384672127370328965}
-  - component: {fileID: 3332119856380960082}
   - component: {fileID: 6174497864684779528}
+  - component: {fileID: -5236924267260404867}
   m_Layer: 7
   m_Name: ATANK
   m_TagString: POJAZD
@@ -324,7 +324,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 20.97
+  m_Speed: 4.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -349,19 +349,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FasolkaRuch
   cel: {fileID: 0}
---- !u!114 &3332119856380960082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6496483028081193415}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24b25e3211072b049a2b432ab305eeea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::pojazd
-  maxHp: 200
 --- !u!54 &6174497864684779528
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -389,3 +376,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-5236924267260404867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6496483028081193415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d251109b0ef6ad74ba08eb29277247cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PojazdTank
+  maxHp: 200
+  pancerz: 10
+  maTaunt: 0
+  promienTauntu: 20

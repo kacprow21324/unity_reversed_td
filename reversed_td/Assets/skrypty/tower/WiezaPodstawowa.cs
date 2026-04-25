@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// WBASIC – skupia ogień na jednym celu dopóki nie zginie lub nie wyjdzie z zasięgu.
+// WBASIC – skupia ogień na jednym celu; priorytetuje pojazdy z tauntem (Czołg).
 public class WiezaPodstawowa : WiezaBaza
 {
     [Header("Ustawienia Ataku")]
@@ -42,16 +42,9 @@ public class WiezaPodstawowa : WiezaBaza
                 _aktywnycel = null;
         }
 
-        // Znajdź nowy cel tylko jeśli aktualny jest pusty
+        // Szukaj nowego celu z priorytetem dla tauntera
         if (_aktywnycel == null)
-        {
-            Collider[] wrogowie = Physics.OverlapSphere(transform.position, zasieg, warstwaWroga);
-            foreach (var w in wrogowie)
-            {
-                pojazd p = w.GetComponent<pojazd>();
-                if (p != null) { _aktywnycel = p; break; }
-            }
-        }
+            _aktywnycel = pojazd.ZnajdzCelWZasiegu(transform.position, zasieg, warstwaWroga);
 
         if (_aktywnycel != null)
         {

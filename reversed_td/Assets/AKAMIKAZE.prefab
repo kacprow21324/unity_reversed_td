@@ -209,8 +209,8 @@ GameObject:
   - component: {fileID: 7941943614219743035}
   - component: {fileID: 6509011415652090366}
   - component: {fileID: 2384672127370328965}
-  - component: {fileID: 3332119856380960082}
   - component: {fileID: -1038108230314393994}
+  - component: {fileID: 2804851102439592364}
   m_Layer: 7
   m_Name: AKAMIKAZE
   m_TagString: POJAZD
@@ -349,19 +349,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FasolkaRuch
   cel: {fileID: 0}
---- !u!114 &3332119856380960082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6496483028081193415}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24b25e3211072b049a2b432ab305eeea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::pojazd
-  maxHp: 10
 --- !u!54 &-1038108230314393994
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -389,3 +376,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2804851102439592364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6496483028081193415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad613a9bb60f3e44ea15718ed159808d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PojazdKamikaze
+  maxHp: 20
+  pancerz: 0
+  maTaunt: 0
+  promienWyzwalacza: 4
+  promienWybuchu: 6
+  obrazeniaWybuchu: 150

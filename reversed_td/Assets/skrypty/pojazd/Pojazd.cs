@@ -11,13 +11,15 @@ public class pojazd : MonoBehaviour
     [Tooltip("Redukuje każde trafienie o tę wartość (chyba że pocisk przebija pancerz).")]
     public float pancerz = 8f;
 
-    private float aktualneHp;
-    private float _debuffMnoznik = 1f;
-    private float _debuffTimer = 0f;
+    // Wóz Tank ustawia tę flagę – wieże go preferują jako cel.
+    [HideInInspector] public bool maTaunt = false;
 
-    private NavMeshAgent _agent;
+    protected float aktualneHp;
+    protected float _debuffMnoznik = 1f;
+    protected float _debuffTimer = 0f;
+    protected NavMeshAgent _agent;
 
-    void Start()
+    protected virtual void Start()
     {
         aktualneHp = maxHp;
         _agent = GetComponent<NavMeshAgent>();
@@ -29,7 +31,7 @@ public class pojazd : MonoBehaviour
             Debug.LogError("Pojazd: Nie znaleziono obiektu ze skryptem FinishLine na mapie!");
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (_debuffTimer > 0f)
         {
@@ -39,15 +41,13 @@ public class pojazd : MonoBehaviour
         }
     }
 
-    // Nakłada debuff (np. od Wieży Sonar). Odświeżenie przedłuża czas trwania.
     public void AplikujDebuff(float mnoznik, float czas)
     {
         _debuffMnoznik = mnoznik;
         _debuffTimer = czas;
     }
 
-    // przebijaPancerz = true: pancerz jest ignorowany (np. Wieża Armatnia).
-    public void OdejmijHp(float obrazenia, bool przebijaPancerz = false)
+    public virtual void OdejmijHp(float obrazenia, bool przebijaPancerz = false)
     {
         float skuteczne = przebijaPancerz
             ? obrazenia
@@ -60,7 +60,7 @@ public class pojazd : MonoBehaviour
             Smierc();
     }
 
-    void Smierc()
+    protected virtual void Smierc()
     {
         Destroy(gameObject);
     }
@@ -68,5 +68,23 @@ public class pojazd : MonoBehaviour
     public float PobierzAktualneHP()
     {
         return aktualneHp;
+    }
+
+    // Pomocnik dla wież: zwraca pojazd priorytetyzując taunterów.
+    public static pojazd ZnajdzCelWZasiegu(Vector3 pozycja, float zasieg, LayerMask warstwa)
+    {
+        Collider[] wrogowie = Physics.OverlapSphere(pozycja, zasieg, warstwa);
+        pojazd priorytet = null;
+        pojazd pierwszy = null;
+
+        foreach (var w in wrogowie)
+        {
+            pojazd p = w.GetComponent<pojazd>();
+            if (p == null) continue;
+            if (pierwszy == null) pierwszy = p;
+            if (p.maTaunt && priorytet == null) priorytet = p;
+        }
+
+        return priorytet ?? pierwszy;
     }
 }

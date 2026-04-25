@@ -195,6 +195,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WyswietlaczHP
   tekstHP: {fileID: 8120357559907444853}
+--- !u!1 &6249334506536161469
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7637309815087854862}
+  m_Layer: 7
+  m_Name: lufa
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7637309815087854862
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6249334506536161469}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.909, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5032475218437432682}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6496483028081193415
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,8 +240,8 @@ GameObject:
   - component: {fileID: 7941943614219743035}
   - component: {fileID: 6509011415652090366}
   - component: {fileID: 2384672127370328965}
-  - component: {fileID: 3332119856380960082}
   - component: {fileID: 3332471570747615454}
+  - component: {fileID: 7355665995341332711}
   m_Layer: 7
   m_Name: AALTY
   m_TagString: POJAZD
@@ -232,6 +263,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 9056213500977354392}
+  - {fileID: 7637309815087854862}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6665158635475753014
@@ -324,7 +356,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 20.97
+  m_Speed: 12
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -349,19 +381,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FasolkaRuch
   cel: {fileID: 0}
---- !u!114 &3332119856380960082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6496483028081193415}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24b25e3211072b049a2b432ab305eeea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::pojazd
-  maxHp: 50
 --- !u!54 &3332471570747615454
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -389,3 +408,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7355665995341332711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6496483028081193415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6dd81be4706a2b4597f144d3cdafed5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PojazdArtyleria
+  maxHp: 60
+  pancerz: 0
+  maTaunt: 0
+  zasiegAtaku: 22
+  cooldownStrzalu: 2.5
+  obrazeniaStrzalu: 40
+  prefabPocisku: {fileID: 8817597802112261899, guid: af9a28f8e4c7f2845912e192d8034de2, type: 3}
+  punktStrzalu: {fileID: 7637309815087854862}

@@ -1,6 +1,7 @@
 using UnityEngine;
 
 // WCANON – wolne przeładowanie, potężne pociski AoE przebijające pancerz.
+// Priorytetuje pojazdy z tauntem (Czołg).
 public class WiezaArmatnia : WiezaBaza
 {
     [Header("Parametry Armaty")]
@@ -19,7 +20,6 @@ public class WiezaArmatnia : WiezaBaza
         maxHP = 120f;
         nagrodaZlota = 80;
         base.Start();
-        // Startujemy z gotową armatą
         _licznikPrzeladowania = 0f;
     }
 
@@ -33,10 +33,10 @@ public class WiezaArmatnia : WiezaBaza
 
     void SzukajCeluIStrzelaj()
     {
-        Collider[] wrogowie = Physics.OverlapSphere(transform.position, zasieg, warstwaWroga);
-        if (wrogowie.Length == 0) return;
+        pojazd cel = pojazd.ZnajdzCelWZasiegu(transform.position, zasieg, warstwaWroga);
+        if (cel == null) return;
 
-        Strzelaj(wrogowie[0].transform);
+        Strzelaj(cel.transform);
         _licznikPrzeladowania = czasPrzeladowania;
     }
 
