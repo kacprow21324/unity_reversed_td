@@ -8,7 +8,7 @@ public class GameplayUIManager : MonoBehaviour
 {
     public static GameplayUIManager Instance;
 
-    // ── Zagnieżdżone typy ─────────────────────────────────────────────────
+    // ── Zagniezdzone typy ─────────────────────────────────────────────────
 
     [System.Serializable]
     public class QueueEntry
@@ -69,18 +69,32 @@ public class GameplayUIManager : MonoBehaviour
     public GameObject queuePanel;
     public GameObject abilitiesPanel;
 
-    // ── Stan wewnętrzny ──────────────────────────────────────────────────
+    [Header("Panel Dekretow")]
+    public GameObject        decreePanel;
+    public TextMeshProUGUI[] decreeTitles  = new TextMeshProUGUI[3];
+    public TextMeshProUGUI[] decreeChanges = new TextMeshProUGUI[3];
+    public Button[]          decreeButtons = new Button[3];
+    public TextMeshProUGUI   decreeTimerText;
+
+    // ── Stan wewnetrzny ──────────────────────────────────────────────────
 
     private int  _currentGold;
     private int  _currentRound     = 1;
     private bool _isPlanning       = true;
     private bool _spawningComplete = false;
     private int  _activeVehicles   = 0;
+    private int  _escapedThisRound = 0;
 
     private readonly List<QueueEntry> _queue          = new List<QueueEntry>();
     private readonly List<GameObject> _queueItems     = new List<GameObject>();
     private readonly List<Button>     _abilityButtons = new List<Button>();
     private Coroutine _noMoneyCoroutine;
+
+    private List<DecreeData> _currentDecrees;
+
+    private const float DECREE_TIMEOUT = 30f;
+    private float _decreeTimeLeft;
+    private bool  _decreeTimerActive;
 
     public bool IsPlanning => _isPlanning;
 
@@ -106,6 +120,9 @@ public class GameplayUIManager : MonoBehaviour
             SetupAbilitiesPanel();
         }
 
+        if (decreePanel != null)
+            decreePanel.SetActive(false);
+
         RefreshHUD();
         SetupShopButtons();
 
@@ -113,8 +130,52 @@ public class GameplayUIManager : MonoBehaviour
             startButton.onClick.AddListener(OnStartClicked);
 
         SyncStartButton();
-
         TowerSpawner.Instance?.GenerateTowers(_currentRound);
+    }
+
+    void Update()
+    {
+        bool gameOver = GameManager.Instance != null && GameManager.Instance.IsGameOver;
+        if (gameOver) return;
+
+        // Debug: P = +100 zlota
+        if (Input.GetKeyDown(KeyCode.P))
+            AddGold(100);
+
+        // Debug: O = wygraj runde, I = wygraj gre, U = przegraj gre
+        if (Input.GetKeyDown(KeyCode.O)) DebugWinCurrentRound();
+        if (Input.GetKeyDown(KeyCode.I)) GameManager.Instance?.TriggerVictory();
+        if (Input.GetKeyDown(KeyCode.U)) GameManager.Instance?.TriggerDefeat();
+
+        if (_decreeTimerActive)
+        {
+            _decreeTimeLeft -= Time.unscaledDeltaTime;
+            UpdateDecreeTimerText();
+            if (_decreeTimeLeft <= 0f)
+            {
+                _decreeTimerActive = false;
+                OnDecreeChosen(0);
+            }
+        }
+    }
+
+    public void DebugWinCurrentRound()
+    {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
+
+        if (_currentRound >= GameManager.VICTORY_ROUND)
+        {
+            GameManager.Instance?.TriggerVictory();
+        }
+        else
+        {
+            // Symuluj wygranie rundy: pokaz dekrety lub przejdz do planowania
+            _escapedThisRound = Mathf.Max(1, _escapedThisRound);
+            if (decreePanel != null && DecreeManager.Instance != null)
+                ShowDecreePanel();
+            else
+                EnterPlanning();
+        }
     }
 
     void BuildNoMoneyTextIfMissing()
@@ -151,6 +212,7 @@ public class GameplayUIManager : MonoBehaviour
         _isPlanning       = false;
         _spawningComplete = false;
         _activeVehicles   = 0;
+        _escapedThisRound = 0;
 
         Time.timeScale = 1f;
 
@@ -191,6 +253,103 @@ public class GameplayUIManager : MonoBehaviour
 
         RefreshHUD();
         SyncStartButton();
+    }
+
+    // ══ DEKRETY Z TIMEREM ══════════════════════════════════════════════════
+
+    void ShowDecreePanel()
+    {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
+
+        Time.timeScale = 0f;
+
+        if (decreePanel == null || DecreeManager.Instance == null)
+        {
+            EnterPlanning();
+            return;
+        }
+
+        _currentDecrees = DecreeManager.Instance.GetRandomThree();
+
+        for (int i = 0; i < 3; i++)
+        {
+            bool hasDecree = i < _currentDecrees.Count;
+
+            if (decreeTitles[i] != null)
+                decreeTitles[i].text = hasDecree ? _currentDecrees[i].Title : string.Empty;
+
+            if (decreeChanges[i] != null)
+            {
+                decreeChanges[i].text = hasDecree
+                    ? _currentDecrees[i].GetCurrentValue() + " -> " + _currentDecrees[i].GetNewValue()
+                    : string.Empty;
+            }
+
+            if (decreeButtons[i] != null)
+            {
+                decreeButtons[i].gameObject.SetActive(hasDecree);
+                if (hasDecree)
+                {
+                    int captured = i;
+                    decreeButtons[i].onClick.RemoveAllListeners();
+                    decreeButtons[i].onClick.AddListener(() => OnDecreeChosen(captured));
+                }
+            }
+        }
+
+        _decreeTimeLeft    = DECREE_TIMEOUT;
+        _decreeTimerActive = true;
+        UpdateDecreeTimerText();
+
+        decreePanel.SetActive(true);
+    }
+
+    void UpdateDecreeTimerText()
+    {
+        if (decreeTimerText == null) return;
+        int remaining = Mathf.CeilToInt(Mathf.Max(0f, _decreeTimeLeft));
+        decreeTimerText.text = "Czas na wybor: " + remaining + "s";
+
+        if (remaining <= 10)
+            decreeTimerText.color = new Color(1f, 0.3f, 0.2f);
+        else if (remaining <= 20)
+            decreeTimerText.color = new Color(1f, 0.8f, 0.1f);
+        else
+            decreeTimerText.color = Color.white;
+    }
+
+    public void OnDecreeChosen(int index)
+    {
+        if (_currentDecrees == null || index >= _currentDecrees.Count) return;
+
+        _decreeTimerActive = false;
+
+        DecreeManager.Instance?.ApplyDecree(_currentDecrees[index].Id);
+        _currentDecrees = null;
+
+        if (decreePanel != null)
+            decreePanel.SetActive(false);
+
+        EnterPlanning();
+    }
+
+    // ══ BLOKADA UI PRZY KONCU GRY ══════════════════════════════════════════
+
+    public void LockForGameOver()
+    {
+        _decreeTimerActive = false;
+
+        if (decreePanel    != null) decreePanel.SetActive(false);
+        if (abilitiesPanel != null) abilitiesPanel.SetActive(false);
+        if (queuePanel     != null) queuePanel.SetActive(false);
+
+        foreach (var s in vehicleSlots)
+            if (s?.button != null) s.button.interactable = false;
+
+        if (startButton != null) startButton.interactable = false;
+
+        foreach (var btn in _abilityButtons)
+            if (btn != null) btn.interactable = false;
     }
 
     // ══ ZAKUPY ════════════════════════════════════════════════════════════
@@ -261,7 +420,6 @@ public class GameplayUIManager : MonoBehaviour
         _queueItems.Clear();
     }
 
-    // Inicjał z ostatniego członu nazwy: "Wóz Tank" → "T", "Kamikaze" → "K"
     static string GetInitial(string name)
     {
         if (string.IsNullOrEmpty(name)) return "?";
@@ -307,7 +465,7 @@ public class GameplayUIManager : MonoBehaviour
 
     void CreateAbilityButton(string abilityName, int cost, int index)
     {
-        var btnGO = new GameObject($"Ability_{abilityName}");
+        var btnGO = new GameObject("Ability_" + abilityName);
         btnGO.transform.SetParent(abilitiesPanel.transform, false);
 
         var img = btnGO.AddComponent<Image>();
@@ -320,7 +478,6 @@ public class GameplayUIManager : MonoBehaviour
         bc.pressedColor     = new Color(0.06f, 0.10f, 0.18f);
         btn.colors = bc;
 
-        // Poziomy: ikona po lewej, teksty po prawej
         var hlg = btnGO.AddComponent<HorizontalLayoutGroup>();
         hlg.childForceExpandWidth  = false;
         hlg.childForceExpandHeight = true;
@@ -330,7 +487,6 @@ public class GameplayUIManager : MonoBehaviour
         hlg.spacing                = 8f;
         hlg.childAlignment         = TextAnchor.MiddleLeft;
 
-        // Ikona kwadratowa po lewej
         var iconGO  = new GameObject("Icon");
         iconGO.transform.SetParent(btnGO.transform, false);
         var iconImg = iconGO.AddComponent<Image>();
@@ -341,7 +497,6 @@ public class GameplayUIManager : MonoBehaviour
         iconLE.preferredWidth  = 48f;
         iconLE.flexibleWidth   = 0f;
 
-        // Blok tekstowy po prawej
         var textGO = new GameObject("Texts");
         textGO.transform.SetParent(btnGO.transform, false);
         var vlg = textGO.AddComponent<VerticalLayoutGroup>();
@@ -353,7 +508,6 @@ public class GameplayUIManager : MonoBehaviour
         vlg.spacing                = 2f;
         textGO.AddComponent<LayoutElement>().flexibleWidth = 1f;
 
-        // Nazwa mocy
         var nameGO  = new GameObject("Name");
         nameGO.transform.SetParent(textGO.transform, false);
         var nameTxt              = nameGO.AddComponent<TextMeshProUGUI>();
@@ -365,22 +519,17 @@ public class GameplayUIManager : MonoBehaviour
         nameTxt.color            = Color.white;
         nameTxt.fontStyle        = FontStyles.Bold;
         nameTxt.alignment        = TextAlignmentOptions.Center;
-        var nameLE               = nameGO.AddComponent<LayoutElement>();
-        nameLE.preferredHeight   = 22f;
-        nameLE.flexibleHeight    = 0f;
+        nameGO.AddComponent<LayoutElement>().preferredHeight = 22f;
 
-        // Koszt
         var costGO  = new GameObject("Cost");
         costGO.transform.SetParent(textGO.transform, false);
         var costTxt            = costGO.AddComponent<TextMeshProUGUI>();
-        costTxt.text           = $"{cost} Z";
+        costTxt.text           = cost + " Z";
         costTxt.fontSize       = 13f;
         costTxt.color          = new Color(1f, 0.85f, 0.2f);
         costTxt.fontStyle      = FontStyles.Bold;
         costTxt.alignment      = TextAlignmentOptions.Center;
-        var costLE             = costGO.AddComponent<LayoutElement>();
-        costLE.preferredHeight = 18f;
-        costLE.flexibleHeight  = 0f;
+        costGO.AddComponent<LayoutElement>().preferredHeight = 18f;
 
         int captured = index;
         btn.onClick.AddListener(() => OnAbilityClicked(captured));
@@ -417,8 +566,24 @@ public class GameplayUIManager : MonoBehaviour
 
     void CheckRoundEnd()
     {
-        if (_spawningComplete && _activeVehicles == 0)
-            EnterPlanning();
+        if (!_spawningComplete || _activeVehicles != 0) return;
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
+
+        // Przegrana: zadna jednostka nie dotarla do mety w tej rundzie
+        if (_escapedThisRound == 0)
+        {
+            GameManager.Instance?.TriggerDefeat();
+            return;
+        }
+
+        // Wygrana: pomyslnie ukonczona runda VICTORY_ROUND
+        if (_currentRound >= GameManager.VICTORY_ROUND)
+        {
+            GameManager.Instance?.TriggerVictory();
+            return;
+        }
+
+        ShowDecreePanel();
     }
 
     // ══ ZLOTO ═════════════════════════════════════════════════════════════
@@ -439,6 +604,7 @@ public class GameplayUIManager : MonoBehaviour
 
     public void AddGoldForEscapedVehicle()
     {
+        _escapedThisRound++;
         if (config != null) _currentGold += config.goldPerEscapedVehicle;
         UpdateGoldDisplay();
     }
@@ -491,7 +657,7 @@ public class GameplayUIManager : MonoBehaviour
             if (slot == null || i >= config.vehicles.Length) continue;
 
             slot.nameText.text = config.vehicles[i].vehicleName;
-            slot.costText.text = $"{config.vehicles[i].cost} Z";
+            slot.costText.text = config.vehicles[i].cost + " Z";
 
             if (config.vehicles[i].icon != null && slot.iconImage != null)
                 slot.iconImage.sprite = config.vehicles[i].icon;

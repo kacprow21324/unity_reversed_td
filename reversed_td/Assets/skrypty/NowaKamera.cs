@@ -2,55 +2,55 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// AIEnhancedRTSCamera - P³ynna kamera orbitalna do gier strategicznych/TD.
+/// AIEnhancedRTSCamera - Pï¿½ynna kamera orbitalna do gier strategicznych/TD.
 /// 
 /// STEROWANIE:
-///   Prawy przycisk myszy (przytrzymaj) - obracanie kamery wokó³ œrodka mapy
-///   Scroll myszy        - p³ynne przybli¿anie / oddalanie (Zoom)
-///   Shift               - tryb turbo (szybszy zoom/obrót)
-///   Alt                 - tryb precyzyjny (wolniejszy zoom/obrót)
-///   F                   - reset k¹ta nachylenia do startowego
-///   R                   - reset ca³kowity (zoom + obrót + pochylenie)
+///   Prawy przycisk myszy (przytrzymaj) - obracanie kamery wokï¿½ ï¿½rodka mapy
+///   Scroll myszy        - pï¿½ynne przybliï¿½anie / oddalanie (Zoom)
+///   Shift               - tryb turbo (szybszy zoom/obrï¿½t)
+///   Alt                 - tryb precyzyjny (wolniejszy zoom/obrï¿½t)
+///   F                   - reset kï¿½ta nachylenia do startowego
+///   R                   - reset caï¿½kowity (zoom + obrï¿½t + pochylenie)
 /// </summary>
 [RequireComponent(typeof(Camera))]
 public class AIEnhancedRTSCamera : MonoBehaviour
 {
     [Header("--- Cel i Orientacja ---")]
-    [Tooltip("Punkt na œrodku mapy, wokó³ którego kamera siê krêci. Jeœli puste, u¿yje (0,0,0)")]
+    [Tooltip("Punkt na ï¿½rodku mapy, wokï¿½ ktï¿½rego kamera siï¿½ krï¿½ci. Jeï¿½li puste, uï¿½yje (0,0,0)")]
     public Transform pivotPoint;
 
-    [Tooltip("Pocz¹tkowe nachylenie kamery pod ukosem w dó³ (w stopniach)")]
+    [Tooltip("Poczï¿½tkowe nachylenie kamery pod ukosem w dï¿½ (w stopniach)")]
     [Range(10f, 85f)]
     public float startTiltAngle = 50f;
 
-    [Header("--- Przybli¿anie (Zoom) ---")]
-    [Tooltip("Podstawowa prêdkoœæ przybli¿ania rolk¹ myszy")]
+    [Header("--- Przybliï¿½anie (Zoom) ---")]
+    [Tooltip("Podstawowa prï¿½dkoï¿½ï¿½ przybliï¿½ania rolkï¿½ myszy")]
     public float zoomSpeed = 30f;
 
-    [Tooltip("Minimalna odleg³oœæ od œrodka mapy")]
+    [Tooltip("Minimalna odlegï¿½oï¿½ï¿½ od ï¿½rodka mapy")]
     public float minZoomDistance = 10f;
 
-    [Tooltip("Maksymalna odleg³oœæ od œrodka mapy")]
+    [Tooltip("Maksymalna odlegï¿½oï¿½ï¿½ od ï¿½rodka mapy")]
     public float maxZoomDistance = 100f;
 
-    [Tooltip("Startowa odleg³oœæ od œrodka mapy")]
+    [Tooltip("Startowa odlegï¿½oï¿½ï¿½ od ï¿½rodka mapy")]
     public float startZoomDistance = 40f;
 
-    [Tooltip("Wyg³adzanie przybli¿ania (im mniejsze, tym wolniejsze)")]
+    [Tooltip("Wygï¿½adzanie przybliï¿½ania (im mniejsze, tym wolniejsze)")]
     public float zoomSmoothing = 8f;
 
-    [Header("--- Obrót orbitalny ---")]
-    [Tooltip("Prêdkoœæ obrotu wokó³ mapy trzymaj¹c prawy przycisk myszy")]
+    [Header("--- Obrï¿½t orbitalny ---")]
+    [Tooltip("Prï¿½dkoï¿½ï¿½ obrotu wokï¿½ mapy trzymajï¿½c prawy przycisk myszy")]
     public float rotationSpeed = 120f;
 
-    [Tooltip("Wyg³adzanie obrotu (im mniejsze, tym wolniejsze)")]
+    [Tooltip("Wygï¿½adzanie obrotu (im mniejsze, tym wolniejsze)")]
     public float rotationSmoothing = 15f;
 
-    [Header("Mno¿niki prêdkoœci (Shift/Alt)")]
-    [Tooltip("Mno¿nik prêdkoœci przy Shift (turbo)")]
+    [Header("Mnoï¿½niki prï¿½dkoï¿½ci (Shift/Alt)")]
+    [Tooltip("Mnoï¿½nik prï¿½dkoï¿½ci przy Shift (turbo)")]
     public float turboMultiplier = 2.5f;
 
-    [Tooltip("Mno¿nik prêdkoœci przy Alt (precyzja)")]
+    [Tooltip("Mnoï¿½nik prï¿½dkoï¿½ci przy Alt (precyzja)")]
     public float slowMultiplier = 0.3f;
 
     private float _currentZoom;
@@ -70,14 +70,14 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
         if (pivotPoint == null)
         {
-            Debug.LogWarning("[Kamera RTS] Nie przypisano punktu centralnego (Pivot). U¿ywam (0,0,0).");
+            Debug.LogWarning("[Kamera RTS] Nie przypisano punktu centralnego (Pivot). Uï¿½ywam (0,0,0).");
             _fallbackPivot = Vector3.zero;
         }
     }
 
     void LateUpdate()
     {
-        // Ignorowanie klikniêæ na interfejs UI
+        // Ignorowanie klikniï¿½ï¿½ na interfejs UI
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
         HandleCalculations();
@@ -95,16 +95,16 @@ public class AIEnhancedRTSCamera : MonoBehaviour
             _targetZoom = Mathf.Clamp(_targetZoom, minZoomDistance, maxZoomDistance);
         }
 
-        _currentZoom = Mathf.Lerp(_currentZoom, _targetZoom, Time.deltaTime * zoomSmoothing);
+        _currentZoom = Mathf.Lerp(_currentZoom, _targetZoom, Time.unscaledDeltaTime * zoomSmoothing);
 
         if (Input.GetMouseButton(1))
         {
             float mouseX = Input.GetAxis("Mouse X");
             float speedMultiplier = GetSpeedMultiplier();
-            _targetRotationY += mouseX * rotationSpeed * speedMultiplier * Time.deltaTime;
+            _targetRotationY += mouseX * rotationSpeed * speedMultiplier * Time.unscaledDeltaTime;
         }
 
-        _currentRotationY = Mathf.LerpAngle(_currentRotationY, _targetRotationY, Time.deltaTime * rotationSmoothing);
+        _currentRotationY = Mathf.LerpAngle(_currentRotationY, _targetRotationY, Time.unscaledDeltaTime * rotationSmoothing);
     }
 
     float GetSpeedMultiplier()

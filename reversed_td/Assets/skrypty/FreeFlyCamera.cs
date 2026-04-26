@@ -64,6 +64,16 @@ public class FreeFlyCamera : MonoBehaviour
     [Tooltip("Startowa rotacja kamery (Euler)")]
     public Vector3 startRotation = new Vector3(30f, 0f, 0f);
 
+    [Header("Granice mapy")]
+    [Tooltip("Minimalna pozycja (X, Y, Z) w jakiej może być kamera")]
+    public Vector3 boundsMin = new Vector3(-200f, 2f, -200f);
+
+    [Tooltip("Maksymalna pozycja (X, Y, Z) w jakiej może być kamera")]
+    public Vector3 boundsMax = new Vector3(200f, 150f, 200f);
+
+    [Tooltip("Czy ograniczać ruch kamery do granic mapy")]
+    public bool useBounds = true;
+
     // Stan wewnętrzny
     private Vector3 _currentVelocity = Vector3.zero;
     private float _yaw;
@@ -138,8 +148,8 @@ public class FreeFlyCamera : MonoBehaviour
         }
 
         // Wygładzony obrót
-        _yaw   = Mathf.LerpAngle(_yaw,   _targetYaw,   Time.deltaTime * rotationSmoothing);
-        _pitch = Mathf.LerpAngle(_pitch, _targetPitch, Time.deltaTime * rotationSmoothing);
+        _yaw   = Mathf.LerpAngle(_yaw,   _targetYaw,   Time.unscaledDeltaTime * rotationSmoothing);
+        _pitch = Mathf.LerpAngle(_pitch, _targetPitch, Time.unscaledDeltaTime * rotationSmoothing);
 
         transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
     }
@@ -170,9 +180,15 @@ public class FreeFlyCamera : MonoBehaviour
         Vector3 targetVelocity = transform.TransformDirection(direction.normalized) * speed;
 
         // Wygładzenie przyspieszenia
-        _currentVelocity = Vector3.Lerp(_currentVelocity, targetVelocity, Time.deltaTime * acceleration);
+        _currentVelocity = Vector3.Lerp(_currentVelocity, targetVelocity, Time.unscaledDeltaTime * acceleration);
 
-        transform.position += _currentVelocity * Time.deltaTime;
+        transform.position += _currentVelocity * Time.unscaledDeltaTime;
+
+        if (useBounds)
+            transform.position = new Vector3(
+                Mathf.Clamp(transform.position.x, boundsMin.x, boundsMax.x),
+                Mathf.Clamp(transform.position.y, boundsMin.y, boundsMax.y),
+                Mathf.Clamp(transform.position.z, boundsMin.z, boundsMax.z));
     }
 
     /// <summary>

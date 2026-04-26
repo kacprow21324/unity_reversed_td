@@ -6,19 +6,19 @@ public class TacticalAbilities : MonoBehaviour
 
     [Header("Nalot")]
     public float airstrikeCost   = 100f;
-    public float airstrikeRadius = 8f;
-    public float airstrikeDamage = 100f;
+    public float airstrikeRadius = DecreeManager.BASE_NALOT_RAD;
+    public float airstrikeDamage = DecreeManager.BASE_NALOT_DMG;
 
     [Header("Tarcza")]
     public float shieldCost     = 75f;
-    public float shieldRadius   = 10f;
-    public float shieldDuration = 4f;
+    public float shieldRadius   = DecreeManager.BASE_SHIELD_RAD;
+    public float shieldDuration = DecreeManager.BASE_SHIELD_DUR;
 
     [Header("Boost")]
     public float boostCost       = 50f;
     public float boostRadius     = 12f;
-    public float boostDuration   = 5f;
-    public float boostMultiplier = 1.5f;
+    public float boostDuration   = DecreeManager.BASE_BOOST_DUR;
+    public float boostMultiplier = DecreeManager.BASE_BOOST_MUL;
 
     [Header("Celowanie")]
     public LayerMask groundLayer;
@@ -51,9 +51,23 @@ public class TacticalAbilities : MonoBehaviour
 
     // ── Aktywacja ─────────────────────────────────────────────────────────
 
-    public void ActivateAirstrike() => StartActivation(0, airstrikeRadius);
-    public void ActivateShield()    => StartActivation(1, shieldRadius);
-    public void ActivateBoost()     => StartActivation(2, boostRadius);
+    public void ActivateAirstrike()
+    {
+        float r = airstrikeRadius;
+        if (DecreeManager.Instance != null)
+            r *= (1f + DecreeManager.Instance.NalotRadiusBonus);
+        StartActivation(0, r);
+    }
+
+    public void ActivateShield()
+    {
+        float r = shieldRadius;
+        if (DecreeManager.Instance != null)
+            r *= (1f + DecreeManager.Instance.ShieldRadiusBonus);
+        StartActivation(1, r);
+    }
+
+    public void ActivateBoost() => StartActivation(2, boostRadius);
 
     void StartActivation(int index, float radius)
     {
@@ -108,7 +122,7 @@ public class TacticalAbilities : MonoBehaviour
         CancelAbility();
     }
 
-    // ── Moce ──────────────────────────────────────────────────────────────
+    // ── Moce z dekretami ──────────────────────────────────────────────────
 
     void UseAirstrike(Vector3 center)
     {
@@ -118,13 +132,23 @@ public class TacticalAbilities : MonoBehaviour
             return;
         }
 
-        foreach (var col in Physics.OverlapSphere(center, airstrikeRadius))
+        float radius = airstrikeRadius;
+        float damage = airstrikeDamage;
+        if (DecreeManager.Instance != null)
+        {
+            radius *= (1f + DecreeManager.Instance.NalotRadiusBonus);
+            damage += DecreeManager.Instance.NalotDamageBonus;
+        }
+
+        foreach (var col in Physics.OverlapSphere(center, radius))
         {
             WiezaBaza wieza = col.GetComponent<WiezaBaza>()
                            ?? col.GetComponentInParent<WiezaBaza>();
             if (wieza != null && wieza.gameObject.activeInHierarchy)
-                wieza.TakeDamage(airstrikeDamage);
+                wieza.TakeDamage(damage);
         }
+
+        GameStatistics.Instance?.RegisterAbility("airstrike");
     }
 
     void UseShield(Vector3 center)
@@ -135,11 +159,21 @@ public class TacticalAbilities : MonoBehaviour
             return;
         }
 
-        foreach (var col in Physics.OverlapSphere(center, shieldRadius))
+        float radius   = shieldRadius;
+        float duration = shieldDuration;
+        if (DecreeManager.Instance != null)
+        {
+            radius   *= (1f + DecreeManager.Instance.ShieldRadiusBonus);
+            duration += DecreeManager.Instance.ShieldDurationBonus;
+        }
+
+        foreach (var col in Physics.OverlapSphere(center, radius))
         {
             pojazd p = col.GetComponent<pojazd>();
-            p?.AktywujTarcze(shieldDuration);
+            p?.AktywujTarcze(duration);
         }
+
+        GameStatistics.Instance?.RegisterAbility("shield");
     }
 
     void UseBoost(Vector3 center)
@@ -150,11 +184,21 @@ public class TacticalAbilities : MonoBehaviour
             return;
         }
 
+        float multiplier = boostMultiplier;
+        float duration   = boostDuration;
+        if (DecreeManager.Instance != null)
+        {
+            multiplier *= (1f + DecreeManager.Instance.BoostMultBonus);
+            duration   += DecreeManager.Instance.BoostDurationBonus;
+        }
+
         foreach (var col in Physics.OverlapSphere(center, boostRadius))
         {
             pojazd p = col.GetComponent<pojazd>();
-            p?.DoladujPredkosc(boostMultiplier, boostDuration);
+            p?.DoladujPredkosc(multiplier, duration);
         }
+
+        GameStatistics.Instance?.RegisterAbility("boost");
     }
 
     // ── Okrag ─────────────────────────────────────────────────────────────

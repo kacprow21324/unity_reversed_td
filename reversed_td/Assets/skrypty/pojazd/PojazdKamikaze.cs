@@ -1,36 +1,41 @@
 using UnityEngine;
 
-// AKAMIKAZE – Szybki wóz-samobójca. Gdy jakakolwiek wieża znajdzie się
-// w promieniu wyzwalacza, pojazd eksploduje zadając ogromne obrażenia AoE
-// wszystkim wieżom w promieniu wybuchu i niszczy siebie.
 public class PojazdKamikaze : pojazd
 {
     [Header("Parametry Eksplozji")]
     public float promienWyzwalacza = 4f;
-    public float promienWybuchu = 6f;
-    public float obrazeniaWybuchu = 150f;
+    public float promienWybuchu    = DecreeManager.BASE_KAM_RAD;
+    public float obrazeniaWybuchu  = DecreeManager.BASE_KAM_DMG;
 
     private bool _eksplodowal = false;
 
     protected override void Start()
     {
-        maxHp = 80f;
+        maxHp   = DecreeManager.Instance != null
+            ? DecreeManager.Instance.FinalHP("Kamikaze", DecreeManager.BASE_KAM_HP)
+            : DecreeManager.BASE_KAM_HP;
         pancerz = 0f;
         base.Start();
-        _agent.speed = 8f;
+        _agent.speed = DecreeManager.Instance != null
+            ? DecreeManager.Instance.FinalSpeed("Kamikaze", DecreeManager.BASE_KAM_SPD)
+            : DecreeManager.BASE_KAM_SPD;
+
+        if (DecreeManager.Instance != null)
+        {
+            promienWybuchu   = DecreeManager.BASE_KAM_RAD * (1f + DecreeManager.Instance.KamikazeRadiusBonus);
+            obrazeniaWybuchu = DecreeManager.BASE_KAM_DMG + DecreeManager.Instance.KamikazeDamageBonus;
+        }
     }
 
     protected override void Update()
     {
         base.Update();
-
         if (!_eksplodowal)
             SprawdzZasiegWiez();
     }
 
     void SprawdzZasiegWiez()
     {
-        // Sprawdź czy jakakolwiek aktywna wieża jest wystarczająco blisko
         Collider[] wszystkie = Physics.OverlapSphere(transform.position, promienWyzwalacza);
         foreach (var c in wszystkie)
         {
@@ -53,7 +58,7 @@ public class PojazdKamikaze : pojazd
             w?.TakeDamage(obrazeniaWybuchu);
         }
 
-        Smierc(); // Notyfikuje UIManager i niszczy obiekt
+        Smierc();
     }
 
     void OnDrawGizmosSelected()

@@ -1,14 +1,10 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
-// AMIRROR – Wóz Lustrzany. Używa Physics.Raycast do wykrywania nadlatujących
-// standardowych pocisków (Pocisk) i odbija je w kierunku wież.
-// NIE działa na: kolce (Kolec), obrażenia obszarowe (PociskArmatni), wiązkę plazmową.
 public class PojazdLustro : pojazd
 {
     [Header("Parametry Tarczy")]
-    public float zasiegDetekcji = 6f;
+    public float zasiegDetekcji   = 6f;
     public float cooldownSkanowania = 0.1f;
 
     private float _licznikSkanowania = 0f;
@@ -16,10 +12,16 @@ public class PojazdLustro : pojazd
 
     protected override void Start()
     {
-        maxHp = 90f;
-        pancerz = 5f;
+        maxHp   = DecreeManager.Instance != null
+            ? DecreeManager.Instance.FinalHP("Lustro", DecreeManager.BASE_LUS_HP)
+            : DecreeManager.BASE_LUS_HP;
+        pancerz = DecreeManager.Instance != null
+            ? DecreeManager.Instance.FinalArmor("Lustro", DecreeManager.BASE_LUS_ARM)
+            : DecreeManager.BASE_LUS_ARM;
         base.Start();
-        _agent.speed = 3f;
+        _agent.speed = DecreeManager.Instance != null
+            ? DecreeManager.Instance.FinalSpeed("Lustro", DecreeManager.BASE_LUS_SPD)
+            : DecreeManager.BASE_LUS_SPD;
     }
 
     protected override void Update()
@@ -36,24 +38,19 @@ public class PojazdLustro : pojazd
 
     void SkanujIPrzebijTarcza()
     {
-        // Znajdź wszystkie pociski w zasięgu
         Collider[] pobliskieCollidery = Physics.OverlapSphere(transform.position, zasiegDetekcji);
 
         foreach (var col in pobliskieCollidery)
         {
             Pocisk pocisk = col.GetComponent<Pocisk>();
-
-            // Pomijaj: już odbite, AoE (PociskArmatni to inny komponent), brak Pocisk
             if (pocisk == null || pocisk.odbity || _juzOdbite.Contains(pocisk)) continue;
 
-            // Raycast z pocisku w kierunku lustra – weryfikuje linię widzenia
             Vector3 kierunekDoLustra = transform.position - col.transform.position;
             RaycastHit hit;
             if (!Physics.Raycast(col.transform.position, kierunekDoLustra.normalized,
                                   out hit, zasiegDetekcji + 1f))
                 continue;
 
-            // Musi trafić dokładnie w nasze lustro
             if (hit.collider.gameObject != gameObject) continue;
 
             Odbij(pocisk);
@@ -71,6 +68,10 @@ public class PojazdLustro : pojazd
 
         pocisk.odbity = true;
         pocisk.UstawCel(najblisza.transform);
+
+        if (DecreeManager.Instance != null && DecreeManager.Instance.LustroOdbicieBonus > 0f)
+            pocisk.obrazenia *= (1f + DecreeManager.Instance.LustroOdbicieBonus);
+
         _juzOdbite.Add(pocisk);
     }
 
