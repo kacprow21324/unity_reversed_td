@@ -130,15 +130,23 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         IsGameOver = false;
-        GameStatistics.Instance?.ResetStats();
-        SceneManager.LoadScene(0);
+        if (GameStatistics.Instance != null) Destroy(GameStatistics.Instance.gameObject);
+        if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
+        if (DecreeManager.Instance != null) Destroy(DecreeManager.Instance.gameObject);
+        int targetScene = 0;
+        Destroy(gameObject);
+        SceneManager.LoadScene(targetScene, LoadSceneMode.Single);
     }
 
     public void RestartScene()
     {
         Time.timeScale = 1f;
         IsGameOver = false;
-        GameStatistics.Instance?.ResetStats();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        int targetScene = SceneManager.GetActiveScene().buildIndex;
+        if (GameStatistics.Instance != null) Destroy(GameStatistics.Instance.gameObject);
+        if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
+        if (DecreeManager.Instance != null) Destroy(DecreeManager.Instance.gameObject);
+        Destroy(gameObject);
+        SceneManager.LoadScene(targetScene, LoadSceneMode.Single);
     }
 }

@@ -6519,7 +6519,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6393581200343061896}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: RestartScene
         m_Mode: 1
@@ -6652,7 +6652,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6393581200343061896}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: RestartScene
         m_Mode: 1
@@ -6785,7 +6785,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6393581200343061896}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: GoToMainMenu
         m_Mode: 1
@@ -7879,7 +7879,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6393581200343061896}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: GoToMainMenu
         m_Mode: 1
@@ -10024,7 +10024,6 @@ GameObject:
   - component: {fileID: 5915589033306843290}
   - component: {fileID: 4381674938377620776}
   - component: {fileID: 4473344750619921337}
-  - component: {fileID: 6393581200343061896}
   - component: {fileID: 4288575527041372850}
   m_Layer: 0
   m_Name: GameplayCanvas
@@ -10225,22 +10224,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3e1e876aae507d4da888f851c8dac3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DecreeManager
---- !u!114 &6393581200343061896
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8905801604679859802}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7ed5d47f02616d479affefaf7fc8daa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  victoryPanel: {fileID: 622802758391418372}
-  defeatPanel: {fileID: 1910036955692014919}
-  victoryStatsText: {fileID: 8465557786373860706}
-  defeatStatsText: {fileID: 5390262790841828903}
 --- !u!114 &4288575527041372850
 MonoBehaviour:
   m_ObjectHideFlags: 0
