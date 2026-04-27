@@ -1,17 +1,22 @@
 using UnityEngine;
 
-// Pojedynczy kolec – po trafieniu pojazdu dezaktywuje się (jednorazowy).
+// Pojedynczy kolec – po trafieniu pojazdu zadaje obrażenia i natychmiast się niszczy.
 public class Kolec : MonoBehaviour
 {
     public float obrazenia = 30f;
 
+    void Awake()
+    {
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.isTrigger = true;
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer != LayerMask.NameToLayer("POJAZD")) return;
-
         pojazd p = other.GetComponent<pojazd>();
-        p?.OdejmijHp(obrazenia);
+        if (p == null) return;
 
-        gameObject.SetActive(false);
+        p.OdejmijHp(obrazenia);
+        Destroy(gameObject);
     }
 }

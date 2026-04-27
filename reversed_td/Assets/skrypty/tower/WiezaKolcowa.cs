@@ -1,14 +1,14 @@
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
 
-// WKOLCE – krótki zasięg. Rozkłada wokół siebie kolce-pułapki.
-// Po zużyciu wszystkich kolców czeka z przeładowaniem.
+// WKOLCE – krótki zasięg. Rozkłada kolce-pułapki na ścieżce NavMesh w swoim zasięgu.
 public class WiezaKolcowa : WiezaBaza
 {
     [Header("Parametry Kolców")]
     public int iloscKolcow = 6;
-    public float promienRozmieszczenia = 3.5f;
+    public float promienRozmieszczenia = 4.5f; // ZWIĘKSZONO! Żeby łatwiej łapał drogę
     public float obrazeniaKolca = 30f;
     public float cooldownPrzeladowania = 8f;
 
@@ -26,9 +26,7 @@ public class WiezaKolcowa : WiezaBaza
     protected override void OnEnable()
     {
         base.OnEnable();
-        // Resetuj kolce przy re-aktywacji
-        foreach (var k in _kolce)
-            if (k != null) k.SetActive(true);
+        _kolce.RemoveAll(k => k == null);
         _przeladowuje = false;
     }
 
@@ -41,44 +39,61 @@ public class WiezaKolcowa : WiezaBaza
 
     void RozstawKolce()
     {
-        for (int i = 0; i < iloscKolcow; i++)
+        int rozmieszczono = 0;
+        int maxProb = iloscKolcow * 40; 
+
+        for (int proba = 0; proba < maxProb && rozmieszczono < iloscKolcow; proba++)
         {
-            float kat = (360f / iloscKolcow) * i * Mathf.Deg2Rad;
-            Vector3 offset = new Vector3(Mathf.Cos(kat), 0f, Mathf.Sin(kat)) * promienRozmieszczenia;
-            Vector3 pozycja = transform.position + offset + Vector3.up * 0.4f;
+            Vector2 offset2D = Random.insideUnitCircle * promienRozmieszczenia;
+         
+            Vector3 kandydat = new Vector3(transform.position.x + offset2D.x, 0f, transform.position.z + offset2D.y);
 
-            GameObject kolcGO = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            kolcGO.name = "Kolec";
-            kolcGO.transform.SetParent(transform);
-            kolcGO.transform.position = pozycja;
-            kolcGO.transform.localScale = new Vector3(0.25f, 0.5f, 0.25f);
+            NavMeshHit hit;
+            if (!NavMesh.SamplePosition(kandydat, out hit, 20f, NavMesh.AllAreas)) continue;
+            Vector2 pozycjaWiezy2D = new Vector2(transform.position.x, transform.position.z);
+            Vector2 pozycjaHita2D = new Vector2(hit.position.x, hit.position.z);
+            
+            if (Vector2.Distance(pozycjaWiezy2D, pozycjaHita2D) > promienRozmieszczenia + 1f) continue;
 
-            CapsuleCollider col = kolcGO.GetComponent<CapsuleCollider>();
-            col.isTrigger = true;
-
-            Renderer r = kolcGO.GetComponent<Renderer>();
-            r.material.color = new Color(0.3f, 0.3f, 0.35f);
-
-            Kolec skrypt = kolcGO.AddComponent<Kolec>();
-            skrypt.obrazenia = obrazeniaKolca;
-
-            _kolce.Add(kolcGO);
+            _kolce.Add(UtworzKolec(hit.position + Vector3.up * 0.4f));
+            rozmieszczono++;
         }
+    }
+
+    GameObject UtworzKolec(Vector3 pozycja)
+    {
+        GameObject kolcGO = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        kolcGO.name = "Kolec";
+        
+        // BARDZO WAŻNE: Kolce NIE są dziećmi wieży!
+        kolcGO.transform.SetParent(null); 
+        
+        kolcGO.transform.position = pozycja;
+        kolcGO.transform.localScale = new Vector3(0.25f, 0.5f, 0.25f);
+
+        kolcGO.GetComponent<CapsuleCollider>().isTrigger = true;
+        kolcGO.GetComponent<Renderer>().material.color = Color.yellow;
+
+        Kolec skrypt = kolcGO.AddComponent<Kolec>();
+        skrypt.obrazenia = obrazeniaKolca;
+
+        return kolcGO;
     }
 
     bool WszystkieKolceUzyte()
     {
+        if (_kolce.Count == 0) return false;
         foreach (var k in _kolce)
-            if (k != null && k.activeInHierarchy) return false;
-        return _kolce.Count > 0;
+            if (k != null) return false;
+        return true;
     }
 
     IEnumerator Przeladuj()
     {
         _przeladowuje = true;
         yield return new WaitForSeconds(cooldownPrzeladowania);
-        foreach (var k in _kolce)
-            if (k != null) k.SetActive(true);
+        _kolce.Clear();
+        RozstawKolce();
         _przeladowuje = false;
     }
 
@@ -92,7 +107,7 @@ public class WiezaKolcowa : WiezaBaza
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.grey;
-        Gizmos.DrawWireSphere(transform.position, promienRozmieszczenia + 0.5f);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, promienRozmieszczenia);
     }
 }

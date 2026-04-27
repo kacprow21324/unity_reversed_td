@@ -61,11 +61,11 @@ public abstract class WiezaBaza : MonoBehaviour
     {
         var hpObj = new GameObject("HP_Display");
         hpObj.transform.SetParent(transform);
-        hpObj.transform.localPosition = new Vector3(0f, 2.5f, 0f);
+        hpObj.transform.localPosition = new Vector3(0f, 4f, 0f);
         hpObj.transform.localRotation = Quaternion.identity;
 
         _hpText = hpObj.AddComponent<TextMeshPro>();
-        _hpText.fontSize = 4f;
+        _hpText.fontSize = 7f;
         _hpText.alignment = TextAlignmentOptions.Center;
         _hpText.fontStyle = FontStyles.Bold;
         _hpText.color = Color.green;
