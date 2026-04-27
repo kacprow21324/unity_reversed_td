@@ -5,19 +5,24 @@ public class VehicleConfig
 {
     public string vehicleName;
     public int cost;
-    public Sprite icon; // Tu w przysz³oœci wrzucisz grafiki w kwadracie
+    public Sprite icon; // Tu w przyszï¿½oï¿½ci wrzucisz grafiki w kwadracie
 }
 
 [CreateAssetMenu(fileName = "UstawieniaEkonomii", menuName = "Tower Defense/Ustawienia Ekonomii")]
 public class GameConfig : ScriptableObject
 {
-    [Header("Ustawienia Z³ota")]
+    [Header("Ustawienia ZÅ‚ota")]
     public int startingGold = 200;
+
+    [Tooltip("Bazowa nagroda za wygranie rundy (czÄ™Å›Ä‡ staÅ‚a wzoru)")]
     public int goldPerWin = 100;
 
-    [Tooltip("Ile z³ota dostaje gracz, gdy jego jednostka dotrze do koñca trasy")]
+    [Tooltip("MnoÅ¼nik rundy we wzorze: goldPerWin + goldPerRoundMultiplier * nrRundy")]
+    public int goldPerRoundMultiplier = 20;
+
+    [Tooltip("Ile zÅ‚ota dostaje gracz, gdy jego jednostka dotrze do koÅ„ca trasy")]
     public int goldPerEscapedVehicle = 10;
 
-    [Header("Lista Pojazdów (ustaw 5)")]
+    [Header("Lista Pojazdï¿½w (ustaw 5)")]
     public VehicleConfig[] vehicles = new VehicleConfig[5];
 }

@@ -669,15 +669,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd278d78e22cfb49b9082a6a052c56f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIEnhancedRTSCamera
+  mode: 0
   pivotPoint: {fileID: 816539693}
   startTiltAngle: 50
+  minTiltAngle: 5
+  maxTiltAngle: 89
   zoomSpeed: 30
   minZoomDistance: 10
   maxZoomDistance: 220
   startZoomDistance: 40
   zoomSmoothing: 8
   rotationSpeed: 120
+  tiltSpeed: 80
   rotationSmoothing: 15
+  freeFlySpeed: 20
+  freeFlyTurboMultiplier: 3
+  lookSensitivity: 2
+  boundCubes:
+  - {fileID: 1396694429}
+  - {fileID: 265131837}
+  - {fileID: 725752959}
+  - {fileID: 1514948330}
+  limitMinY: 10
+  limitMaxY: 80
+  flyScrollSpeed: 15
+  zoomedFOV: 20
+  fovSmoothing: 10
   turboMultiplier: 2.5
   slowMultiplier: 0.3
 --- !u!1001 &470760001

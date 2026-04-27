@@ -21,6 +21,11 @@ public class VehicleSpawner : MonoBehaviour
         StartCoroutine(SpawnCoroutine(queue));
     }
 
+    public void StopSpawning()
+    {
+        StopAllCoroutines();
+    }
+
     IEnumerator SpawnCoroutine(List<GameplayUIManager.QueueEntry> queue)
     {
         foreach (var entry in queue)

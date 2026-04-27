@@ -1165,20 +1165,24 @@ MonoBehaviour:
   mode: 0
   pivotPoint: {fileID: 1472089311}
   startTiltAngle: 50.2
+  minTiltAngle: 5
+  maxTiltAngle: 89
   zoomSpeed: 30
   minZoomDistance: 10
   maxZoomDistance: 220
   startZoomDistance: 40
   zoomSmoothing: 8
   rotationSpeed: 120
+  tiltSpeed: 80
   rotationSmoothing: 15
   freeFlySpeed: 20
   freeFlyTurboMultiplier: 3
+  lookSensitivity: 2
   boundCubes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1574227936}
+  - {fileID: 372314487}
+  - {fileID: 1866639400}
+  - {fileID: 843591587}
   limitMinY: 10
   limitMaxY: 80
   flyScrollSpeed: 15

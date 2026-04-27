@@ -163,14 +163,38 @@ public class GameplayUIManager : MonoBehaviour
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
 
+        // Zatrzymaj spawner żeby nie pojawiały się nowe pojazdy
+        VehicleSpawner.Instance?.StopSpawning();
+
+        // Złoto za każdy pojazd który był na mapie (jakby uciekł)
+        pojazd[] pojazdy = FindObjectsByType<pojazd>(FindObjectsSortMode.None);
+        if (config != null && pojazdy.Length > 0)
+            AddGold(config.goldPerEscapedVehicle * pojazdy.Length);
+
+        // Zniszcz wszystkie pojazdy bezpośrednio (omijamy Smierc/OnVehicleRemoved
+        // żeby nie wyzwolić CheckRoundEnd w środku pętli)
+        foreach (var p in pojazdy)
+            if (p != null) Destroy(p.gameObject);
+
+        // Zniszcz wszystkie kolce na mapie
+        foreach (var k in FindObjectsByType<Kolec>(FindObjectsSortMode.None))
+            if (k != null) Destroy(k.gameObject);
+
+        // Resetuj stan rundy – traktujemy wszystkie pojazdy jako uciekłe
+        _activeVehicles   = 0;
+        _spawningComplete = true;
+        _escapedThisRound = Mathf.Max(1, _escapedThisRound + pojazdy.Length);
+
+        // Nagroda za wygraną rundę: goldPerWin + goldPerRoundMultiplier * nrRundy
+        if (config != null)
+            AddGold(config.goldPerWin + config.goldPerRoundMultiplier * _currentRound);
+
         if (_currentRound >= GameManager.VICTORY_ROUND)
         {
             GameManager.Instance?.TriggerVictory();
         }
         else
         {
-            // Symuluj wygranie rundy: pokaz dekrety lub przejdz do planowania
-            _escapedThisRound = Mathf.Max(1, _escapedThisRound);
             if (decreePanel != null && DecreeManager.Instance != null)
                 ShowDecreePanel();
             else
@@ -574,6 +598,13 @@ public class GameplayUIManager : MonoBehaviour
         {
             GameManager.Instance?.TriggerDefeat();
             return;
+        }
+
+        // Nagroda za wygraną rundę: 100 + 20 * nrRundy (wartości z GameConfig)
+        if (config != null)
+        {
+            int nagroda = config.goldPerWin + config.goldPerRoundMultiplier * _currentRound;
+            AddGold(nagroda);
         }
 
         // Wygrana: pomyslnie ukonczona runda VICTORY_ROUND

@@ -4,20 +4,20 @@ using UnityEngine.EventSystems;
 public enum CameraMode { Orbit, FreeFly }
 
 /// STEROWANIE:
-///   Prawy przycisk myszy  – obracanie kamery (oba tryby)
+///   Prawy przycisk myszy  – Orbit: obrót poziomy + nachylenie góra/dół
+///                         – FreeFly: FPS look (pitch + yaw)
 ///   Scroll myszy          – Orbit: zoom dystansu | FreeFly: zmiana wysokości Y
-///   Shift                 – turbo (szybszy ruch/zoom)
-///   Alt                   – precyzja (wolniejszy ruch/zoom)
+///   Shift                 – turbo  |  Alt – precyzja
 ///   Q                     – przełącz w tryb FreeFly
 ///   E                     – wróć do trybu Orbit (płynny powrót do pivota)
-///   WSAD                  – lot w trybie FreeFly (płaszczyzna XZ kamery)
-///   C (przytrzymaj)       – Optifine Zoom (FOV → 20)
-///   F                     – reset nachylenia
+///   WSAD                  – lot w trybie FreeFly (płaszczyzna XZ)
+///   C (przytrzymaj)       – Optifine Zoom (FOV → zoomedFOV)
+///   F                     – reset nachylenia (Orbit)
 ///   R                     – pełny reset (Orbit)
 [RequireComponent(typeof(Camera))]
 public class AIEnhancedRTSCamera : MonoBehaviour
 {
-    // ── Tryb kamery ──────────────────────────────────────────────────────────
+    // ── Tryb kamery ───────────────────────────────────────────────────────
 
     [Header("Tryb Kamery")]
     public CameraMode mode = CameraMode.Orbit;
@@ -28,29 +28,41 @@ public class AIEnhancedRTSCamera : MonoBehaviour
     [Tooltip("Punkt środkowy mapy, wokół którego kamera się obraca. Puste = (0,0,0).")]
     public Transform pivotPoint;
 
-    [Tooltip("Początkowe nachylenie kamery (stopnie)")]
-    [Range(10f, 85f)]
+    [Tooltip("Początkowe nachylenie kamery (stopnie od poziomu)")]
+    [Range(5f, 89f)]
     public float startTiltAngle = 50f;
 
+    [Tooltip("Minimalne nachylenie (prawie poziomo)")]
+    [Range(5f, 45f)]
+    public float minTiltAngle = 5f;
+
+    [Tooltip("Maksymalne nachylenie (prawie pionowo – widok z góry)")]
+    [Range(45f, 89f)]
+    public float maxTiltAngle = 89f;
+
     [Header("Orbit – Zoom")]
-    public float zoomSpeed = 30f;
+    public float zoomSpeed       = 30f;
     public float minZoomDistance = 10f;
     public float maxZoomDistance = 100f;
     public float startZoomDistance = 40f;
-    public float zoomSmoothing = 8f;
+    public float zoomSmoothing   = 8f;
 
-    [Header("Orbit – Obrót")]
-    public float rotationSpeed = 120f;
+    [Header("Orbit – Obrót i Nachylenie")]
+    public float rotationSpeed   = 120f;
+    public float tiltSpeed       = 80f;
     public float rotationSmoothing = 15f;
 
     // ── FreeFly ───────────────────────────────────────────────────────────
 
     [Header("FreeFly – Lot")]
-    public float freeFlySpeed = 20f;
+    public float freeFlySpeed           = 20f;
     public float freeFlyTurboMultiplier = 3f;
 
+    [Header("FreeFly – Czułość myszki (look)")]
+    public float lookSensitivity = 2f;
+
     [Header("FreeFly – Granice mapy (4 Cube'y)")]
-    [Tooltip("4 obiekty wyznaczające rogi/krawędzie mapy. Bounding box liczy się automatycznie z ich pozycji. Jeśli puste – Start() szuka Cube(1)..Cube(4) po nazwie.")]
+    [Tooltip("4 obiekty wyznaczające rogi mapy. Bounding box liczony automatycznie. Puste = Start() szuka Cube(1)..Cube(4).")]
     public Transform[] boundCubes = new Transform[4];
 
     [Header("FreeFly – Limity wysokości")]
@@ -63,50 +75,56 @@ public class AIEnhancedRTSCamera : MonoBehaviour
     // ── Zoom Optifine ─────────────────────────────────────────────────────
 
     [Header("Zoom Optifine (klawisz C)")]
-    public float zoomedFOV = 20f;
+    public float zoomedFOV   = 20f;
     public float fovSmoothing = 10f;
 
     // ── Wspólne mnożniki ──────────────────────────────────────────────────
 
     [Header("Mnożniki prędkości (Shift / Alt)")]
     public float turboMultiplier = 2.5f;
-    public float slowMultiplier = 0.3f;
+    public float slowMultiplier  = 0.3f;
 
     // ── Stan prywatny ─────────────────────────────────────────────────────
 
-    // Orbit
-    // Granice obliczone z Cube'ów
+    // Bounds
     private float _minX, _maxX, _minZ, _maxZ;
-    private bool _boundsReady;
+    private bool  _boundsReady;
 
+    // Orbit
     private float _currentZoom;
     private float _targetZoom;
     private float _currentRotationY;
     private float _targetRotationY;
     private float _currentTilt;
+    private float _targetTilt;
     private Vector3 _fallbackPivot;
 
-    // FreeFly
-    private bool _returningToOrbit;
-    private Vector3 _orbitReturnPos;
+    // Orbit → powrót
+    private bool       _returningToOrbit;
+    private Vector3    _orbitReturnPos;
     private Quaternion _orbitReturnRot;
+
+    // FreeFly look
+    private float _flyYaw;
+    private float _flyPitch;
 
     // FOV
     private Camera _cam;
-    private float _defaultFOV;
+    private float  _defaultFOV;
 
     // ─────────────────────────────────────────────────────────────────────
 
     void Start()
     {
-        _cam = GetComponent<Camera>();
+        _cam       = GetComponent<Camera>();
         _defaultFOV = _cam.fieldOfView;
 
-        _targetZoom = startZoomDistance;
-        _currentZoom = startZoomDistance;
-        _targetRotationY = transform.eulerAngles.y;
+        _targetZoom       = startZoomDistance;
+        _currentZoom      = startZoomDistance;
+        _targetRotationY  = transform.eulerAngles.y;
         _currentRotationY = _targetRotationY;
-        _currentTilt = startTiltAngle;
+        _targetTilt       = startTiltAngle;
+        _currentTilt      = startTiltAngle;
 
         _fallbackPivot = (pivotPoint != null) ? pivotPoint.position : Vector3.zero;
 
@@ -115,6 +133,8 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         AutoFindBoundCubes();
         RecalcBounds();
     }
+
+    // ── Auto-wyszukiwanie Cube'ów ─────────────────────────────────────────
 
     void AutoFindBoundCubes()
     {
@@ -158,17 +178,24 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         _minZ = minZ; _maxZ = maxZ;
     }
 
+    // ── LateUpdate ────────────────────────────────────────────────────────
+
     void LateUpdate()
     {
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
         HandleModeSwitch();
-        HandleRotation();
 
         if (mode == CameraMode.Orbit)
+        {
+            HandleOrbitRotation();
             HandleOrbit();
+        }
         else
+        {
+            HandleFreeFlyLook();
             HandleFreeFly();
+        }
 
         HandleOptifineZoom();
     }
@@ -181,6 +208,11 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         {
             mode = CameraMode.FreeFly;
             _returningToOrbit = false;
+
+            // Inicjalizuj kąty FreeFly z bieżącej orientacji kamery
+            Vector3 euler = transform.eulerAngles;
+            _flyYaw   = euler.y;
+            _flyPitch = euler.x > 180f ? euler.x - 360f : euler.x;
         }
 
         if (Input.GetKeyDown(KeyCode.E) && mode == CameraMode.FreeFly)
@@ -188,14 +220,12 @@ public class AIEnhancedRTSCamera : MonoBehaviour
             mode = CameraMode.Orbit;
             _returningToOrbit = true;
 
-            // Zapamiętaj docelową pozycję powrotu do Orbit
             Vector3 pivot = PivotPos();
             Quaternion rot = Quaternion.Euler(_currentTilt, _currentRotationY, 0f);
             _orbitReturnPos = pivot + rot * new Vector3(0f, 0f, -_currentZoom);
             _orbitReturnRot = Quaternion.LookRotation(pivot - _orbitReturnPos);
         }
 
-        // Płynny powrót do Orbit
         if (_returningToOrbit)
         {
             transform.position = Vector3.Lerp(transform.position, _orbitReturnPos, Time.unscaledDeltaTime * 6f);
@@ -206,37 +236,49 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         }
     }
 
-    // ── Wspólny obrót (prawy przycisk myszy) ─────────────────────────────
+    // ── Orbit: rotacja (prawy przycisk myszy) ─────────────────────────────
+    // X myszy → obrót poziomy (yaw)
+    // Y myszy → nachylenie góra/dół (tilt)
 
-    void HandleRotation()
+    void HandleOrbitRotation()
     {
         if (!Input.GetMouseButton(1)) return;
 
-        float mouseX = Input.GetAxis("Mouse X");
-        float multiplier = GetSpeedMultiplier();
-        _targetRotationY += mouseX * rotationSpeed * multiplier * Time.unscaledDeltaTime;
-        _currentRotationY = Mathf.LerpAngle(_currentRotationY, _targetRotationY, Time.unscaledDeltaTime * rotationSmoothing);
+        float mouseX  = Input.GetAxis("Mouse X");
+        float mouseY  = Input.GetAxis("Mouse Y");
+        float mult    = GetSpeedMultiplier();
+        float dt      = Time.unscaledDeltaTime;
+
+        _targetRotationY += mouseX * rotationSpeed * mult * dt;
+
+        // Przeciągnięcie w górę → mniejszy kąt (widok z boku),
+        // przeciągnięcie w dół → większy kąt (widok z góry).
+        _targetTilt -= mouseY * tiltSpeed * mult * dt;
+        _targetTilt  = Mathf.Clamp(_targetTilt, minTiltAngle, maxTiltAngle);
+
+        _currentRotationY = Mathf.LerpAngle(_currentRotationY, _targetRotationY,
+                                             dt * rotationSmoothing);
+        _currentTilt      = Mathf.Lerp(_currentTilt, _targetTilt,
+                                        dt * rotationSmoothing);
     }
 
-    // ── Tryb Orbit ────────────────────────────────────────────────────────
+    // ── Orbit: zoom i pozycjonowanie ──────────────────────────────────────
 
     void HandleOrbit()
     {
-        // Klawisze specjalne
         if (Input.GetKeyDown(KeyCode.R))
         {
             _targetZoom = startZoomDistance;
-            _currentTilt = startTiltAngle;
+            _targetTilt = startTiltAngle;
         }
         if (Input.GetKeyDown(KeyCode.F))
-            _currentTilt = startTiltAngle;
+            _targetTilt = startTiltAngle;
 
-        // Scroll → zoom
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Abs(scroll) > 0.01f)
         {
             _targetZoom -= scroll * zoomSpeed * GetSpeedMultiplier();
-            _targetZoom = Mathf.Clamp(_targetZoom, minZoomDistance, maxZoomDistance);
+            _targetZoom  = Mathf.Clamp(_targetZoom, minZoomDistance, maxZoomDistance);
         }
 
         _currentZoom = Mathf.Lerp(_currentZoom, _targetZoom, Time.unscaledDeltaTime * zoomSmoothing);
@@ -247,28 +289,37 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void ApplyOrbitTransform()
     {
-        Vector3 pivot = PivotPos();
-        Quaternion rot = Quaternion.Euler(_currentTilt, _currentRotationY, 0f);
+        Vector3 pivot    = PivotPos();
+        Quaternion rot   = Quaternion.Euler(_currentTilt, _currentRotationY, 0f);
         transform.position = pivot + rot * new Vector3(0f, 0f, -_currentZoom);
         transform.LookAt(pivot);
     }
 
-    // ── Tryb FreeFly ──────────────────────────────────────────────────────
+    // ── FreeFly: FPS look (prawy przycisk myszy) ──────────────────────────
+    // X myszy → yaw  |  Y myszy → pitch
+
+    void HandleFreeFlyLook()
+    {
+        if (!Input.GetMouseButton(1)) return;
+
+        _flyYaw   += Input.GetAxis("Mouse X") * lookSensitivity;
+        _flyPitch -= Input.GetAxis("Mouse Y") * lookSensitivity;
+        _flyPitch  = Mathf.Clamp(_flyPitch, -89f, 89f);
+
+        transform.rotation = Quaternion.Euler(_flyPitch, _flyYaw, 0f);
+    }
+
+    // ── FreeFly: ruch WSAD + scroll ───────────────────────────────────────
 
     void HandleFreeFly()
     {
-        float multiplier = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)
-            ? freeFlyTurboMultiplier : 1f;
-        float speed = freeFlySpeed * multiplier * Time.unscaledDeltaTime;
+        float mult  = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                      ? freeFlyTurboMultiplier : 1f;
+        float speed = freeFlySpeed * mult * Time.unscaledDeltaTime;
 
-        // WSAD w płaszczyźnie XZ kamery (bez zmiany Y)
-        Vector3 forward = transform.forward;
-        forward.y = 0f;
-        forward.Normalize();
-
-        Vector3 right = transform.right;
-        right.y = 0f;
-        right.Normalize();
+        // Ruch w płaszczyźnie XZ względem orientacji kamery (bez zmiany Y)
+        Vector3 forward = transform.forward; forward.y = 0f; forward.Normalize();
+        Vector3 right   = transform.right;   right.y   = 0f; right.Normalize();
 
         Vector3 move = Vector3.zero;
         if (Input.GetKey(KeyCode.W)) move += forward;
@@ -287,7 +338,6 @@ public class AIEnhancedRTSCamera : MonoBehaviour
             transform.position = p;
         }
 
-        // Klamrowanie w granicach mapy
         ClampToBounds();
     }
 
@@ -309,8 +359,8 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleOptifineZoom()
     {
-        float targetFOV = Input.GetKey(KeyCode.C) ? zoomedFOV : _defaultFOV;
-        _cam.fieldOfView = Mathf.Lerp(_cam.fieldOfView, targetFOV, Time.unscaledDeltaTime * fovSmoothing);
+        float target = Input.GetKey(KeyCode.C) ? zoomedFOV : _defaultFOV;
+        _cam.fieldOfView = Mathf.Lerp(_cam.fieldOfView, target, Time.unscaledDeltaTime * fovSmoothing);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
@@ -333,7 +383,6 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         Gizmos.DrawWireSphere(pivot, 2f);
         Gizmos.DrawLine(transform.position, pivot);
 
-        // Granice mapy – Cube'y i bounding box
         Gizmos.color = Color.cyan;
         foreach (var t in boundCubes)
             if (t != null) Gizmos.DrawWireSphere(t.position, 1.5f);
@@ -341,7 +390,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         if (_boundsReady)
         {
             Gizmos.color = new Color(0f, 1f, 1f, 0.3f);
-            Vector3 center = new Vector3((_minX + _maxX) / 2f, 0f, (_minZ + _maxZ) / 2f);
+            Vector3 center = new Vector3((_minX + _maxX) * 0.5f, 0f, (_minZ + _maxZ) * 0.5f);
             Vector3 size   = new Vector3(_maxX - _minX, 1f, _maxZ - _minZ);
             Gizmos.DrawWireCube(center, size);
         }
