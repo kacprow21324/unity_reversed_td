@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class PojazdLustro : pojazd
 {
     [Header("Parametry Tarczy")]
-    public float zasiegDetekcji   = 6f;
+    public float zasiegDetekcji    = 6f;
     public float cooldownSkanowania = 0.1f;
 
     private float _licznikSkanowania = 0f;
@@ -12,16 +12,14 @@ public class PojazdLustro : pojazd
 
     protected override void Start()
     {
-        maxHp   = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalHP("Lustro", DecreeManager.BASE_LUS_HP)
-            : DecreeManager.BASE_LUS_HP;
-        pancerz = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalArmor("Lustro", DecreeManager.BASE_LUS_ARM)
-            : DecreeManager.BASE_LUS_ARM;
+        if (DecreeManager.Instance != null)
+        {
+            maxHp   = DecreeManager.Instance.FinalHP("Lustro", maxHp);
+            pancerz = DecreeManager.Instance.FinalArmor("Lustro", pancerz);
+        }
         base.Start();
-        _agent.speed = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalSpeed("Lustro", DecreeManager.BASE_LUS_SPD)
-            : DecreeManager.BASE_LUS_SPD;
+        if (DecreeManager.Instance != null)
+            _agent.speed = DecreeManager.Instance.FinalSpeed("Lustro", _agent.speed);
     }
 
     protected override void Update()

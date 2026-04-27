@@ -3,9 +3,9 @@ using UnityEngine;
 public class PojazdArtyleria : pojazd
 {
     [Header("Parametry Ataku")]
-    public float zasiegAtaku    = 22f;
-    public float cooldownStrzalu = 2.5f;
-    public float obrazeniaStrzalu = DecreeManager.BASE_ALT_DMG;
+    public float zasiegAtaku      = 22f;
+    public float cooldownStrzalu  = 2.5f;
+    public float obrazeniaStrzalu = 40f;
 
     [Header("Prefab Pocisku Artyleryjskiego")]
     public GameObject prefabPocisku;
@@ -15,20 +15,15 @@ public class PojazdArtyleria : pojazd
 
     protected override void Start()
     {
-        maxHp   = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalHP("Artyleria", DecreeManager.BASE_ALT_HP)
-            : DecreeManager.BASE_ALT_HP;
-        pancerz = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalArmor("Artyleria", DecreeManager.BASE_ALT_ARM)
-            : DecreeManager.BASE_ALT_ARM;
+        if (DecreeManager.Instance != null)
+        {
+            maxHp   = DecreeManager.Instance.FinalHP("Artyleria", maxHp);
+            pancerz = DecreeManager.Instance.FinalArmor("Artyleria", pancerz);
+            obrazeniaStrzalu *= (1f + DecreeManager.Instance.ArtyleriaObrazeniaBonus);
+        }
         base.Start();
-        _agent.speed = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalSpeed("Artyleria", DecreeManager.BASE_ALT_SPD)
-            : DecreeManager.BASE_ALT_SPD;
-
-        obrazeniaStrzalu = DecreeManager.Instance != null
-            ? DecreeManager.BASE_ALT_DMG * (1f + DecreeManager.Instance.ArtyleriaObrazeniaBonus)
-            : DecreeManager.BASE_ALT_DMG;
+        if (DecreeManager.Instance != null)
+            _agent.speed = DecreeManager.Instance.FinalSpeed("Artyleria", _agent.speed);
 
         _licznikStrzalu = 0f;
     }

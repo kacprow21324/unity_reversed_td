@@ -25,37 +25,45 @@ public class DecreeManager : MonoBehaviour
 {
     public static DecreeManager Instance { get; private set; }
 
-    // ── Wartosci bazowe (zgodne ze skryptami pojazdow) ─────────────────────
+    // ── Wartości bazowe – edytowalne w Inspektorze ────────────────────────
+    // Używane TYLKO do podglądu dekretów (UI). Rzeczywiste statystyki pojazdów
+    // bierzesz z Inspektora prefabu każdego pojazdu.
 
-    public const float BASE_POD_HP     = 120f;
-    public const float BASE_POD_SPD    = 4.5f;
-    public const float BASE_POD_ARM    = 10f;
+    [Header("Baza – Wóz Podstawowy (tylko podgląd dekretów)")]
+    public float BASE_POD_HP  = 120f;
+    public float BASE_POD_SPD = 4.5f;
+    public float BASE_POD_ARM = 10f;
 
-    public const float BASE_TNK_HP     = 500f;
-    public const float BASE_TNK_SPD    = 1.5f;
-    public const float BASE_TNK_ARM    = 30f;
+    [Header("Baza – Wóz Tank (tylko podgląd dekretów)")]
+    public float BASE_TNK_HP  = 200f;
+    public float BASE_TNK_SPD = 1.5f;
+    public float BASE_TNK_ARM = 30f;
 
-    public const float BASE_ALT_HP     = 60f;
-    public const float BASE_ALT_SPD    = 3.5f;
-    public const float BASE_ALT_ARM    = 0f;
-    public const float BASE_ALT_DMG    = 40f;
+    [Header("Baza – Wóz Artyleria (tylko podgląd dekretów)")]
+    public float BASE_ALT_HP  = 60f;
+    public float BASE_ALT_SPD = 3.5f;
+    public float BASE_ALT_ARM = 0f;
+    public float BASE_ALT_DMG = 40f;
 
-    public const float BASE_LUS_HP     = 90f;
-    public const float BASE_LUS_SPD    = 3f;
-    public const float BASE_LUS_ARM    = 5f;
+    [Header("Baza – Wóz Lustro (tylko podgląd dekretów)")]
+    public float BASE_LUS_HP  = 90f;
+    public float BASE_LUS_SPD = 3f;
+    public float BASE_LUS_ARM = 5f;
 
-    public const float BASE_KAM_HP     = 80f;
-    public const float BASE_KAM_SPD    = 8f;
-    public const float BASE_KAM_ARM    = 0f;
-    public const float BASE_KAM_RAD    = 6f;
-    public const float BASE_KAM_DMG    = 150f;
+    [Header("Baza – Wóz Kamikaze (tylko podgląd dekretów)")]
+    public float BASE_KAM_HP  = 80f;
+    public float BASE_KAM_SPD = 8f;
+    public float BASE_KAM_ARM = 0f;
+    public float BASE_KAM_RAD = 6f;
+    public float BASE_KAM_DMG = 150f;
 
-    public const float BASE_NALOT_RAD  = 8f;
-    public const float BASE_NALOT_DMG  = 100f;
-    public const float BASE_SHIELD_DUR = 4f;
-    public const float BASE_SHIELD_RAD = 10f;
-    public const float BASE_BOOST_MUL  = 1.5f;
-    public const float BASE_BOOST_DUR  = 5f;
+    [Header("Baza – Zdolności (tylko podgląd dekretów)")]
+    public float BASE_NALOT_RAD  = 8f;
+    public float BASE_NALOT_DMG  = 100f;
+    public float BASE_SHIELD_DUR = 4f;
+    public float BASE_SHIELD_RAD = 10f;
+    public float BASE_BOOST_MUL  = 1.5f;
+    public float BASE_BOOST_DUR  = 5f;
 
     // ── Aktywne buffy (mnozniki procentowe lub wartosci plynne) ────────────
 
@@ -139,7 +147,7 @@ public class DecreeManager : MonoBehaviour
             () => Mathf.RoundToInt(BASE_TNK_ARM * (1f + TankArmor + 0.10f)).ToString(),
             () => { TankArmor += 0.10f; });
 
-        // ARTYLERIA – Dalekosiez. (6-8)
+        // ARTYLERIA (6-8)
         Add(6, "Woz Dalekosiez.: Max HP",
             () => Mathf.RoundToInt(BASE_ALT_HP * (1f + ArtileriaHP)).ToString(),
             () => Mathf.RoundToInt(BASE_ALT_HP * (1f + ArtileriaHP + 0.20f)).ToString(),
@@ -171,7 +179,7 @@ public class DecreeManager : MonoBehaviour
             () => Mathf.RoundToInt(BASE_LUS_ARM * (1f + LustroArmor + 0.10f)).ToString(),
             () => { LustroArmor += 0.10f; });
 
-        // KAMIKAZE – Zasadzka (12-14)
+        // KAMIKAZE (12-14)
         Add(12, "Woz Zasadzka: Max HP",
             () => Mathf.RoundToInt(BASE_KAM_HP * (1f + KamikazeHP)).ToString(),
             () => Mathf.RoundToInt(BASE_KAM_HP * (1f + KamikazeHP + 0.20f)).ToString(),
@@ -264,15 +272,16 @@ public class DecreeManager : MonoBehaviour
     }
 
     // ── Pomocniki dla spawnerow pojazdow ──────────────────────────────────
+    // baseValue = wartość z Inspektora prefabu pojazdu/zdolności
 
-    public float FinalHP(string vehicleType, float baseHp)
-        => baseHp * (1f + HPBonus(vehicleType));
+    public float FinalHP(string vehicleType, float baseValue)
+        => baseValue * (1f + HPBonus(vehicleType));
 
-    public float FinalSpeed(string vehicleType, float baseSpeed)
-        => baseSpeed * (1f + SpeedBonus(vehicleType));
+    public float FinalSpeed(string vehicleType, float baseValue)
+        => baseValue * (1f + SpeedBonus(vehicleType));
 
-    public float FinalArmor(string vehicleType, float baseArmor)
-        => baseArmor * (1f + ArmorBonus(vehicleType));
+    public float FinalArmor(string vehicleType, float baseValue)
+        => baseValue * (1f + ArmorBonus(vehicleType));
 
     float HPBonus(string t)
     {

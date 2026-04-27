@@ -420,11 +420,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6dd81be4706a2b4597f144d3cdafed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PojazdArtyleria
-  maxHp: 60
+  maxHp: 30
   pancerz: 0
   maTaunt: 0
+  isInvulnerable: 0
   zasiegAtaku: 22
-  cooldownStrzalu: 2.5
-  obrazeniaStrzalu: 40
+  cooldownStrzalu: 4
+  obrazeniaStrzalu: 50
   prefabPocisku: {fileID: 8817597802112261899, guid: af9a28f8e4c7f2845912e192d8034de2, type: 3}
   punktStrzalu: {fileID: 7637309815087854862}

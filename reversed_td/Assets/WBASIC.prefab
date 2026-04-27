@@ -129,10 +129,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WiezaPodstawowa
   maxHP: 100
-  nagrodaZlota: 50
-  zasieg: 12
-  szybkoscAtaku: 1.5
-  obrazenia: 20
+  nagrodaZlota: 30
+  zasieg: 18
+  szybkoscAtaku: 2
+  obrazenia: 25
   warstwaWroga:
     serializedVersion: 2
     m_Bits: 128

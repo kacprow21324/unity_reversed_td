@@ -1,147 +1,349 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// AIEnhancedRTSCamera - P�ynna kamera orbitalna do gier strategicznych/TD.
-/// 
+public enum CameraMode { Orbit, FreeFly }
+
 /// STEROWANIE:
-///   Prawy przycisk myszy (przytrzymaj) - obracanie kamery wok� �rodka mapy
-///   Scroll myszy        - p�ynne przybli�anie / oddalanie (Zoom)
-///   Shift               - tryb turbo (szybszy zoom/obr�t)
-///   Alt                 - tryb precyzyjny (wolniejszy zoom/obr�t)
-///   F                   - reset k�ta nachylenia do startowego
-///   R                   - reset ca�kowity (zoom + obr�t + pochylenie)
-/// </summary>
+///   Prawy przycisk myszy  – obracanie kamery (oba tryby)
+///   Scroll myszy          – Orbit: zoom dystansu | FreeFly: zmiana wysokości Y
+///   Shift                 – turbo (szybszy ruch/zoom)
+///   Alt                   – precyzja (wolniejszy ruch/zoom)
+///   Q                     – przełącz w tryb FreeFly
+///   E                     – wróć do trybu Orbit (płynny powrót do pivota)
+///   WSAD                  – lot w trybie FreeFly (płaszczyzna XZ kamery)
+///   C (przytrzymaj)       – Optifine Zoom (FOV → 20)
+///   F                     – reset nachylenia
+///   R                     – pełny reset (Orbit)
 [RequireComponent(typeof(Camera))]
 public class AIEnhancedRTSCamera : MonoBehaviour
 {
-    [Header("--- Cel i Orientacja ---")]
-    [Tooltip("Punkt na �rodku mapy, wok� kt�rego kamera si� kr�ci. Je�li puste, u�yje (0,0,0)")]
+    // ── Tryb kamery ──────────────────────────────────────────────────────────
+
+    [Header("Tryb Kamery")]
+    public CameraMode mode = CameraMode.Orbit;
+
+    // ── Orbit ─────────────────────────────────────────────────────────────
+
+    [Header("Orbit – Cel i Orientacja")]
+    [Tooltip("Punkt środkowy mapy, wokół którego kamera się obraca. Puste = (0,0,0).")]
     public Transform pivotPoint;
 
-    [Tooltip("Pocz�tkowe nachylenie kamery pod ukosem w d� (w stopniach)")]
+    [Tooltip("Początkowe nachylenie kamery (stopnie)")]
     [Range(10f, 85f)]
     public float startTiltAngle = 50f;
 
-    [Header("--- Przybli�anie (Zoom) ---")]
-    [Tooltip("Podstawowa pr�dko�� przybli�ania rolk� myszy")]
+    [Header("Orbit – Zoom")]
     public float zoomSpeed = 30f;
-
-    [Tooltip("Minimalna odleg�o�� od �rodka mapy")]
     public float minZoomDistance = 10f;
-
-    [Tooltip("Maksymalna odleg�o�� od �rodka mapy")]
     public float maxZoomDistance = 100f;
-
-    [Tooltip("Startowa odleg�o�� od �rodka mapy")]
     public float startZoomDistance = 40f;
-
-    [Tooltip("Wyg�adzanie przybli�ania (im mniejsze, tym wolniejsze)")]
     public float zoomSmoothing = 8f;
 
-    [Header("--- Obr�t orbitalny ---")]
-    [Tooltip("Pr�dko�� obrotu wok� mapy trzymaj�c prawy przycisk myszy")]
+    [Header("Orbit – Obrót")]
     public float rotationSpeed = 120f;
-
-    [Tooltip("Wyg�adzanie obrotu (im mniejsze, tym wolniejsze)")]
     public float rotationSmoothing = 15f;
 
-    [Header("Mno�niki pr�dko�ci (Shift/Alt)")]
-    [Tooltip("Mno�nik pr�dko�ci przy Shift (turbo)")]
-    public float turboMultiplier = 2.5f;
+    // ── FreeFly ───────────────────────────────────────────────────────────
 
-    [Tooltip("Mno�nik pr�dko�ci przy Alt (precyzja)")]
+    [Header("FreeFly – Lot")]
+    public float freeFlySpeed = 20f;
+    public float freeFlyTurboMultiplier = 3f;
+
+    [Header("FreeFly – Granice mapy (4 Cube'y)")]
+    [Tooltip("4 obiekty wyznaczające rogi/krawędzie mapy. Bounding box liczy się automatycznie z ich pozycji. Jeśli puste – Start() szuka Cube(1)..Cube(4) po nazwie.")]
+    public Transform[] boundCubes = new Transform[4];
+
+    [Header("FreeFly – Limity wysokości")]
+    public float limitMinY = 10f;
+    public float limitMaxY = 80f;
+
+    [Header("FreeFly – Scroll → zmiana wysokości")]
+    public float flyScrollSpeed = 15f;
+
+    // ── Zoom Optifine ─────────────────────────────────────────────────────
+
+    [Header("Zoom Optifine (klawisz C)")]
+    public float zoomedFOV = 20f;
+    public float fovSmoothing = 10f;
+
+    // ── Wspólne mnożniki ──────────────────────────────────────────────────
+
+    [Header("Mnożniki prędkości (Shift / Alt)")]
+    public float turboMultiplier = 2.5f;
     public float slowMultiplier = 0.3f;
+
+    // ── Stan prywatny ─────────────────────────────────────────────────────
+
+    // Orbit
+    // Granice obliczone z Cube'ów
+    private float _minX, _maxX, _minZ, _maxZ;
+    private bool _boundsReady;
 
     private float _currentZoom;
     private float _targetZoom;
     private float _currentRotationY;
     private float _targetRotationY;
-    private float _currentTargetTilt;
+    private float _currentTilt;
     private Vector3 _fallbackPivot;
+
+    // FreeFly
+    private bool _returningToOrbit;
+    private Vector3 _orbitReturnPos;
+    private Quaternion _orbitReturnRot;
+
+    // FOV
+    private Camera _cam;
+    private float _defaultFOV;
+
+    // ─────────────────────────────────────────────────────────────────────
 
     void Start()
     {
+        _cam = GetComponent<Camera>();
+        _defaultFOV = _cam.fieldOfView;
+
         _targetZoom = startZoomDistance;
         _currentZoom = startZoomDistance;
         _targetRotationY = transform.eulerAngles.y;
         _currentRotationY = _targetRotationY;
-        _currentTargetTilt = startTiltAngle;
+        _currentTilt = startTiltAngle;
 
-        if (pivotPoint == null)
+        _fallbackPivot = (pivotPoint != null) ? pivotPoint.position : Vector3.zero;
+
+        mode = CameraMode.Orbit;
+
+        AutoFindBoundCubes();
+        RecalcBounds();
+    }
+
+    void AutoFindBoundCubes()
+    {
+        string[] names = { "Cube(1)", "Cube(2)", "Cube(3)", "Cube(4)" };
+        bool anyMissing = false;
+        for (int i = 0; i < boundCubes.Length; i++)
+            if (boundCubes[i] == null) { anyMissing = true; break; }
+
+        if (!anyMissing) return;
+
+        if (boundCubes.Length < 4) System.Array.Resize(ref boundCubes, 4);
+
+        for (int i = 0; i < 4; i++)
         {
-            Debug.LogWarning("[Kamera RTS] Nie przypisano punktu centralnego (Pivot). U�ywam (0,0,0).");
-            _fallbackPivot = Vector3.zero;
+            if (boundCubes[i] != null) continue;
+            GameObject found = GameObject.Find(names[i]);
+            if (found != null)
+                boundCubes[i] = found.transform;
+            else
+                Debug.LogWarning($"[Kamera] Nie znaleziono obiektu '{names[i]}' na scenie.");
         }
+    }
+
+    void RecalcBounds()
+    {
+        _boundsReady = false;
+        float minX = float.MaxValue, maxX = float.MinValue;
+        float minZ = float.MaxValue, maxZ = float.MinValue;
+
+        foreach (var t in boundCubes)
+        {
+            if (t == null) continue;
+            minX = Mathf.Min(minX, t.position.x);
+            maxX = Mathf.Max(maxX, t.position.x);
+            minZ = Mathf.Min(minZ, t.position.z);
+            maxZ = Mathf.Max(maxZ, t.position.z);
+            _boundsReady = true;
+        }
+
+        _minX = minX; _maxX = maxX;
+        _minZ = minZ; _maxZ = maxZ;
     }
 
     void LateUpdate()
     {
-        // Ignorowanie klikni�� na interfejs UI
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
-        HandleCalculations();
-        HandleSpecialKeys();
-        ApplyTransform();
+        HandleModeSwitch();
+        HandleRotation();
+
+        if (mode == CameraMode.Orbit)
+            HandleOrbit();
+        else
+            HandleFreeFly();
+
+        HandleOptifineZoom();
     }
 
-    void HandleCalculations()
+    // ── Przełączanie trybów ───────────────────────────────────────────────
+
+    void HandleModeSwitch()
     {
+        if (Input.GetKeyDown(KeyCode.Q) && mode == CameraMode.Orbit)
+        {
+            mode = CameraMode.FreeFly;
+            _returningToOrbit = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E) && mode == CameraMode.FreeFly)
+        {
+            mode = CameraMode.Orbit;
+            _returningToOrbit = true;
+
+            // Zapamiętaj docelową pozycję powrotu do Orbit
+            Vector3 pivot = PivotPos();
+            Quaternion rot = Quaternion.Euler(_currentTilt, _currentRotationY, 0f);
+            _orbitReturnPos = pivot + rot * new Vector3(0f, 0f, -_currentZoom);
+            _orbitReturnRot = Quaternion.LookRotation(pivot - _orbitReturnPos);
+        }
+
+        // Płynny powrót do Orbit
+        if (_returningToOrbit)
+        {
+            transform.position = Vector3.Lerp(transform.position, _orbitReturnPos, Time.unscaledDeltaTime * 6f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, _orbitReturnRot, Time.unscaledDeltaTime * 6f);
+
+            if (Vector3.Distance(transform.position, _orbitReturnPos) < 0.05f)
+                _returningToOrbit = false;
+        }
+    }
+
+    // ── Wspólny obrót (prawy przycisk myszy) ─────────────────────────────
+
+    void HandleRotation()
+    {
+        if (!Input.GetMouseButton(1)) return;
+
+        float mouseX = Input.GetAxis("Mouse X");
+        float multiplier = GetSpeedMultiplier();
+        _targetRotationY += mouseX * rotationSpeed * multiplier * Time.unscaledDeltaTime;
+        _currentRotationY = Mathf.LerpAngle(_currentRotationY, _targetRotationY, Time.unscaledDeltaTime * rotationSmoothing);
+    }
+
+    // ── Tryb Orbit ────────────────────────────────────────────────────────
+
+    void HandleOrbit()
+    {
+        // Klawisze specjalne
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            _targetZoom = startZoomDistance;
+            _currentTilt = startTiltAngle;
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+            _currentTilt = startTiltAngle;
+
+        // Scroll → zoom
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Abs(scroll) > 0.01f)
         {
-            float speedMultiplier = GetSpeedMultiplier();
-            _targetZoom -= scroll * zoomSpeed * speedMultiplier;
+            _targetZoom -= scroll * zoomSpeed * GetSpeedMultiplier();
             _targetZoom = Mathf.Clamp(_targetZoom, minZoomDistance, maxZoomDistance);
         }
 
         _currentZoom = Mathf.Lerp(_currentZoom, _targetZoom, Time.unscaledDeltaTime * zoomSmoothing);
 
-        if (Input.GetMouseButton(1))
+        if (!_returningToOrbit)
+            ApplyOrbitTransform();
+    }
+
+    void ApplyOrbitTransform()
+    {
+        Vector3 pivot = PivotPos();
+        Quaternion rot = Quaternion.Euler(_currentTilt, _currentRotationY, 0f);
+        transform.position = pivot + rot * new Vector3(0f, 0f, -_currentZoom);
+        transform.LookAt(pivot);
+    }
+
+    // ── Tryb FreeFly ──────────────────────────────────────────────────────
+
+    void HandleFreeFly()
+    {
+        float multiplier = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)
+            ? freeFlyTurboMultiplier : 1f;
+        float speed = freeFlySpeed * multiplier * Time.unscaledDeltaTime;
+
+        // WSAD w płaszczyźnie XZ kamery (bez zmiany Y)
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        forward.Normalize();
+
+        Vector3 right = transform.right;
+        right.y = 0f;
+        right.Normalize();
+
+        Vector3 move = Vector3.zero;
+        if (Input.GetKey(KeyCode.W)) move += forward;
+        if (Input.GetKey(KeyCode.S)) move -= forward;
+        if (Input.GetKey(KeyCode.D)) move += right;
+        if (Input.GetKey(KeyCode.A)) move -= right;
+
+        transform.position += move * speed;
+
+        // Scroll → zmiana wysokości Y
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (Mathf.Abs(scroll) > 0.01f)
         {
-            float mouseX = Input.GetAxis("Mouse X");
-            float speedMultiplier = GetSpeedMultiplier();
-            _targetRotationY += mouseX * rotationSpeed * speedMultiplier * Time.unscaledDeltaTime;
+            Vector3 p = transform.position;
+            p.y += scroll * flyScrollSpeed * GetSpeedMultiplier();
+            transform.position = p;
         }
 
-        _currentRotationY = Mathf.LerpAngle(_currentRotationY, _targetRotationY, Time.unscaledDeltaTime * rotationSmoothing);
+        // Klamrowanie w granicach mapy
+        ClampToBounds();
     }
+
+    void ClampToBounds()
+    {
+        Vector3 p = transform.position;
+
+        if (_boundsReady)
+        {
+            p.x = Mathf.Clamp(p.x, _minX, _maxX);
+            p.z = Mathf.Clamp(p.z, _minZ, _maxZ);
+        }
+
+        p.y = Mathf.Clamp(p.y, limitMinY, limitMaxY);
+        transform.position = p;
+    }
+
+    // ── Optifine Zoom (klawisz C) ─────────────────────────────────────────
+
+    void HandleOptifineZoom()
+    {
+        float targetFOV = Input.GetKey(KeyCode.C) ? zoomedFOV : _defaultFOV;
+        _cam.fieldOfView = Mathf.Lerp(_cam.fieldOfView, targetFOV, Time.unscaledDeltaTime * fovSmoothing);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    Vector3 PivotPos() => pivotPoint != null ? pivotPoint.position : _fallbackPivot;
 
     float GetSpeedMultiplier()
     {
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) return turboMultiplier;
-        if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) return slowMultiplier;
+        if (Input.GetKey(KeyCode.LeftAlt)   || Input.GetKey(KeyCode.RightAlt))   return slowMultiplier;
         return 1f;
     }
 
-    void ApplyTransform()
-    {
-        Vector3 currentPivotPos = (pivotPoint != null) ? pivotPoint.position : _fallbackPivot;
-        Quaternion rotation = Quaternion.Euler(_currentTargetTilt, _currentRotationY, 0f);
-        Vector3 negativeDistance = new Vector3(0.0f, 0.0f, -_currentZoom);
-
-        transform.position = currentPivotPos + rotation * negativeDistance;
-        transform.LookAt(currentPivotPos);
-    }
-
-    void HandleSpecialKeys()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            _targetZoom = startZoomDistance;
-            _currentTargetTilt = startTiltAngle;
-        }
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            _currentTargetTilt = startTiltAngle;
-        }
-    }
+    // ── Gizmos ────────────────────────────────────────────────────────────
 
     void OnDrawGizmosSelected()
     {
-        Vector3 currentPivotPos = (pivotPoint != null) ? pivotPoint.position : _fallbackPivot;
+        Vector3 pivot = (pivotPoint != null) ? pivotPoint.position : Vector3.zero;
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(currentPivotPos, 2f);
-        Gizmos.DrawLine(transform.position, currentPivotPos);
+        Gizmos.DrawWireSphere(pivot, 2f);
+        Gizmos.DrawLine(transform.position, pivot);
+
+        // Granice mapy – Cube'y i bounding box
+        Gizmos.color = Color.cyan;
+        foreach (var t in boundCubes)
+            if (t != null) Gizmos.DrawWireSphere(t.position, 1.5f);
+
+        if (_boundsReady)
+        {
+            Gizmos.color = new Color(0f, 1f, 1f, 0.3f);
+            Vector3 center = new Vector3((_minX + _maxX) / 2f, 0f, (_minZ + _maxZ) / 2f);
+            Vector3 size   = new Vector3(_maxX - _minX, 1f, _maxZ - _minZ);
+            Gizmos.DrawWireCube(center, size);
+        }
     }
 }

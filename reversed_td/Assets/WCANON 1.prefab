@@ -128,10 +128,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e990ad7ecbb8ca4fb221087349bbc80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WiezaArmatnia
-  maxHP: 80
-  nagrodaZlota: 50
-  zasieg: 18
-  czasPrzeladowania: 4
+  maxHP: 150
+  nagrodaZlota: 60
+  zasieg: 23
+  czasPrzeladowania: 6.5
   warstwaWroga:
     serializedVersion: 2
     m_Bits: 128

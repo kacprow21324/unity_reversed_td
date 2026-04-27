@@ -388,8 +388,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fed2420294e70e4d96f7c61a5a79f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PojazdLustro
-  maxHp: 90
-  pancerz: 5
+  maxHp: 1
+  pancerz: 0
   maTaunt: 0
-  zasiegDetekcji: 6
+  isInvulnerable: 0
+  zasiegDetekcji: 14
   cooldownSkanowania: 0.1

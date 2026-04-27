@@ -7,16 +7,14 @@ public class PojazdTank : pojazd
 
     protected override void Start()
     {
-        maxHp   = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalHP("Tank", DecreeManager.BASE_TNK_HP)
-            : DecreeManager.BASE_TNK_HP;
-        pancerz = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalArmor("Tank", DecreeManager.BASE_TNK_ARM)
-            : DecreeManager.BASE_TNK_ARM;
+        if (DecreeManager.Instance != null)
+        {
+            maxHp   = DecreeManager.Instance.FinalHP("Tank", maxHp);
+            pancerz = DecreeManager.Instance.FinalArmor("Tank", pancerz);
+        }
         maTaunt = true;
         base.Start();
-        _agent.speed = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalSpeed("Tank", DecreeManager.BASE_TNK_SPD)
-            : DecreeManager.BASE_TNK_SPD;
+        if (DecreeManager.Instance != null)
+            _agent.speed = DecreeManager.Instance.FinalSpeed("Tank", _agent.speed);
     }
 }

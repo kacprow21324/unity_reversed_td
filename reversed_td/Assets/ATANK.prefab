@@ -388,7 +388,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d251109b0ef6ad74ba08eb29277247cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PojazdTank
-  maxHp: 200
+  maxHp: 250
   pancerz: 10
   maTaunt: 0
-  promienTauntu: 20
+  isInvulnerable: 0
+  promienTauntu: 30

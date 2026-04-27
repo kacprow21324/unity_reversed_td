@@ -4,27 +4,23 @@ public class PojazdKamikaze : pojazd
 {
     [Header("Parametry Eksplozji")]
     public float promienWyzwalacza = 4f;
-    public float promienWybuchu    = DecreeManager.BASE_KAM_RAD;
-    public float obrazeniaWybuchu  = DecreeManager.BASE_KAM_DMG;
+    public float promienWybuchu    = 6f;
+    public float obrazeniaWybuchu  = 150f;
 
     private bool _eksplodowal = false;
 
     protected override void Start()
     {
-        maxHp   = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalHP("Kamikaze", DecreeManager.BASE_KAM_HP)
-            : DecreeManager.BASE_KAM_HP;
-        pancerz = 0f;
-        base.Start();
-        _agent.speed = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalSpeed("Kamikaze", DecreeManager.BASE_KAM_SPD)
-            : DecreeManager.BASE_KAM_SPD;
-
         if (DecreeManager.Instance != null)
         {
-            promienWybuchu   = DecreeManager.BASE_KAM_RAD * (1f + DecreeManager.Instance.KamikazeRadiusBonus);
-            obrazeniaWybuchu = DecreeManager.BASE_KAM_DMG + DecreeManager.Instance.KamikazeDamageBonus;
+            maxHp            = DecreeManager.Instance.FinalHP("Kamikaze", maxHp);
+            promienWybuchu  *= (1f + DecreeManager.Instance.KamikazeRadiusBonus);
+            obrazeniaWybuchu += DecreeManager.Instance.KamikazeDamageBonus;
         }
+        pancerz = 0f;
+        base.Start();
+        if (DecreeManager.Instance != null)
+            _agent.speed = DecreeManager.Instance.FinalSpeed("Kamikaze", _agent.speed);
     }
 
     protected override void Update()

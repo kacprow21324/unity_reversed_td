@@ -159,9 +159,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc3ec12050c168d4d8ab98ee675690f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WiezaPlazmowa
-  maxHP: 90
-  nagrodaZlota: 50
-  zasieg: 10
+  maxHP: 200
+  nagrodaZlota: 80
+  zasieg: 24
   obrazeniaBazowe: 4
   tickRate: 0.15
   mnoznikRastu: 0.3

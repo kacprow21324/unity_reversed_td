@@ -17,8 +17,6 @@ public class WiezaKolcowa : WiezaBaza
 
     protected override void Start()
     {
-        maxHP = 200f;
-        nagrodaZlota = 60;
         base.Start();
         RozstawKolce();
     }

@@ -17,8 +17,6 @@ public class WiezaArmatnia : WiezaBaza
 
     protected override void Start()
     {
-        maxHP = 120f;
-        nagrodaZlota = 80;
         base.Start();
         _licznikPrzeladowania = 0f;
     }

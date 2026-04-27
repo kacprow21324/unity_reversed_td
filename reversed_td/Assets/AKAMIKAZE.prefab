@@ -388,9 +388,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad613a9bb60f3e44ea15718ed159808d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PojazdKamikaze
-  maxHp: 20
+  maxHp: 1
   pancerz: 0
   maTaunt: 0
-  promienWyzwalacza: 4
-  promienWybuchu: 6
-  obrazeniaWybuchu: 150
+  isInvulnerable: 0
+  promienWyzwalacza: 11
+  promienWybuchu: 15
+  obrazeniaWybuchu: 1000

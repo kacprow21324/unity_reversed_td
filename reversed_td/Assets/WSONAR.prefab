@@ -128,9 +128,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 093054d2248507d42ad20498cdb3c341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WiezaSonar
-  maxHP: 100
-  nagrodaZlota: 50
-  zasieg: 15
+  maxHP: 10
+  nagrodaZlota: 10
+  zasieg: 50
   mnoznikDebuffa: 1.5
   czestotliwoscSkanowania: 0.5
   warstwaWroga:

@@ -6,19 +6,19 @@ public class TacticalAbilities : MonoBehaviour
 
     [Header("Nalot")]
     public float airstrikeCost   = 100f;
-    public float airstrikeRadius = DecreeManager.BASE_NALOT_RAD;
-    public float airstrikeDamage = DecreeManager.BASE_NALOT_DMG;
+    public float airstrikeRadius = 8f;
+    public float airstrikeDamage = 100f;
 
     [Header("Tarcza")]
     public float shieldCost     = 75f;
-    public float shieldRadius   = DecreeManager.BASE_SHIELD_RAD;
-    public float shieldDuration = DecreeManager.BASE_SHIELD_DUR;
+    public float shieldRadius   = 10f;
+    public float shieldDuration = 4f;
 
     [Header("Boost")]
     public float boostCost       = 50f;
     public float boostRadius     = 12f;
-    public float boostDuration   = DecreeManager.BASE_BOOST_DUR;
-    public float boostMultiplier = DecreeManager.BASE_BOOST_MUL;
+    public float boostDuration   = 5f;
+    public float boostMultiplier = 1.5f;
 
     [Header("Celowanie")]
     public LayerMask groundLayer;

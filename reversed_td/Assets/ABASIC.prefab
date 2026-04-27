@@ -388,6 +388,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5678c568410b91e4791b557f5874bd05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PojazdPodstawowy
-  maxHp: 100
-  pancerz: 8
+  maxHp: 75
+  pancerz: 5
   maTaunt: 0
+  isInvulnerable: 0

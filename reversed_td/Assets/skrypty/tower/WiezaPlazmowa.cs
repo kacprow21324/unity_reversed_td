@@ -24,8 +24,6 @@ public class WiezaPlazmowa : WiezaBaza
 
     protected override void Start()
     {
-        maxHP = 100f;
-        nagrodaZlota = 70;
         base.Start();
         SetupLineRenderer();
         _skanCoroutine = StartCoroutine(SkanujCel());

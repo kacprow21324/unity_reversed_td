@@ -18,8 +18,6 @@ public class WiezaPodstawowa : WiezaBaza
 
     protected override void Start()
     {
-        maxHP = 150f;
-        nagrodaZlota = 50;
         base.Start();
     }
 

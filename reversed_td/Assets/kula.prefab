@@ -153,9 +153,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 020d8d03cd32bb042a72bf18f065c3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PociskArmatni
-  predkosc: 7
+  predkosc: 20
   obrazenia: 75
-  promienWybuchu: 5
+  promienWybuchu: 8
   czasZycia: 10
   warstwaWroga:
     serializedVersion: 2

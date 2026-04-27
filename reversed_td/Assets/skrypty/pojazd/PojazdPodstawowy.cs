@@ -4,15 +4,13 @@ public class PojazdPodstawowy : pojazd
 {
     protected override void Start()
     {
-        maxHp   = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalHP("Podstawowy", DecreeManager.BASE_POD_HP)
-            : DecreeManager.BASE_POD_HP;
-        pancerz = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalArmor("Podstawowy", DecreeManager.BASE_POD_ARM)
-            : DecreeManager.BASE_POD_ARM;
+        if (DecreeManager.Instance != null)
+        {
+            maxHp   = DecreeManager.Instance.FinalHP("Podstawowy", maxHp);
+            pancerz = DecreeManager.Instance.FinalArmor("Podstawowy", pancerz);
+        }
         base.Start();
-        _agent.speed = DecreeManager.Instance != null
-            ? DecreeManager.Instance.FinalSpeed("Podstawowy", DecreeManager.BASE_POD_SPD)
-            : DecreeManager.BASE_POD_SPD;
+        if (DecreeManager.Instance != null)
+            _agent.speed = DecreeManager.Instance.FinalSpeed("Podstawowy", _agent.speed);
     }
 }

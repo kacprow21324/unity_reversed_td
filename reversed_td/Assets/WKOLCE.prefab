@@ -159,9 +159,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38522baf8c1cd844787d4fef35107c67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WiezaKolcowa
-  maxHP: 20
-  nagrodaZlota: 50
+  maxHP: 25
+  nagrodaZlota: 40
   iloscKolcow: 6
-  promienRozmieszczenia: 3.5
+  promienRozmieszczenia: 16
   obrazeniaKolca: 30
   cooldownPrzeladowania: 8

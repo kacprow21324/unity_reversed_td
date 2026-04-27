@@ -13,8 +13,6 @@ public class WiezaSonar : WiezaBaza
 
     protected override void Start()
     {
-        maxHP = 80f;
-        nagrodaZlota = 40;
         base.Start();
         StartCoroutine(Skanuj());
     }
