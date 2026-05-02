@@ -390,5 +390,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PojazdPodstawowy
   maxHp: 75
   pancerz: 5
+  unikanieWlaczone: 1
+  przyspieszenie: 80
   maTaunt: 0
   isInvulnerable: 0

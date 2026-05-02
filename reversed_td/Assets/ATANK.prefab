@@ -390,6 +390,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PojazdTank
   maxHp: 250
   pancerz: 10
+  unikanieWlaczone: 1
+  przyspieszenie: 80
   maTaunt: 0
   isInvulnerable: 0
   promienTauntu: 30

@@ -19,6 +19,7 @@ public class WyswietlaczHP : MonoBehaviour
             tekstHP.fontSize = 8f;
             tekstHP.fontStyle = FontStyles.Bold;
             tekstHP.alignment = TextAlignmentOptions.Center;
+            tekstHP.fontMaterial.SetFloat("_ZTestMode", 8f);
         }
     }
 

@@ -19,6 +19,7 @@ public class WiezaPodstawowa : WiezaBaza
     protected override void Start()
     {
         base.Start();
+        UtworzKragZasiegu(zasieg, new Color(0f, 0.4f, 1f, 0.85f));
     }
 
     protected override void Update()
@@ -36,7 +37,8 @@ public class WiezaPodstawowa : WiezaBaza
         {
             bool nieAktywny = !_aktywnycel.gameObject.activeInHierarchy;
             bool pozaZasiegiem = Vector3.Distance(transform.position, _aktywnycel.transform.position) > zasieg;
-            if (nieAktywny || pozaZasiegiem)
+            bool nieDocelowy = !_aktywnycel.IsTargetable;
+            if (nieAktywny || pozaZasiegiem || nieDocelowy)
                 _aktywnycel = null;
         }
 
@@ -60,6 +62,7 @@ public class WiezaPodstawowa : WiezaBaza
         if (skrypt != null)
         {
             skrypt.obrazenia = obrazenia;
+            skrypt.strzelajacaWieza = transform;
             skrypt.UstawCel(cel);
         }
     }
@@ -70,9 +73,9 @@ public class WiezaPodstawowa : WiezaBaza
         _aktywnycel = null;
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue;
+        Gizmos.color = new Color(0f, 0.4f, 1f, 0.35f);
         Gizmos.DrawWireSphere(transform.position, zasieg);
     }
 }

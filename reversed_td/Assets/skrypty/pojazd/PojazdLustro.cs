@@ -1,15 +1,9 @@
 using UnityEngine;
-using System.Collections.Generic;
 
+// AMIRROR – odbija pociski WBASIC i laser WPLAZMA z powrotem w wieżę,
+// o ile pojazd nie jest wykryty przez żaden aktywny sonar (WiezaSonar).
 public class PojazdLustro : pojazd
 {
-    [Header("Parametry Tarczy")]
-    public float zasiegDetekcji    = 6f;
-    public float cooldownSkanowania = 0.1f;
-
-    private float _licznikSkanowania = 0f;
-    private readonly HashSet<Pocisk> _juzOdbite = new HashSet<Pocisk>();
-
     protected override void Start()
     {
         if (DecreeManager.Instance != null)
@@ -22,76 +16,50 @@ public class PojazdLustro : pojazd
             _agent.speed = DecreeManager.Instance.FinalSpeed("Lustro", _agent.speed);
     }
 
-    protected override void Update()
+    // ── Odbicie lasera (WPLAZMA wywołuje to PRZED OdejmijHp) ───────────────
+    public override bool ReflektujLaser(float dmg, WiezaBaza zrodlo)
     {
-        base.Update();
+        if (isInvulnerable) return false;
+        if (WiezaSonar.IsInRadarRange(transform.position)) return false;
 
-        _licznikSkanowania -= Time.deltaTime;
-        if (_licznikSkanowania <= 0f)
-        {
-            SkanujIPrzebijTarcza();
-            _licznikSkanowania = cooldownSkanowania;
-        }
+        zrodlo?.TakeDamage(dmg);
+        return true; // laser odbity – wieża pomija własny strzał
     }
 
-    void SkanujIPrzebijTarcza()
+    // ── Odbicie pocisków (WBASIC uderza przez trigger → OdejmijHp) ─────────
+    public override void OdejmijHp(float obrazenia, DamageType typ, Component zrodlo, bool przebijaPancerz = false)
     {
-        Collider[] pobliskieCollidery = Physics.OverlapSphere(transform.position, zasiegDetekcji);
+        if (isInvulnerable) return;
 
-        foreach (var col in pobliskieCollidery)
+        if (WiezaSonar.IsInRadarRange(transform.position))
         {
-            Pocisk pocisk = col.GetComponent<Pocisk>();
-            if (pocisk == null || pocisk.odbity || _juzOdbite.Contains(pocisk)) continue;
-
-            Vector3 kierunekDoLustra = transform.position - col.transform.position;
-            RaycastHit hit;
-            if (!Physics.Raycast(col.transform.position, kierunekDoLustra.normalized,
-                                  out hit, zasiegDetekcji + 1f))
-                continue;
-
-            if (hit.collider.gameObject != gameObject) continue;
-
-            Odbij(pocisk);
-        }
-    }
-
-    void Odbij(Pocisk pocisk)
-    {
-        WiezaBaza najblisza = ZnajdzNajblizszeWieze();
-        if (najblisza == null)
-        {
-            Destroy(pocisk.gameObject);
+            base.OdejmijHp(obrazenia, przebijaPancerz);
             return;
         }
 
-        pocisk.odbity = true;
-        pocisk.UstawCel(najblisza.transform);
+        if (typ == DamageType.Basic)
+        {
+            OdbijPocisk(zrodlo as Pocisk);
+            return;
+        }
+
+        // Pozostałe typy (AoE armaty, kolce) – normalne obrażenia.
+        base.OdejmijHp(obrazenia, przebijaPancerz);
+    }
+
+    void OdbijPocisk(Pocisk pocisk)
+    {
+        if (pocisk == null) return;
 
         if (DecreeManager.Instance != null && DecreeManager.Instance.LustroOdbicieBonus > 0f)
             pocisk.obrazenia *= (1f + DecreeManager.Instance.LustroOdbicieBonus);
 
-        _juzOdbite.Add(pocisk);
-    }
-
-    WiezaBaza ZnajdzNajblizszeWieze()
-    {
-        WiezaBaza[] wiezy = FindObjectsByType<WiezaBaza>(FindObjectsSortMode.None);
-        WiezaBaza najblisza = null;
-        float minDyst = float.MaxValue;
-
-        foreach (var w in wiezy)
-        {
-            if (!w.gameObject.activeInHierarchy) continue;
-            float d = Vector3.Distance(transform.position, w.transform.position);
-            if (d < minDyst) { minDyst = d; najblisza = w; }
-        }
-
-        return najblisza;
+        pocisk.OdbijWStroneWiezy();
     }
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = new Color(0.5f, 0.8f, 1f);
-        Gizmos.DrawWireSphere(transform.position, zasiegDetekcji);
+        Gizmos.color = new Color(0.5f, 0.8f, 1f, 0.6f);
+        Gizmos.DrawWireSphere(transform.position, 1f);
     }
 }

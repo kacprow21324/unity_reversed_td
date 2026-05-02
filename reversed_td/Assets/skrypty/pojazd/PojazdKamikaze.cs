@@ -7,6 +7,9 @@ public class PojazdKamikaze : pojazd
     public float promienWybuchu    = 6f;
     public float obrazeniaWybuchu  = 150f;
 
+    // Kamikaze jest niewidzialny dla wież domyślnie; radar (WiezaSonar) go wykrywa.
+    public override bool IsTargetable => WiezaSonar.ActiveRadarsCount > 0;
+
     private bool _eksplodowal = false;
 
     protected override void Start()
@@ -17,7 +20,6 @@ public class PojazdKamikaze : pojazd
             promienWybuchu  *= (1f + DecreeManager.Instance.KamikazeRadiusBonus);
             obrazeniaWybuchu += DecreeManager.Instance.KamikazeDamageBonus;
         }
-        pancerz = 0f;
         base.Start();
         if (DecreeManager.Instance != null)
             _agent.speed = DecreeManager.Instance.FinalSpeed("Kamikaze", _agent.speed);

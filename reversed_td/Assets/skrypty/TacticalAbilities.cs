@@ -15,10 +15,10 @@ public class TacticalAbilities : MonoBehaviour
     public float shieldDuration = 4f;
 
     [Header("Boost")]
-    public float boostCost       = 50f;
-    public float boostRadius     = 12f;
-    public float boostDuration   = 5f;
-    public float boostMultiplier = 1.5f;
+    public float boostCost      = 50f;
+    public float boostRadius    = 12f;
+    public float boostDuration  = 10f;
+    public float boostFlatBonus = 5.0f;
 
     [Header("Celowanie")]
     public LayerMask groundLayer;
@@ -184,18 +184,18 @@ public class TacticalAbilities : MonoBehaviour
             return;
         }
 
-        float multiplier = boostMultiplier;
-        float duration   = boostDuration;
+        float flat     = boostFlatBonus;
+        float duration = boostDuration;
         if (DecreeManager.Instance != null)
         {
-            multiplier *= (1f + DecreeManager.Instance.BoostMultBonus);
-            duration   += DecreeManager.Instance.BoostDurationBonus;
+            flat     += DecreeManager.Instance.BoostFlatBonus;
+            duration += DecreeManager.Instance.BoostDurationBonus;
         }
 
         foreach (var col in Physics.OverlapSphere(center, boostRadius))
         {
             pojazd p = col.GetComponent<pojazd>();
-            p?.DoladujPredkosc(multiplier, duration);
+            p?.DoladujPredkosc(flat, duration);
         }
 
         GameStatistics.Instance?.RegisterAbility("boost");

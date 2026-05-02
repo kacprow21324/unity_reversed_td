@@ -18,6 +18,7 @@ public class WiezaArmatnia : WiezaBaza
     protected override void Start()
     {
         base.Start();
+        UtworzKragZasiegu(zasieg, new Color(1f, 0.4f, 0f, 0.85f));
         _licznikPrzeladowania = 0f;
     }
 
@@ -51,9 +52,9 @@ public class WiezaArmatnia : WiezaBaza
         }
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        Gizmos.color = new Color(1f, 0.4f, 0f);
+        Gizmos.color = new Color(1f, 0.4f, 0f, 0.35f);
         Gizmos.DrawWireSphere(transform.position, zasieg);
     }
 }

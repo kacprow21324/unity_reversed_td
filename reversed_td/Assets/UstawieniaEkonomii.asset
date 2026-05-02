@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19c7e204fa17422449fa4549f9dad298, type: 3}
   m_Name: UstawieniaEkonomii
   m_EditorClassIdentifier: Assembly-CSharp::GameConfig
-  startingGold: 200
+  startingGold: 350
   goldPerWin: 100
+  goldPerRoundMultiplier: 20
   goldPerEscapedVehicle: 10
   vehicles:
   - vehicleName: "W\xF3z Tank"

@@ -390,6 +390,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PojazdKamikaze
   maxHp: 1
   pancerz: 0
+  unikanieWlaczone: 1
+  przyspieszenie: 80
   maTaunt: 0
   isInvulnerable: 0
   promienWyzwalacza: 11

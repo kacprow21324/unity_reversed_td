@@ -16,7 +16,8 @@ public class Kolec : MonoBehaviour
         pojazd p = other.GetComponent<pojazd>();
         if (p == null) return;
 
-        p.OdejmijHp(obrazenia);
+        float efektywne = Mathf.Max(1f, obrazenia - 5f);
+        p.OdejmijHp(efektywne, przebijaPancerz: true);
         Destroy(gameObject);
     }
 }

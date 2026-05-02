@@ -25,6 +25,7 @@ public class WiezaPlazmowa : WiezaBaza
     protected override void Start()
     {
         base.Start();
+        UtworzKragZasiegu(zasieg, new Color(0.7f, 0f, 1f, 0.85f));
         SetupLineRenderer();
         _skanCoroutine = StartCoroutine(SkanujCel());
     }
@@ -60,8 +61,9 @@ public class WiezaPlazmowa : WiezaBaza
             bool celNieAktywny = _aktualnycel == null || !_aktualnycel.gameObject.activeInHierarchy;
             bool pozaZasiegiem = _aktualnycel != null &&
                                  Vector3.Distance(transform.position, _aktualnycel.transform.position) > zasieg;
+            bool celNieDocelowy = _aktualnycel != null && !_aktualnycel.IsTargetable;
 
-            if (celNieAktywny || pozaZasiegiem)
+            if (celNieAktywny || pozaZasiegiem || celNieDocelowy)
             {
                 if (_wiazkaCoroutine != null)
                 {
@@ -88,12 +90,14 @@ public class WiezaPlazmowa : WiezaBaza
         _aktualnyMnoznik = 1f;
         _lr.enabled = true;
 
-        while (_aktualnycel != null && _aktualnycel.gameObject.activeInHierarchy)
+        while (_aktualnycel != null && _aktualnycel.gameObject.activeInHierarchy && _aktualnycel.IsTargetable)
         {
             if (Vector3.Distance(transform.position, _aktualnycel.transform.position) > zasieg)
                 break;
 
-            _aktualnycel.OdejmijHp(obrazeniaBazowe * _aktualnyMnoznik, przebijaPancerz: false);
+            float dmg = obrazeniaBazowe * _aktualnyMnoznik;
+            if (!_aktualnycel.ReflektujLaser(dmg, this))
+                _aktualnycel.OdejmijHp(dmg, przebijaPancerz: false);
 
             _aktualnyMnoznik = Mathf.Min(_aktualnyMnoznik + mnoznikRastu * tickRate, maxMnoznik);
 
@@ -122,9 +126,9 @@ public class WiezaPlazmowa : WiezaBaza
         if (_lr != null) _lr.enabled = false;
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        Gizmos.color = new Color(0.7f, 0f, 1f);
+        Gizmos.color = new Color(0.7f, 0f, 1f, 0.35f);
         Gizmos.DrawWireSphere(transform.position, zasieg);
     }
 }

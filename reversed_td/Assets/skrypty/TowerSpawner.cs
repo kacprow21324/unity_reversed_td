@@ -36,8 +36,8 @@ public class TowerSpawner : MonoBehaviour
             return;
         }
 
-        // Liczba wież = round + 1, nie więcej niż dostępnych płyt
-        int towerCount = Mathf.Min(round + 1, plates.Length);
+        // Liczba wież = round + 3 (min 4 w rundzie 1), nie więcej niż dostępnych płyt
+        int towerCount = Mathf.Min(round + 3, plates.Length);
 
         List<TowerProgression> available = towerProgressions.FindAll(
             t => t.prefab != null && t.minRound <= round);
@@ -52,7 +52,15 @@ public class TowerSpawner : MonoBehaviour
 
         for (int i = 0; i < towerCount; i++)
         {
-            TowerProgression chosen = available[Random.Range(0, available.Count)];
+            // Ogranicz WiezaSonar do max 2 na mapie
+            List<TowerProgression> options = available;
+            if (WiezaSonar.ActiveRadarsCount >= 2)
+            {
+                var bezSonara = available.FindAll(t => t.prefab.GetComponent<WiezaSonar>() == null);
+                if (bezSonara.Count > 0) options = bezSonara;
+            }
+
+            TowerProgression chosen = options[Random.Range(0, options.Count)];
             Transform plate = plates[i].transform;
             GameObject tower = Instantiate(chosen.prefab, plate.position, plate.rotation);
             tower.transform.SetParent(plate);

@@ -8,6 +8,7 @@ public class VehicleSpawner : MonoBehaviour
 
     [Header("Punkt Spawnu")]
     public Transform spawnPoint;
+    [SerializeField] private float minOdstepSpawnu = 3f;
 
     [Header("Prefaby Fasolek (0-4, kolejność zgodna z GameConfig)")]
     public GameObject[] vehiclePrefabs = new GameObject[5];
@@ -37,7 +38,13 @@ public class VehicleSpawner : MonoBehaviour
                 GameStatistics.Instance?.RegisterDeployedUnit(vehiclePrefabs[idx].name);
                 GameplayUIManager.Instance?.OnVehicleSpawned();
             }
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitUntil(() =>
+            {
+                Collider[] col = Physics.OverlapSphere(spawnPoint.position, minOdstepSpawnu);
+                foreach (var c in col)
+                    if (c.GetComponent<pojazd>() != null) return false;
+                return true;
+            });
         }
 
         GameplayUIManager.Instance?.OnSpawningComplete();

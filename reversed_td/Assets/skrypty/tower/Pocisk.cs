@@ -10,11 +10,27 @@ public class Pocisk : MonoBehaviour
     // True po odbiciu przez Wóz Lustrzany – leci w kierunku wieży.
     [HideInInspector] public bool odbity = false;
 
+    // Referencja do wieży, która wystrzeliła pocisk – potrzebna przy odbiciu.
+    [HideInInspector] public Transform strzelajacaWieza;
+
     private Transform cel;
 
     public void UstawCel(Transform nowyCel)
     {
         cel = nowyCel;
+    }
+
+    /// <summary>Wywołuje PojazdLustrzany: odwraca cel na wieżę i niszczy pocisk po 0.5s.</summary>
+    public void OdbijWStroneWiezy()
+    {
+        if (strzelajacaWieza == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        odbity = true;
+        cel = strzelajacaWieza;
+        Destroy(gameObject, 0.5f);
     }
 
     void Start()
@@ -55,14 +71,17 @@ public class Pocisk : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // Odbite pociski nie szkodzą pojazdom.
         if (odbity) return;
 
         if (other.gameObject.layer == LayerMask.NameToLayer("POJAZD"))
         {
             pojazd p = other.GetComponent<pojazd>();
-            if (p != null) p.OdejmijHp(obrazenia);
-            Destroy(gameObject);
+            if (p != null)
+                p.OdejmijHp(obrazenia, DamageType.Basic, this);
+
+            // Jeśli OdejmijHp ustawił odbity=true (PojazdLustrzany), pocisk żyje dalej.
+            if (!odbity)
+                Destroy(gameObject);
         }
     }
 }

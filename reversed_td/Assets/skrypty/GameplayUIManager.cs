@@ -176,9 +176,7 @@ public class GameplayUIManager : MonoBehaviour
         foreach (var p in pojazdy)
             if (p != null) Destroy(p.gameObject);
 
-        // Zniszcz wszystkie kolce na mapie
-        foreach (var k in FindObjectsByType<Kolec>(FindObjectsSortMode.None))
-            if (k != null) Destroy(k.gameObject);
+        CleanupBattlefield();
 
         // Resetuj stan rundy – traktujemy wszystkie pojazdy jako uciekłe
         _activeVehicles   = 0;
@@ -588,6 +586,12 @@ public class GameplayUIManager : MonoBehaviour
         CheckRoundEnd();
     }
 
+    void CleanupBattlefield()
+    {
+        foreach (var k in FindObjectsByType<Kolec>(FindObjectsSortMode.None))
+            if (k != null) Destroy(k.gameObject);
+    }
+
     void CheckRoundEnd()
     {
         if (!_spawningComplete || _activeVehicles != 0) return;
@@ -606,6 +610,8 @@ public class GameplayUIManager : MonoBehaviour
             int nagroda = config.goldPerWin + config.goldPerRoundMultiplier * _currentRound;
             AddGold(nagroda);
         }
+
+        CleanupBattlefield();
 
         // Wygrana: pomyslnie ukonczona runda VICTORY_ROUND
         if (_currentRound >= GameManager.VICTORY_ROUND)

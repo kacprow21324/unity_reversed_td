@@ -57,6 +57,36 @@ public abstract class WiezaBaza : MonoBehaviour
 
     protected virtual void OnZniszcz() { }
 
+    protected void UtworzKragZasiegu(float promien, Color kolor)
+    {
+        var go = new GameObject("KragZasiegu");
+        go.transform.SetParent(transform);
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localRotation = Quaternion.identity;
+
+        const int punkty = 64;
+        var lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = false;
+        lr.loop = true;
+        lr.widthMultiplier = 0.12f;
+        lr.positionCount = punkty;
+        var mat = new Material(Shader.Find("Sprites/Default"));
+        mat.renderQueue = 4000;
+        mat.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
+        lr.material = mat;
+        lr.startColor = kolor;
+        lr.endColor = kolor;
+        lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        lr.receiveShadows = false;
+        lr.sortingOrder = 10;
+
+        for (int i = 0; i < punkty; i++)
+        {
+            float kat = i / (float)punkty * Mathf.PI * 2f;
+            lr.SetPosition(i, new Vector3(Mathf.Cos(kat) * promien, 0.08f, Mathf.Sin(kat) * promien));
+        }
+    }
+
     void CreateHPDisplay()
     {
         var hpObj = new GameObject("HP_Display");
@@ -69,6 +99,8 @@ public abstract class WiezaBaza : MonoBehaviour
         _hpText.alignment = TextAlignmentOptions.Center;
         _hpText.fontStyle = FontStyles.Bold;
         _hpText.color = Color.green;
+        _hpText.fontMaterial.SetFloat("_ZTestMode", 8f); // 8 = CompareFunction.Always
+        _hpText.sortingOrder = 10;
     }
 
     void UpdateHPDisplay()

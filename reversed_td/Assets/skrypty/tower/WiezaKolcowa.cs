@@ -18,6 +18,7 @@ public class WiezaKolcowa : WiezaBaza
     protected override void Start()
     {
         base.Start();
+        UtworzKragZasiegu(promienRozmieszczenia, new Color(1f, 0.9f, 0f, 0.85f));
         RozstawKolce();
     }
 
@@ -98,14 +99,14 @@ public class WiezaKolcowa : WiezaBaza
     protected override void OnZniszcz()
     {
         StopAllCoroutines();
-        foreach (var k in _kolce)
-            if (k != null) Destroy(k);
+        // Kolce rozstawione przed zniszczeniem wieży zostają na mapie do końca rundy.
+        // CleanupBattlefield() w GameplayUIManager usuwa je po zakończeniu rundy.
         _kolce.Clear();
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
+        Gizmos.color = new Color(1f, 0.9f, 0f, 0.35f);
         Gizmos.DrawWireSphere(transform.position, promienRozmieszczenia);
     }
 }

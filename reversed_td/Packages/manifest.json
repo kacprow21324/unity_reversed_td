@@ -5,9 +5,8 @@
     "com.unity.feature.development": "1.0.2",
     "com.unity.inputsystem": "1.18.0",
     "com.unity.multiplayer.center": "1.0.1",
-    "com.unity.timeline": "1.8.10",
+    "com.unity.timeline": "1.8.12",
     "com.unity.ugui": "2.0.0",
-    "com.unity.vectorgraphics": "3.0.0-preview.7",
     "com.unity.visualscripting": "1.9.9",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
@@ -42,8 +41,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.ivanmurzak.unity.mcp": "0.66.0"
+    "com.unity.modules.xr": "1.0.0"
   },
   "scopedRegistries": [
     {
