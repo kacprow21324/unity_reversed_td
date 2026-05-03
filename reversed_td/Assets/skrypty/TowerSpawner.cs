@@ -21,18 +21,31 @@ public class TowerSpawner : MonoBehaviour
     [Tooltip("Dodatkowe przesuniecie w gore po auto-wyrownaniu do powierzchni plyty")]
     [SerializeField] private float spawnYOffset = 0f;
 
+    [Header("Izolacja Mapy (tylko Multiplayer)")]
+    [Tooltip("Ustaw na korzeń swojej mapy w scenie MP. Null = tryb SP (globalne wyszukiwanie).")]
+    public Transform mapRoot;
+
     private readonly List<GameObject> _activeTowers = new List<GameObject>();
 
     void Awake() => Instance = this;
+
+    /// Punkt wejścia dla trybu multiplayer — inicjalizuje RNG seedem zanim
+    /// cokolwiek zostanie wygenerowane, gwarantując identyczny układ u obu graczy.
+    public void GenerateMapWithSeed(int seed)
+    {
+        Random.InitState(seed);
+        GenerateTowers(1);
+    }
 
     public void GenerateTowers(int round)
     {
         DestroyExistingTowers();
 
-        GameObject[] plates = GameObject.FindGameObjectsWithTag("TowerPlate");
+        GameObject[] plates = GetPlatesInScope();
         if (plates.Length == 0)
         {
-            Debug.LogWarning("TowerSpawner: Brak obiektow z tagiem TowerPlate na scenie.");
+            Debug.LogWarning("TowerSpawner: Brak obiektow z tagiem TowerPlate" +
+                (mapRoot != null ? $" w '{mapRoot.name}'" : " na scenie") + ".");
             return;
         }
 
@@ -67,6 +80,19 @@ public class TowerSpawner : MonoBehaviour
             UstawWysokoscWiezy(tower, plate.position.y + spawnYOffset);
             _activeTowers.Add(tower);
         }
+    }
+
+    // Singleplayer (mapRoot == null): globalne FindGameObjectsWithTag — bez zmian.
+    // Multiplayer  (mapRoot != null): przeszukuje TYLKO dzieci swojego korzenia mapy.
+    GameObject[] GetPlatesInScope()
+    {
+        if (mapRoot == null)
+            return GameObject.FindGameObjectsWithTag("TowerPlate");
+
+        var result = new List<GameObject>();
+        foreach (Transform t in mapRoot.GetComponentsInChildren<Transform>(true))
+            if (t.CompareTag("TowerPlate")) result.Add(t.gameObject);
+        return result.ToArray();
     }
 
     void DestroyExistingTowers()

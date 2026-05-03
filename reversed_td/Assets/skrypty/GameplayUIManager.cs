@@ -130,7 +130,11 @@ public class GameplayUIManager : MonoBehaviour
             startButton.onClick.AddListener(OnStartClicked);
 
         SyncStartButton();
-        TowerSpawner.Instance?.GenerateTowers(_currentRound);
+
+        // W trybie MP seed przychodzi przez SyncVar — NetworkMatchManager
+        // wywoła GenerateTowers po OnSeedReceived, więc tutaj pomijamy.
+        if (NetworkMatchManager.Instance == null)
+            TowerSpawner.Instance?.GenerateTowers(_currentRound);
     }
 
     void Update()
@@ -668,8 +672,26 @@ public class GameplayUIManager : MonoBehaviour
 
     void OnStartClicked()
     {
-        if (_isPlanning && _queue.Count > 0)
+        if (!_isPlanning || _queue.Count == 0) return;
+
+        if (NetworkMatchManager.Instance != null)
+        {
+            // Multiplayer: żądanie idzie przez Command na serwer — blokuje start bez przeciwnika.
+            NetworkMatchManager.Instance.RequestStartFromLocalPlayer();
+        }
+        else
+        {
+            // Singleplayer: bezpośredni start, logika bez zmian.
             EnterExecution();
+        }
+    }
+
+    /// Punkt wejścia dla NetworkMatchManager — uruchamia fazę ataku zdalnie.
+    /// Wywoływana przez RpcStartActionPhase na każdym kliencie z osobna.
+    public void StartNetworkRound()
+    {
+        if (!_isPlanning) return;
+        EnterExecution();
     }
 
     void SyncStartButton()

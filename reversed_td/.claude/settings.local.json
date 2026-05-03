@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Kacper\\\\Desktop\\\\unity_reversed_td\\\\reversed_td\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Kacper\\\\Desktop\\\\unity_reversed_td\\\\reversed_td\\\\Assets\" -Directory | Where-Object {$_.Name -match \"Script|Multi|Network|Lobby\"} | Select-Object -ExpandProperty FullName)"
+    ]
+  }
+}
