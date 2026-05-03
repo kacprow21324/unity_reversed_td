@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 7356545996337840970}
   - component: {fileID: 6481646859429634262}
   - component: {fileID: -3696603765185652405}
+  - component: {fileID: -6425694385437276931}
   m_Layer: 0
   m_Name: WKOLCE
   m_TagString: Untagged
@@ -165,3 +166,20 @@ MonoBehaviour:
   promienRozmieszczenia: 16
   obrazeniaKolca: 30
   cooldownPrzeladowania: 8
+--- !u!114 &-6425694385437276931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8705261584234010601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 0
+  _assetId: 4263362012
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0

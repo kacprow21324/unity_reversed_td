@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -131,9 +132,11 @@ public class GameplayUIManager : MonoBehaviour
 
         SyncStartButton();
 
-        // W trybie MP seed przychodzi przez SyncVar — NetworkMatchManager
-        // wywoła GenerateTowers po OnSeedReceived, więc tutaj pomijamy.
-        if (NetworkMatchManager.Instance == null)
+        // W SP generujemy od razu; w MP czekamy na RpcGenerateMapsOnClients z serwera.
+        // NetworkManager.singleton.isNetworkActive jest true na obu stronach zaraz po
+        // aktywacji sieci — niezawodne, bo nie zależy od tego, czy NetworkMatchManager
+        // zdążył się już zaincjalizować na kliencie.
+        if (NetworkManager.singleton == null || !NetworkManager.singleton.isNetworkActive)
             TowerSpawner.Instance?.GenerateTowers(_currentRound);
     }
 

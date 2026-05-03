@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5552292435469724230}
   - component: {fileID: 6239834969971031815}
   - component: {fileID: -8436270263764577605}
+  - component: {fileID: -820400368155752905}
   m_Layer: 0
   m_Name: WBASIC
   m_TagString: Untagged
@@ -138,6 +139,23 @@ MonoBehaviour:
     m_Bits: 128
   prefabPocisku: {fileID: 8372783012883140579, guid: 0504259f7651f26429bd8eda5465f2bc, type: 3}
   punktStrzalu: {fileID: 1439249085509444690}
+--- !u!114 &-820400368155752905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 297420494903486130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 0
+  _assetId: 3862093017
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &8713232860998304194
 GameObject:
   m_ObjectHideFlags: 0

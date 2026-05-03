@@ -57,12 +57,18 @@ public class NetworkMatchManager : NetworkBehaviour
     {
         if (!isServer) return;
 
-        // PROBLEM 1 FIX: generuj mapy dopiero gdy OBAJ gracze są w scenie.
+        // Generuj mapy dopiero gdy OBAJ gracze są w scenie (NetworkPlayer spawned).
+        // Sprawdzanie connections.Count bez player check powoduje RPC za wcześnie —
+        // klient może mieć otwarte połączenie TCP, ale jeszcze nie załadował sceny.
         if (!_isMapGenerated && NetworkServer.connections.Count == 2)
         {
-            _isMapGenerated = true;
-            Debug.Log($"[NetworkMatchManager] Dwóch graczy w scenie. Generuję mapy seedem {matchSeed}.");
-            RpcGenerateMapsOnClients(matchSeed);
+            NetworkPlayer[] players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+            if (players.Length == 2)
+            {
+                _isMapGenerated = true;
+                Debug.Log($"[NetworkMatchManager] Obaj gracze w scenie. Generuję mapy seedem {matchSeed}.");
+                RpcGenerateMapsOnClients(matchSeed);
+            }
         }
 
         // Mechanizm gotowości (opcjonalny — uzupełnia CmdTryStartGame)
