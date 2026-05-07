@@ -21,8 +21,11 @@ public class pojazd : MonoBehaviour
     public float minOdstep = 3.5f;
 
     // Wóz Tank ustawia tę flagę – wieże go preferują jako cel.
-    [HideInInspector] public bool maTaunt       = false;
+    [HideInInspector] public bool maTaunt        = false;
     [HideInInspector] public bool isInvulnerable = false;
+    // Ghost = pojazd przeciwnika renderowany lokalnie tylko wizualnie; nie wpływa na stan gry.
+    [HideInInspector] public bool isGhost            = false;
+    [HideInInspector] public FinishLine targetFinish = null;
 
     // false = wieże całkowicie ignorują ten pojazd (np. kamuflaż Kamikaze bez radaru)
     public virtual bool IsTargetable => true;
@@ -47,7 +50,7 @@ public class pojazd : MonoBehaviour
         _agent.autoBraking  = false;
         _predkoscBazowa = _agent.speed;
 
-        FinishLine meta = FindFirstObjectByType<FinishLine>();
+        FinishLine meta = targetFinish != null ? targetFinish : FindFirstObjectByType<FinishLine>();
         if (meta != null)
             _agent.SetDestination(meta.transform.position);
         else
@@ -131,7 +134,8 @@ public class pojazd : MonoBehaviour
 
     protected virtual void Smierc()
     {
-        GameplayUIManager.Instance?.OnVehicleRemoved();
+        if (!isGhost)
+            GameplayUIManager.Instance?.OnVehicleRemoved();
         Destroy(gameObject);
     }
 

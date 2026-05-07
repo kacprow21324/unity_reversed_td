@@ -1,4 +1,5 @@
 using System.Text;
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,10 +14,21 @@ public class GameManager : MonoBehaviour
     [Header("Panele Konca Gry")]
     public GameObject victoryPanel;
     public GameObject defeatPanel;
+    public GameObject drawPanel;
 
     [Header("Statystyki na Ekranie Konca")]
     public TextMeshProUGUI victoryStatsText;
     public TextMeshProUGUI defeatStatsText;
+    public TextMeshProUGUI drawStatsText;
+
+    [Header("Przyciski SP")]
+    public Button victoryRestartButton;
+    public Button defeatRestartButton;
+
+    [Header("Przyciski MP - Powrót do Lobby")]
+    public Button victoryLobbyButton;
+    public Button defeatLobbyButton;
+    public Button drawLobbyButton;
 
     public bool IsGameOver { get; private set; }
 
@@ -31,10 +43,17 @@ public class GameManager : MonoBehaviour
     {
         if (victoryPanel != null) victoryPanel.SetActive(false);
         if (defeatPanel  != null) defeatPanel.SetActive(false);
+        if (drawPanel    != null) drawPanel.SetActive(false);
         IsGameOver = false;
 
         if (GameStatistics.Instance != null)
             GameStatistics.Instance.gameStartTime = Time.realtimeSinceStartup;
+
+        bool isMP = NetworkManager.singleton != null && NetworkManager.singleton.isNetworkActive;
+        if (victoryRestartButton != null) victoryRestartButton.gameObject.SetActive(!isMP);
+        if (defeatRestartButton  != null) defeatRestartButton.gameObject.SetActive(!isMP);
+        if (victoryLobbyButton   != null) victoryLobbyButton.gameObject.SetActive(isMP);
+        if (defeatLobbyButton    != null) defeatLobbyButton.gameObject.SetActive(isMP);
     }
 
     void EnsureDecreeManager()
@@ -75,6 +94,21 @@ public class GameManager : MonoBehaviour
             defeatPanel.SetActive(true);
     }
 
+    public void TriggerDraw()
+    {
+        if (IsGameOver) return;
+        IsGameOver = true;
+        Time.timeScale = 0f;
+
+        GameplayUIManager.Instance?.LockForGameOver();
+
+        if (drawStatsText != null)
+            drawStatsText.text = BuildStatsText(won: false);
+
+        if (drawPanel != null)
+            drawPanel.SetActive(true);
+    }
+
     // ── Statystyki ─────────────────────────────────────────────────────────
 
     string BuildStatsText(bool won)
@@ -82,9 +116,9 @@ public class GameManager : MonoBehaviour
         var gs = GameStatistics.Instance;
         var sb = new StringBuilder();
 
-        float dur     = gs != null ? gs.GetGameDuration() : 0f;
-        int minutes   = (int)(dur / 60f);
-        int seconds   = (int)(dur % 60f);
+        float dur   = gs != null ? gs.GetGameDuration() : 0f;
+        int minutes = (int)(dur / 60f);
+        int seconds = (int)(dur % 60f);
 
         sb.AppendLine(won ? "Ukonczone rundy: " + VICTORY_ROUND : "Przetrwane rundy: " + (gs != null ? gs.wavesSurvived : 0));
         sb.AppendLine("Czas gry: " + minutes + " min " + seconds + " sek");
@@ -107,9 +141,9 @@ public class GameManager : MonoBehaviour
         sb.AppendLine("  Wydane zloto: " + (gs != null ? gs.totalGoldSpent : 0));
         sb.AppendLine();
 
-        int nalot   = gs != null ? gs.airstrikeUsed : 0;
-        int tarcza  = gs != null ? gs.shieldUsed    : 0;
-        int boost   = gs != null ? gs.boostUsed     : 0;
+        int nalot  = gs != null ? gs.airstrikeUsed : 0;
+        int tarcza = gs != null ? gs.shieldUsed    : 0;
+        int boost  = gs != null ? gs.boostUsed     : 0;
         sb.AppendLine("MOCE TAKTYCZNE");
         sb.AppendLine("  Nalot: " + nalot);
         sb.AppendLine("  Tarcza: " + tarcza);
@@ -130,12 +164,11 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         IsGameOver = false;
-        if (GameStatistics.Instance != null) Destroy(GameStatistics.Instance.gameObject);
+        if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
-        if (DecreeManager.Instance != null) Destroy(DecreeManager.Instance.gameObject);
-        int targetScene = 0;
+        if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
         Destroy(gameObject);
-        SceneManager.LoadScene(targetScene, LoadSceneMode.Single);
+        SceneManager.LoadScene(0, LoadSceneMode.Single);
     }
 
     public void RestartScene()
@@ -143,10 +176,28 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         IsGameOver = false;
         int targetScene = SceneManager.GetActiveScene().buildIndex;
-        if (GameStatistics.Instance != null) Destroy(GameStatistics.Instance.gameObject);
+        if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
-        if (DecreeManager.Instance != null) Destroy(DecreeManager.Instance.gameObject);
+        if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
         Destroy(gameObject);
         SceneManager.LoadScene(targetScene, LoadSceneMode.Single);
+    }
+
+    public void ReturnToLobby()
+    {
+        Time.timeScale = 1f;
+        IsGameOver = false;
+
+        if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
+        if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
+        if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
+        Destroy(gameObject);
+
+        if (NetworkServer.active && NetworkClient.isConnected)
+            NetworkManager.singleton.StopHost();
+        else if (NetworkClient.isConnected)
+            NetworkManager.singleton.StopClient();
+
+        SceneManager.LoadScene(0, LoadSceneMode.Single);
     }
 }

@@ -3,7 +3,9 @@ using UnityEngine;
 
 public class NetworkPlayer : NetworkBehaviour
 {
-    [SyncVar] public int playerGold = 1000;
+    // ── Gra ───────────────────────────────────────────────────────────────
+
+    [SyncVar] public int playerGold  = 1000;
     [SyncVar] public int playerLives = 5;
 
     [SyncVar(hook = nameof(OnReadyChanged))]
@@ -11,37 +13,123 @@ public class NetworkPlayer : NetworkBehaviour
 
     [SyncVar] public int playerIndex;
 
+    // ── Lobby ─────────────────────────────────────────────────────────────
+
+    [SyncVar(hook = nameof(OnNicknameChanged))]
+    public string playerNickname = "Gracz";
+
+    [SyncVar(hook = nameof(OnLobbyReadyChanged))]
+    public bool isLobbyReady = false;
+
+    // Ustawienia wybierane przez Hosta (playerIndex == 1), widoczne u wszystkich
+    [SyncVar(hook = nameof(OnMapIndexChanged))]
+    public int selectedMapIndex = 0;
+
+    [SyncVar(hook = nameof(OnStartGoldChanged))]
+    public int lobbyStartGold = 500;
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────
+
     public override void OnStartServer()
     {
-        // Host dostaje indeks 1, każdy kolejny klient dostaje 2
-        playerIndex = NetworkServer.connections.Count == 1 ? 1 : 2;
+        // connectionId == 0 → własne połączenie hosta
+        playerIndex = connectionToClient?.connectionId == 0 ? 1 : 2;
     }
 
-    void OnReadyChanged(bool oldValue, bool newValue)
+    public override void OnStartLocalPlayer()
     {
-        Debug.Log($"[NetworkPlayer] Gracz {playerIndex} zmienił gotowość: {newValue}");
+        NicknameManager.EnsureExists();
+        CmdSetNickname(NicknameManager.LocalNickname);
+    }
+
+    // ── Haki SyncVar ──────────────────────────────────────────────────────
+
+    void OnReadyChanged(bool _, bool __)       => Debug.Log($"[NetworkPlayer] Gracz {playerIndex} isReady={isReady}");
+    void OnNicknameChanged(string _, string __)
+    {
+        LobbyPanelUI.Instance?.RefreshPlayerList();
+        MatchHPUI.Instance?.RefreshHP();
+    }
+    void OnLobbyReadyChanged(bool _, bool __)   => LobbyPanelUI.Instance?.RefreshPlayerList();
+    void OnMapIndexChanged(int _, int newVal)   => LobbyPanelUI.Instance?.OnHostMapChanged(newVal);
+    void OnStartGoldChanged(int _, int newVal)  => LobbyPanelUI.Instance?.OnHostGoldChanged(newVal);
+
+    // ── Commands: lobby ───────────────────────────────────────────────────
+
+    [Command]
+    public void CmdSetNickname(string nick)
+    {
+        nick = string.IsNullOrWhiteSpace(nick) ? "Gracz" : nick.Trim();
+        if (nick.Length > 24) nick = nick.Substring(0, 24);
+        playerNickname = nick;
     }
 
     [Command]
-    public void CmdSetReady(bool state)
+    public void CmdSetLobbyReady(bool state) => isLobbyReady = state;
+
+    [Command]
+    public void CmdSetMapIndex(int index)
     {
-        isReady = state;
+        if (playerIndex == 1) selectedMapIndex = index;
     }
 
-    /// Jedyny sieciowy punkt wejścia do startu fali.
-    /// Wywoływany przez GameplayUIManager → NetworkMatchManager.RequestStartFromLocalPlayer().
-    /// Wymóg: dokładnie 2 połączone klienty — bez sprawdzania isReady.
     [Command]
-    public void CmdTryStartGame()
+    public void CmdSetStartGold(int gold)
     {
-        Debug.Log($"[NetworkPlayer] Próba startu: podłączonych graczy = {NetworkServer.connections.Count}");
+        if (playerIndex == 1) lobbyStartGold = Mathf.Max(0, gold);
+    }
 
-        if (NetworkServer.connections.Count < 2)
-        {
-            Debug.Log("[NetworkPlayer] CmdTryStartGame: czekamy na drugiego gracza.");
-            return;
-        }
+    /// Żądanie startu meczu: walidacja → sync golda na wszystkich klientach → ServerChangeScene.
+    [Command]
+    public void CmdTryStartMatch(string sceneName, int startGold)
+    {
+        if (playerIndex != 1) return; // tylko Host
 
-        NetworkMatchManager.Instance?.ForceStartActionPhase();
+        var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+        if (players.Length < 2) return;
+
+        foreach (var p in players)
+            if (!p.isLobbyReady) return;
+
+        LobbySettings.StartGold = startGold;
+        RpcSyncStartGold(startGold); // klient (nie-host) dostaje gold przed zmianą sceny
+        NetworkManager.singleton.ServerChangeScene(sceneName);
+    }
+
+    [ClientRpc]
+    void RpcSyncStartGold(int gold)
+    {
+        LobbySettings.StartGold = gold;
+    }
+
+    // ── Commands: gra ─────────────────────────────────────────────────────
+
+    [Command]
+    public void CmdSetReady(bool state) => isReady = state;
+
+    [Command]
+    public void CmdTryStartGame() => isReady = true;
+
+    /// Wysyła kolejkę pojazdów do serwera i oznacza gracza jako gotowego do wczesnego startu.
+    [Command]
+    public void CmdSubmitQueueAndReady(int[] vehicleIndices)
+    {
+        isReady = true;
+        NetworkMatchManager.Instance?.StorePlayerQueue(playerIndex, vehicleIndices);
+    }
+
+    /// Wysyła kolejkę po starcie fazy ataku (ekspiracja timera) bez zmiany flagi gotowości.
+    [Command]
+    public void CmdSubmitQueue(int[] vehicleIndices)
+    {
+        NetworkMatchManager.Instance?.StorePlayerQueue(playerIndex, vehicleIndices);
+    }
+
+    /// Klient raportuje ile jednostek uciekło w tej rundzie.
+    /// Serwer zbiera wyniki obu graczy, przetwarza HP i decyduje o kolejnej rundzie.
+    [Command]
+    public void CmdReportRoundResult(int escaped)
+    {
+        NetworkMatchManager.Instance?.OnRoundResultReceived(playerIndex, escaped);
     }
 }

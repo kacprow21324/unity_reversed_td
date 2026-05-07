@@ -5,15 +5,49 @@ using TMPro;
 
 public class MultiplayerLobbyUI : MonoBehaviour
 {
+    // ── Panele ─────────────────────────────────────────────────────────────
+
     [Header("Panele")]
     public GameObject multiplayerPanel;
     public GameObject waitingPanel;
+    public GameObject lobbyPanel;
 
-    [Header("Pole IP")]
+    // ── Połączenie ─────────────────────────────────────────────────────────
+
+    [Header("Pole IP i Nick")]
     public TMP_InputField ipInputField;
+    public TMP_InputField nicknameInputField;
 
-    [Header("Etykiety statusu")]
+    [Header("Status (WaitingPanel)")]
     public TextMeshProUGUI statusLabel;
+
+    // ── Referencja do LobbyPanelUI ─────────────────────────────────────────
+
+    [Header("Lobby Panel UI")]
+    public LobbyPanelUI lobbyPanelUI;
+
+    // ── Stan wewnętrzny ────────────────────────────────────────────────────
+
+    bool _lobbyShown;
+
+    // ── Unity lifecycle ────────────────────────────────────────────────────
+
+    void Awake()
+    {
+        NicknameManager.EnsureExists();
+    }
+
+    void Update()
+    {
+        // Przejście WaitingPanel → LobbyPanel gdy lokalny NetworkPlayer jest gotowy
+        if (_lobbyShown) return;
+        if (!NetworkClient.active && !NetworkServer.active) return;
+        if (NetworkClient.localPlayer == null) return;
+
+        ShowLobbyPanel();
+    }
+
+    // ── Publiczne akcje ────────────────────────────────────────────────────
 
     public void HostGame()
     {
@@ -23,10 +57,16 @@ public class MultiplayerLobbyUI : MonoBehaviour
             return;
         }
 
+        SaveNicknameFromField();
+
+        // Lobby zarządza zmianą sceny ręcznie przez CmdTryStartMatch → ServerChangeScene.
+        // Jeśli onlineScene jest ustawiona, Mirror załaduje ją natychmiast po połączeniu
+        // z pominięciem całego lobby — dlatego czyścimy ją przed startem.
+        NetworkManager.singleton.onlineScene = string.Empty;
+
         NetworkManager.singleton.StartHost();
-        if (multiplayerPanel) multiplayerPanel.SetActive(false);
-        SetStatus("Hosting... czekam na gracza.");
         ShowWaitingPanel();
+        SetStatus("Hosting... czekam na gracza.");
     }
 
     public void JoinGame(string ipAddress)
@@ -37,15 +77,18 @@ public class MultiplayerLobbyUI : MonoBehaviour
             return;
         }
 
+        SaveNicknameFromField();
+
+        // Analogicznie jak HostGame — blokujemy auto-scenę.
+        NetworkManager.singleton.onlineScene = string.Empty;
+
         string ip = string.IsNullOrWhiteSpace(ipAddress) ? "localhost" : ipAddress.Trim();
         NetworkManager.singleton.networkAddress = ip;
         NetworkManager.singleton.StartClient();
-        if (multiplayerPanel) multiplayerPanel.SetActive(false);
-        SetStatus($"Łączenie z {ip}...");
         ShowWaitingPanel();
+        SetStatus($"Łączenie z {ip}...");
     }
 
-    // Podpięte pod przycisk "Dołącz" — pobiera IP z pola tekstowego
     public void JoinGameFromInput()
     {
         string ip = ipInputField != null ? ipInputField.text : "localhost";
@@ -59,20 +102,49 @@ public class MultiplayerLobbyUI : MonoBehaviour
         else if (NetworkClient.isConnected)
             NetworkManager.singleton.StopClient();
 
+        _lobbyShown = false;
         ShowMultiplayerPanel();
         SetStatus("");
     }
 
+    // ── Prywatne helpers ───────────────────────────────────────────────────
+
+    void SaveNicknameFromField()
+    {
+        if (nicknameInputField == null) return;
+        NicknameManager.Instance?.SaveNickname(nicknameInputField.text);
+    }
+
+    void ShowLobbyPanel()
+    {
+        _lobbyShown = true;
+
+        if (waitingPanel)     waitingPanel.SetActive(false);
+        if (multiplayerPanel) multiplayerPanel.SetActive(false);
+        if (lobbyPanel)
+        {
+            lobbyPanel.SetActive(true);
+            lobbyPanelUI?.OnLobbyOpened();
+        }
+        else
+        {
+            Debug.LogWarning("[MultiplayerLobbyUI] Brak referencji do lobbyPanel. Uruchom Tools/Generuj UI Lobby.");
+        }
+    }
+
     void ShowWaitingPanel()
     {
+        _lobbyShown = false;
         if (multiplayerPanel) multiplayerPanel.SetActive(false);
         if (waitingPanel)     waitingPanel.SetActive(true);
+        if (lobbyPanel)       lobbyPanel.SetActive(false);
     }
 
     void ShowMultiplayerPanel()
     {
         if (multiplayerPanel) multiplayerPanel.SetActive(true);
         if (waitingPanel)     waitingPanel.SetActive(false);
+        if (lobbyPanel)       lobbyPanel.SetActive(false);
     }
 
     void SetStatus(string message)

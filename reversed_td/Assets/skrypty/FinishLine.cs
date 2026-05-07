@@ -6,6 +6,13 @@ public class FinishLine : MonoBehaviour
     {
         if (!other.CompareTag("POJAZD")) return;
 
+        pojazd p = other.GetComponent<pojazd>();
+        if (p != null && p.isGhost)
+        {
+            Destroy(other.gameObject);
+            return;
+        }
+
         GameplayUIManager.Instance?.AddGoldForEscapedVehicle();
         GameplayUIManager.Instance?.OnVehicleRemoved();
         Destroy(other.gameObject);

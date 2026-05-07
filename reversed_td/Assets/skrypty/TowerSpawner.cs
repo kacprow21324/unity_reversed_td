@@ -31,10 +31,10 @@ public class TowerSpawner : MonoBehaviour
 
     /// Punkt wejścia dla trybu multiplayer — inicjalizuje RNG seedem zanim
     /// cokolwiek zostanie wygenerowane, gwarantując identyczny układ u obu graczy.
-    public void GenerateMapWithSeed(int seed)
+    public void GenerateMapWithSeed(int seed, int round = 1)
     {
         Random.InitState(seed);
-        GenerateTowers(1);
+        GenerateTowers(round);
     }
 
     public void GenerateTowers(int round)

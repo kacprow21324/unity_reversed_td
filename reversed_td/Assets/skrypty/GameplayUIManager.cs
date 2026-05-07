@@ -111,7 +111,25 @@ public class GameplayUIManager : MonoBehaviour
     {
         if (config == null) { Debug.LogError("UIManager: brak GameConfig!"); return; }
 
-        _currentGold = config.startingGold;
+        // W trybie MP używamy złota z lobby; w SP – z GameConfig.
+        // LobbySettings.StartGold jest syncowany przez RpcSyncStartGold tuż przed zmianą sceny.
+        // Fallback: SyncVar lobbyStartGold na hoście (playerIndex==1) — zawsze dostępna u obu.
+        bool isMultiplayer = NetworkManager.singleton != null && NetworkManager.singleton.isNetworkActive;
+        if (isMultiplayer)
+        {
+            int gold = LobbySettings.StartGold;
+            if (gold < 0)
+            {
+                var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+                foreach (var p in players)
+                    if (p.playerIndex == 1) { gold = p.lobbyStartGold; break; }
+            }
+            _currentGold = gold >= 0 ? gold : config.startingGold;
+        }
+        else
+        {
+            _currentGold = config.startingGold;
+        }
 
         BuildNoMoneyTextIfMissing();
 
@@ -149,10 +167,13 @@ public class GameplayUIManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P))
             AddGold(100);
 
-        // Debug: O = wygraj runde, I = wygraj gre, U = przegraj gre
-        if (Input.GetKeyDown(KeyCode.O)) DebugWinCurrentRound();
-        if (Input.GetKeyDown(KeyCode.I)) GameManager.Instance?.TriggerVictory();
-        if (Input.GetKeyDown(KeyCode.U)) GameManager.Instance?.TriggerDefeat();
+        // Debug: O = wygraj runde, I = wygraj gre, U = przegraj gre (tylko SP)
+        if (NetworkMatchManager.Instance == null)
+        {
+            if (Input.GetKeyDown(KeyCode.O)) DebugWinCurrentRound();
+            if (Input.GetKeyDown(KeyCode.I)) GameManager.Instance?.TriggerVictory();
+            if (Input.GetKeyDown(KeyCode.U)) GameManager.Instance?.TriggerDefeat();
+        }
 
         if (_decreeTimerActive)
         {
@@ -254,7 +275,22 @@ public class GameplayUIManager : MonoBehaviour
 
         ClearQueueUI();
 
-        VehicleSpawner.Instance.StartSpawning(new List<QueueEntry>(_queue));
+        // W MP każdy gracz atakuje mapę PRZECIWNIKA — wybieramy właściwy spawner i metę explicite,
+        // żeby nie zależeć od singletonu (który może wskazywać na złą mapę).
+        VehicleSpawner spawner   = VehicleSpawner.Instance;
+        FinishLine     finishCel = null;
+        var nmm = NetworkMatchManager.Instance;
+        if (nmm != null)
+        {
+            var lp = NetworkClient.localPlayer?.GetComponent<NetworkPlayer>();
+            if (lp != null)
+            {
+                bool isP1 = lp.playerIndex == 1;
+                spawner   = isP1 ? nmm.vehicleSpawnerMap2 : nmm.vehicleSpawnerMap1;
+                finishCel = isP1 ? nmm.finishLine2        : nmm.finishLine1;
+            }
+        }
+        spawner.StartSpawning(new List<QueueEntry>(_queue), finishCel);
         _queue.Clear();
 
         RefreshHUD();
@@ -359,7 +395,12 @@ public class GameplayUIManager : MonoBehaviour
         if (decreePanel != null)
             decreePanel.SetActive(false);
 
-        EnterPlanning();
+        // W MP serwer zarządza następną rundą — raportujemy wynik zamiast wchodzić w planowanie.
+        // (planning przyjdzie przez RpcPrepareNextRound gdy obaj gracze zgłoszą wyniki)
+        if (NetworkMatchManager.Instance != null)
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()?.CmdReportRoundResult(_escapedThisRound);
+        else
+            EnterPlanning();
     }
 
     // ══ BLOKADA UI PRZY KONCU GRY ══════════════════════════════════════════
@@ -604,14 +645,30 @@ public class GameplayUIManager : MonoBehaviour
         if (!_spawningComplete || _activeVehicles != 0) return;
         if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
 
-        // Przegrana: zadna jednostka nie dotarla do mety w tej rundzie
+        // Multiplayer: raportujemy wynik do serwera — serwer decyduje o HP i kolejnej rundzie
+        // Złoto i dekret zawsze przysługują niezależnie od wyniku; jedyną karą jest strata serduszka.
+        if (NetworkMatchManager.Instance != null)
+        {
+            if (config != null)
+                AddGold(config.goldPerWin + config.goldPerRoundMultiplier * _currentRound);
+
+            CleanupBattlefield();
+
+            // Pokaż panel dekretów przed raportem — OnDecreeChosen wyśle CmdReportRoundResult
+            if (decreePanel != null && DecreeManager.Instance != null)
+                ShowDecreePanel();
+            else
+                NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()?.CmdReportRoundResult(_escapedThisRound);
+            return;
+        }
+
+        // Singleplayer: oryginalna logika bez zmian
         if (_escapedThisRound == 0)
         {
             GameManager.Instance?.TriggerDefeat();
             return;
         }
 
-        // Nagroda za wygraną rundę: 100 + 20 * nrRundy (wartości z GameConfig)
         if (config != null)
         {
             int nagroda = config.goldPerWin + config.goldPerRoundMultiplier * _currentRound;
@@ -620,7 +677,6 @@ public class GameplayUIManager : MonoBehaviour
 
         CleanupBattlefield();
 
-        // Wygrana: pomyslnie ukonczona runda VICTORY_ROUND
         if (_currentRound >= GameManager.VICTORY_ROUND)
         {
             GameManager.Instance?.TriggerVictory();
@@ -628,6 +684,30 @@ public class GameplayUIManager : MonoBehaviour
         }
 
         ShowDecreePanel();
+    }
+
+    /// Wywoływane przez RpcPrepareNextRound: regeneruje wieże i wchodzi w planowanie.
+    public void PrepareNextNetworkRound(int round)
+    {
+        _isPlanning       = true;
+        _spawningComplete = false;
+        _activeVehicles   = 0;
+        _escapedThisRound = 0;
+        _currentRound     = round;
+
+        if (GameStatistics.Instance != null)
+            GameStatistics.Instance.wavesSurvived++;
+
+        if (abilitiesPanel != null) abilitiesPanel.SetActive(false);
+        if (queuePanel     != null) queuePanel.SetActive(true);
+
+        Time.timeScale = 0f;
+
+        foreach (var s in vehicleSlots)
+            if (s?.button != null) s.button.interactable = true;
+
+        RefreshHUD();
+        SyncStartButton();
     }
 
     // ══ ZLOTO ═════════════════════════════════════════════════════════════
@@ -679,12 +759,15 @@ public class GameplayUIManager : MonoBehaviour
 
         if (NetworkMatchManager.Instance != null)
         {
-            // Multiplayer: żądanie idzie przez Command na serwer — blokuje start bez przeciwnika.
-            NetworkMatchManager.Instance.RequestStartFromLocalPlayer();
+            int[] indices = new int[_queue.Count];
+            for (int i = 0; i < _queue.Count; i++)
+                indices[i] = _queue[i].vehicleIndex;
+
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()?.CmdSubmitQueueAndReady(indices);
+            if (startButton != null) startButton.interactable = false;
         }
         else
         {
-            // Singleplayer: bezpośredni start, logika bez zmian.
             EnterExecution();
         }
     }
@@ -694,6 +777,13 @@ public class GameplayUIManager : MonoBehaviour
     public void StartNetworkRound()
     {
         if (!_isPlanning) return;
+
+        // Zgłoś kolejkę do serwera aby mógł rozesłać duchy do przeciwnika.
+        int[] indices = new int[_queue.Count];
+        for (int i = 0; i < _queue.Count; i++)
+            indices[i] = _queue[i].vehicleIndex;
+        NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()?.CmdSubmitQueue(indices);
+
         EnterExecution();
     }
 
