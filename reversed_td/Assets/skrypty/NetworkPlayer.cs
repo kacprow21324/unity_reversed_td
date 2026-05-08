@@ -125,11 +125,65 @@ public class NetworkPlayer : NetworkBehaviour
         NetworkMatchManager.Instance?.StorePlayerQueue(playerIndex, vehicleIndices);
     }
 
-    /// Klient raportuje ile jednostek uciekło w tej rundzie.
-    /// Serwer zbiera wyniki obu graczy, przetwarza HP i decyduje o kolejnej rundzie.
+    /// Klient raportuje koniec fali natychmiast po jej zakończeniu.
+    /// Serwer czeka na obydwu graczy, przetwarza HP, po czym wysyła RpcStartDecreePhase do obu.
+    [Command]
+    public void CmdReportWaveFinished(int escaped)
+    {
+        NetworkMatchManager.Instance?.OnWaveFinishedReceived(playerIndex, escaped);
+    }
+
+    /// Stara komenda — zachowana dla kompatybilności.
     [Command]
     public void CmdReportRoundResult(int escaped)
     {
         NetworkMatchManager.Instance?.OnRoundResultReceived(playerIndex, escaped);
+    }
+
+    // ── Synchronizacja Mocy Specjalnych ───────────────────────────────────
+
+    /// Centralny hub Mocy Specjalnych dla trybu Multiplayer.
+    /// Serwer rozsyła efekt ClientRpc do obu klientów — gwarantuje identyczny wynik bez NetworkIdentity.
+    ///
+    /// powerType  : "airstrike" | "shield_towers" | "boost_towers"
+    /// isOnOwnMap : true = własna plansza, false = plansza wroga
+    /// paramA     : promień (wszystkie moce)
+    /// paramB     : obrażenia (airstrike) | czas trwania (shield) | mnożnik prędkości (boost)
+    /// paramC     : czas trwania (boost); nieużywany przez pozostałe
+    [Command]
+    public void CmdApplySpecialPower(
+        string powerType, Vector3 position, bool isOnOwnMap,
+        float paramA, float paramB, float paramC)
+    {
+        var nmm = NetworkMatchManager.Instance;
+        if (nmm == null) return;
+
+        switch (powerType)
+        {
+            case "airstrike":
+                // paramA = radius, paramB = damage — niszczy wieże na obu klientach
+                nmm.RpcApplyAirstrikeOnTowers(position, paramA, paramB);
+                break;
+
+            case "airstrike_vehicles":
+                // paramA = radius, paramB = damage — niszczy pojazdy (+ duchy) na obu klientach
+                nmm.RpcApplyAirstrikeOnVehicles(position, paramA, paramB);
+                break;
+
+            case "shield_towers":
+                // paramA = radius, paramB = duration
+                nmm.RpcApplyShieldOnTowers(position, paramA, paramB);
+                break;
+
+            case "boost_towers":
+                // paramA = radius, paramB = speedMult, paramC = duration
+                nmm.RpcApplyBoostOnTowers(position, paramA, paramB, paramC);
+                break;
+
+            case "boost_vehicles":
+                // paramA = radius, paramB = flat bonus, paramC = duration
+                nmm.RpcApplyBoostOnVehicles(position, paramA, paramB, paramC);
+                break;
+        }
     }
 }

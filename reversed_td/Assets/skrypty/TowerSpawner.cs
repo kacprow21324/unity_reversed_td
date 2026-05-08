@@ -82,17 +82,24 @@ public class TowerSpawner : MonoBehaviour
         }
     }
 
-    // Singleplayer (mapRoot == null): globalne FindGameObjectsWithTag — bez zmian.
-    // Multiplayer  (mapRoot != null): przeszukuje TYLKO dzieci swojego korzenia mapy.
+    // Singleplayer (mapRoot == null): globalne FindGameObjectsWithTag.
+    // Multiplayer  (mapRoot != null): przeszukuje dzieci swojego korzenia mapy;
+    //   jezeli mapRoot nie zawiera TowerPlate (bledna konfiguracja SP), fallback globalny.
     GameObject[] GetPlatesInScope()
     {
-        if (mapRoot == null)
-            return GameObject.FindGameObjectsWithTag("TowerPlate");
+        if (mapRoot != null)
+        {
+            var result = new List<GameObject>();
+            foreach (Transform t in mapRoot.GetComponentsInChildren<Transform>(true))
+                if (t.CompareTag("TowerPlate")) result.Add(t.gameObject);
 
-        var result = new List<GameObject>();
-        foreach (Transform t in mapRoot.GetComponentsInChildren<Transform>(true))
-            if (t.CompareTag("TowerPlate")) result.Add(t.gameObject);
-        return result.ToArray();
+            if (result.Count > 0)
+                return result.ToArray();
+
+            Debug.LogWarning($"[TowerSpawner] mapRoot '{mapRoot.name}' nie zawiera obiektow z tagiem TowerPlate. Szukam globalnie (SP fallback).");
+        }
+
+        return GameObject.FindGameObjectsWithTag("TowerPlate");
     }
 
     void DestroyExistingTowers()

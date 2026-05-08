@@ -3,7 +3,12 @@
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Kacper\\\\Desktop\\\\unity_reversed_td\\\\reversed_td\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Kacper\\\\Desktop\\\\unity_reversed_td\\\\reversed_td\\\\Assets\" -Directory | Where-Object {$_.Name -match \"Script|Multi|Network|Lobby\"} | Select-Object -ExpandProperty FullName)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Kacper\\\\Desktop\\\\unity_reversed_td\\\\reversed_td\\\\Assets\" -Directory | Where-Object {$_.Name -match \"Script|Multi|Network|Lobby\"} | Select-Object -ExpandProperty FullName)",
+      "Bash(sed -n '2550,2565p' \"C:/Users/Kacper/Desktop/unity_reversed_td/reversed_td/Assets/mapy/teren2/teren2.unity\")",
+      "Bash(sed -n '1298,1313p' \"C:/Users/Kacper/Desktop/unity_reversed_td/reversed_td/Assets/mapy/teren1/teren1.unity\")",
+      "Bash(awk 'NR>=2553 && NR<=2560' \"C:/Users/Kacper/Desktop/unity_reversed_td/reversed_td/Assets/mapy/teren2/teren2.unity\")",
+      "Bash(awk 'NR>=1301 && NR<=1308' \"C:/Users/Kacper/Desktop/unity_reversed_td/reversed_td/Assets/mapy/teren1/teren1.unity\")",
+      "Bash(python3 *)"
     ]
   }
 }

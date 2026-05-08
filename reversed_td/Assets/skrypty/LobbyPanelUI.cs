@@ -257,6 +257,8 @@ public class LobbyPanelUI : MonoBehaviour
         // Dropdown wyboru mapy
         if (mapDropdown == null)
             mapDropdown = BuildMapDropdown();
+        else
+            SyncDropdownOptions(mapDropdown);
 
         // Podgląd mapy
         if (mapPreviewImage == null)
@@ -353,6 +355,14 @@ public class LobbyPanelUI : MonoBehaviour
         vlg.childControlWidth = vlg.childControlHeight = true;
 
         return go.transform;
+    }
+
+    void SyncDropdownOptions(TMP_Dropdown dd)
+    {
+        dd.options.Clear();
+        foreach (var s in mapSceneNames)
+            dd.options.Add(new TMP_Dropdown.OptionData(s.Replace("_Multiplayer", "")));
+        dd.RefreshShownValue();
     }
 
     TMP_Dropdown BuildMapDropdown()

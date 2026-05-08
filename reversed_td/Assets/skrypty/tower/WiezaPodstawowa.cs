@@ -49,7 +49,7 @@ public class WiezaPodstawowa : WiezaBaza
         if (_aktywnycel != null)
         {
             Strzelaj(_aktywnycel.transform);
-            _licznikAtaku = 1f / szybkoscAtaku;
+            _licznikAtaku = 1f / (szybkoscAtaku * attackSpeedMultiplier);
         }
     }
 

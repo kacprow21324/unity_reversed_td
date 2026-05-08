@@ -36,7 +36,7 @@ public class WiezaArmatnia : WiezaBaza
         if (cel == null) return;
 
         Strzelaj(cel.transform);
-        _licznikPrzeladowania = czasPrzeladowania;
+        _licznikPrzeladowania = czasPrzeladowania / attackSpeedMultiplier;
     }
 
     void Strzelaj(Transform cel)

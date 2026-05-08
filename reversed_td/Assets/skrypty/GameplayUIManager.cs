@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 
@@ -97,6 +98,11 @@ public class GameplayUIManager : MonoBehaviour
     private float _decreeTimeLeft;
     private bool  _decreeTimerActive;
 
+    // Multiplayer: numer rundy oczekujący na zatwierdzenie po ekranie Dekretów
+    private int _pendingMPRound = 1;
+    // Overlay "Oczekiwanie na przeciwnika" tworzony dynamicznie
+    private GameObject _waitingOverlay;
+
     public bool IsPlanning => _isPlanning;
 
     // ── Unity lifecycle ──────────────────────────────────────────────────
@@ -105,16 +111,28 @@ public class GameplayUIManager : MonoBehaviour
     {
         Instance = this;
         Time.timeScale = 0f;
+        Debug.Log("[GameplayUIManager] Awake OK");
     }
 
     void Start()
     {
-        if (config == null) { Debug.LogError("UIManager: brak GameConfig!"); return; }
+        bool isMultiplayer = SceneManager.GetActiveScene().name.Contains("Multiplayer");
+        Debug.Log("[GameplayUIManager] Start BEGIN, isMP=" + isMultiplayer);
+        // Panele UI — widoczne niezalezne od config, zeby UI nigdy nie znikalo
+        if (queuePanel     != null) queuePanel.SetActive(true);
+        if (decreePanel    != null) decreePanel.SetActive(false);
+        if (abilitiesPanel != null) { abilitiesPanel.SetActive(false); SetupAbilitiesPanel(); }
+
+        if (config == null)
+        {
+            Debug.LogError("[GameplayUIManager] GameConfig nie jest przypisany w Inspektorze! Sklep i zloto nie beda dzialac. Przypisz GameConfig do pola 'config'.");
+            if (!isMultiplayer)
+                SpawnTowers();
+            return;
+        }
 
         // W trybie MP używamy złota z lobby; w SP – z GameConfig.
         // LobbySettings.StartGold jest syncowany przez RpcSyncStartGold tuż przed zmianą sceny.
-        // Fallback: SyncVar lobbyStartGold na hoście (playerIndex==1) — zawsze dostępna u obu.
-        bool isMultiplayer = NetworkManager.singleton != null && NetworkManager.singleton.isNetworkActive;
         if (isMultiplayer)
         {
             int gold = LobbySettings.StartGold;
@@ -132,16 +150,6 @@ public class GameplayUIManager : MonoBehaviour
         }
 
         BuildNoMoneyTextIfMissing();
-
-        if (abilitiesPanel != null)
-        {
-            abilitiesPanel.SetActive(false);
-            SetupAbilitiesPanel();
-        }
-
-        if (decreePanel != null)
-            decreePanel.SetActive(false);
-
         RefreshHUD();
         SetupShopButtons();
 
@@ -151,11 +159,20 @@ public class GameplayUIManager : MonoBehaviour
         SyncStartButton();
 
         // W SP generujemy od razu; w MP czekamy na RpcGenerateMapsOnClients z serwera.
-        // NetworkManager.singleton.isNetworkActive jest true na obu stronach zaraz po
-        // aktywacji sieci — niezawodne, bo nie zależy od tego, czy NetworkMatchManager
-        // zdążył się już zaincjalizować na kliencie.
-        if (NetworkManager.singleton == null || !NetworkManager.singleton.isNetworkActive)
-            TowerSpawner.Instance?.GenerateTowers(_currentRound);
+        if (!isMultiplayer)
+            SpawnTowers();
+
+        Debug.Log("[GameplayUIManager] Start END, isMP=" + isMultiplayer);
+    }
+
+    void SpawnTowers()
+    {
+        if (TowerSpawner.Instance == null)
+        {
+            Debug.LogError("[GameplayUIManager] TowerSpawner.Instance jest null — upewnij sie ze obiekt TowerSpawner jest w scenie i TowerPlate maja odpowiedni tag.");
+            return;
+        }
+        TowerSpawner.Instance.GenerateTowers(_currentRound);
     }
 
     void Update()
@@ -334,6 +351,9 @@ public class GameplayUIManager : MonoBehaviour
             return;
         }
 
+        int[] queueIndices = new int[_queue.Count];
+        for (int i = 0; i < _queue.Count; i++) queueIndices[i] = _queue[i].vehicleIndex;
+        DecreeManager.Instance.SetQueueFilter(queueIndices);
         _currentDecrees = DecreeManager.Instance.GetRandomThree();
 
         for (int i = 0; i < 3; i++)
@@ -395,12 +415,79 @@ public class GameplayUIManager : MonoBehaviour
         if (decreePanel != null)
             decreePanel.SetActive(false);
 
-        // W MP serwer zarządza następną rundą — raportujemy wynik zamiast wchodzić w planowanie.
-        // (planning przyjdzie przez RpcPrepareNextRound gdy obaj gracze zgłoszą wyniki)
+        // W MP serwer już przetworzył wyniki rundy (w OnWaveFinishedReceived) i wygenerował mapy.
+        // Lokalne wejście w planowanie wystarczy — timer przygotowawczy już odlicza na serwerze.
         if (NetworkMatchManager.Instance != null)
-            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()?.CmdReportRoundResult(_escapedThisRound);
+            PrepareNextNetworkRound(_pendingMPRound);
         else
             EnterPlanning();
+    }
+
+    // ══ MULTIPLAYER – SYNCHRONIZACJA FAZY DEKRETÓW ════════════════════════
+
+    /// Wywoływane przez RpcStartDecreePhase: pokazuje panel Dekretów u obu graczy w tej samej chwili.
+    /// Szybszy gracz wcześniej widział tylko "Oczekiwanie..." i mógł swobodnie obserwować planszę wroga.
+    public void ShowDecreePhaseMP(int round)
+    {
+        _pendingMPRound = round;
+        HideWaitingOverlay();
+
+        if (decreePanel != null && DecreeManager.Instance != null)
+            ShowDecreePanel();
+        else
+            PrepareNextNetworkRound(round);
+    }
+
+    void ShowWaitingForOpponent()
+    {
+        if (abilitiesPanel != null) abilitiesPanel.SetActive(false);
+
+        BuildWaitingOverlayIfMissing();
+        if (_waitingOverlay != null) _waitingOverlay.SetActive(true);
+    }
+
+    void HideWaitingOverlay()
+    {
+        if (_waitingOverlay != null) _waitingOverlay.SetActive(false);
+    }
+
+    void BuildWaitingOverlayIfMissing()
+    {
+        if (_waitingOverlay != null) return;
+
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (canvas == null) return;
+
+        _waitingOverlay = new GameObject("WaitingOverlay");
+        _waitingOverlay.transform.SetParent(canvas.transform, false);
+
+        var rt             = _waitingOverlay.AddComponent<RectTransform>();
+        rt.anchorMin       = new Vector2(0.5f, 0f);
+        rt.anchorMax       = new Vector2(0.5f, 0f);
+        rt.pivot           = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 80f);
+        rt.sizeDelta       = new Vector2(420f, 48f);
+
+        var bg           = _waitingOverlay.AddComponent<UnityEngine.UI.Image>();
+        bg.color         = new Color(0f, 0f, 0f, 0.55f);
+
+        var textGO = new GameObject("Text");
+        textGO.transform.SetParent(_waitingOverlay.transform, false);
+        var textRT            = textGO.AddComponent<RectTransform>();
+        textRT.anchorMin      = Vector2.zero;
+        textRT.anchorMax      = Vector2.one;
+        textRT.offsetMin      = Vector2.zero;
+        textRT.offsetMax      = Vector2.zero;
+
+        var tmp              = textGO.AddComponent<TextMeshProUGUI>();
+        tmp.text             = "Oczekiwanie na przeciwnika...";
+        tmp.fontSize         = 18f;
+        tmp.fontStyle        = FontStyles.Bold;
+        tmp.color            = new Color(1f, 0.85f, 0.2f);
+        tmp.alignment        = TextAlignmentOptions.Center;
+        tmp.raycastTarget    = false;
+
+        _waitingOverlay.SetActive(false);
     }
 
     // ══ BLOKADA UI PRZY KONCU GRY ══════════════════════════════════════════
@@ -412,6 +499,7 @@ public class GameplayUIManager : MonoBehaviour
         if (decreePanel    != null) decreePanel.SetActive(false);
         if (abilitiesPanel != null) abilitiesPanel.SetActive(false);
         if (queuePanel     != null) queuePanel.SetActive(false);
+        HideWaitingOverlay();
 
         foreach (var s in vehicleSlots)
             if (s?.button != null) s.button.interactable = false;
@@ -645,20 +733,19 @@ public class GameplayUIManager : MonoBehaviour
         if (!_spawningComplete || _activeVehicles != 0) return;
         if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
 
-        // Multiplayer: raportujemy wynik do serwera — serwer decyduje o HP i kolejnej rundzie
-        // Złoto i dekret zawsze przysługują niezależnie od wyniku; jedyną karą jest strata serduszka.
+        // Multiplayer: zgłaszamy koniec fali do serwera i CZEKAMY.
+        // Serwer zbierze wyniki obu graczy, przetworzy HP, i wyśle RpcStartDecreePhase jednocześnie
+        // do obu — dopiero wtedy obaj zobaczą ekran Dekretów w tej samej klatce.
         if (NetworkMatchManager.Instance != null)
         {
             if (config != null)
                 AddGold(config.goldPerWin + config.goldPerRoundMultiplier * _currentRound);
 
             CleanupBattlefield();
+            ShowWaitingForOpponent();
 
-            // Pokaż panel dekretów przed raportem — OnDecreeChosen wyśle CmdReportRoundResult
-            if (decreePanel != null && DecreeManager.Instance != null)
-                ShowDecreePanel();
-            else
-                NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()?.CmdReportRoundResult(_escapedThisRound);
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
+                ?.CmdReportWaveFinished(_escapedThisRound);
             return;
         }
 
@@ -684,6 +771,19 @@ public class GameplayUIManager : MonoBehaviour
         }
 
         ShowDecreePanel();
+    }
+
+    /// Wywoływane przez RpcGenerateMapsOnClients: pokazuje UI planowania dla rundy 1
+    /// bez inkrementowania statystyk (to nie jest jeszcze "przeżyta runda").
+    public void ShowPlanningUIForFirstRound()
+    {
+        _isPlanning = true;
+        if (abilitiesPanel != null) abilitiesPanel.SetActive(false);
+        if (queuePanel     != null) queuePanel.SetActive(true);
+        foreach (var s in vehicleSlots)
+            if (s?.button != null) s.button.interactable = true;
+        RefreshHUD();
+        SyncStartButton();
     }
 
     /// Wywoływane przez RpcPrepareNextRound: regeneruje wieże i wchodzi w planowanie.
@@ -808,14 +908,17 @@ public class GameplayUIManager : MonoBehaviour
             var slot = vehicleSlots[i];
             if (slot == null || i >= config.vehicles.Length) continue;
 
-            slot.nameText.text = config.vehicles[i].vehicleName;
-            slot.costText.text = config.vehicles[i].cost + " Z";
+            if (slot.nameText != null) slot.nameText.text = config.vehicles[i].vehicleName;
+            if (slot.costText != null) slot.costText.text = config.vehicles[i].cost + " Z";
 
             if (config.vehicles[i].icon != null && slot.iconImage != null)
                 slot.iconImage.sprite = config.vehicles[i].icon;
 
-            int captured = i;
-            slot.button.onClick.AddListener(() => OnBuyVehicle(captured));
+            if (slot.button != null)
+            {
+                int captured = i;
+                slot.button.onClick.AddListener(() => OnBuyVehicle(captured));
+            }
         }
     }
 

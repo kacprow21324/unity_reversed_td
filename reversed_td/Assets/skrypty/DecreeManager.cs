@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
 public class DecreeData
@@ -104,13 +105,18 @@ public class DecreeManager : MonoBehaviour
     // ── Pula dekretów ─────────────────────────────────────────────────────
 
     private List<DecreeData> _pool;
+    private HashSet<int> _queueFilter = new HashSet<int>();
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) { Destroy(this); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
         BuildPool();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 
     void BuildPool()
@@ -234,16 +240,51 @@ public class DecreeManager : MonoBehaviour
 
     // ── API publiczne ─────────────────────────────────────────────────────
 
+    /// Ustaw filtr dekretów na podstawie kolejki pojazdów gracza.
+    /// vehicleIndices: indeksy z GameConfig.vehicles (2 = Artyleria).
+    public void SetQueueFilter(int[] vehicleIndices)
+    {
+        _queueFilter.Clear();
+        if (vehicleIndices == null) return;
+        foreach (int idx in vehicleIndices)
+        {
+            // Artyleria (index 2) ma Pancerz = 0 → dekret ID 8 jest bezużyteczny
+            if (idx == 2) _queueFilter.Add(8);
+        }
+    }
+
     public List<DecreeData> GetRandomThree()
     {
-        var list = new List<DecreeData>(_pool);
-        for (int i = list.Count - 1; i > 0; i--)
+        // Pula bez dekretów odfiltrowanych przez kolejkę gracza
+        var list = new List<DecreeData>(_pool.Count);
+        foreach (var d in _pool)
+            if (!_queueFilter.Contains(d.Id)) list.Add(d);
+
+        // Niezależny RNG: w MP każdy klient losuje osobno (różny TickCount + instanceID).
+        // W SP zachowanie identyczne jak wcześniej.
+        bool isMP = NetworkClient.active || NetworkServer.active;
+        if (isMP)
         {
-            int j = UnityEngine.Random.Range(0, i + 1);
-            DecreeData tmp = list[i];
-            list[i] = list[j];
-            list[j] = tmp;
+            var rng = new System.Random(unchecked(Environment.TickCount + GetInstanceID()));
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(0, i + 1);
+                DecreeData tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
+            }
         }
+        else
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = UnityEngine.Random.Range(0, i + 1);
+                DecreeData tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
+            }
+        }
+
         return list.GetRange(0, Mathf.Min(3, list.Count));
     }
 

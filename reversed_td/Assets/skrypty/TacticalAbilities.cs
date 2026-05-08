@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 public class TacticalAbilities : MonoBehaviour
@@ -19,6 +20,12 @@ public class TacticalAbilities : MonoBehaviour
     public float boostRadius    = 12f;
     public float boostDuration  = 10f;
     public float boostFlatBonus = 5.0f;
+
+    [Header("Detekcja Terytorium (Multiplayer)")]
+    [Tooltip("Transform centrum NASZEJ planszy (wież). Jeśli null — używa NetworkMatchManager.spawnerMap1/2.")]
+    public Transform myMapRoot;
+    [Tooltip("Transform centrum planszy WROGA. Jeśli null — używa NetworkMatchManager.spawnerMap1/2.")]
+    public Transform enemyMapRoot;
 
     [Header("Celowanie")]
     public LayerMask groundLayer;
@@ -122,6 +129,33 @@ public class TacticalAbilities : MonoBehaviour
         CancelAbility();
     }
 
+    // ── Wykrywanie mapy ───────────────────────────────────────────────────
+
+    // Zwraca true jeśli pozycja leży na własnej planszy (z wieżami gracza).
+    // Detekcja: myMapRoot/enemyMapRoot (z Inspektora) lub pozycje TowerSpawnerów z NMM.
+    // W SP zawsze zwraca true — oryginalne zachowanie.
+    bool IsOnMyMap(Vector3 worldPos)
+    {
+        var nmm = NetworkMatchManager.Instance;
+        if (nmm == null) return true;
+
+        var localPlayer = NetworkClient.localPlayer?.GetComponent<NetworkPlayer>();
+        if (localPlayer == null) return true;
+
+        // Preferuj explicite podane rooty map; fallback na spawnerów z NetworkMatchManager
+        Transform root1 = myMapRoot    != null ? myMapRoot    : nmm.spawnerMap1?.transform;
+        Transform root2 = enemyMapRoot != null ? enemyMapRoot : nmm.spawnerMap2?.transform;
+
+        if (root1 == null || root2 == null) return true;
+
+        float d1 = Vector3.Distance(worldPos, root1.position);
+        float d2 = Vector3.Distance(worldPos, root2.position);
+        bool onMap1 = d1 <= d2;
+
+        // Gracz 1 → root1 (Map1) jest jego planszą; Gracz 2 → root2 (Map2) jest jego planszą
+        return localPlayer.playerIndex == 1 ? onMap1 : !onMap1;
+    }
+
     // ── Moce z dekretami ──────────────────────────────────────────────────
 
     void UseAirstrike(Vector3 center)
@@ -140,12 +174,33 @@ public class TacticalAbilities : MonoBehaviour
             damage += DecreeManager.Instance.NalotDamageBonus;
         }
 
-        foreach (var col in Physics.OverlapSphere(center, radius))
+        bool onMyMap = IsOnMyMap(center);
+        bool isMP    = NetworkMatchManager.Instance != null;
+
+        if (!isMP)
         {
-            WiezaBaza wieza = col.GetComponent<WiezaBaza>()
-                           ?? col.GetComponentInParent<WiezaBaza>();
-            if (wieza != null && wieza.gameObject.activeInHierarchy)
-                wieza.TakeDamage(damage);
+            // ── SP: lokalny nalot na wieże (oryginalne zachowanie) ────────────
+            foreach (var col in Physics.OverlapSphere(center, radius))
+            {
+                WiezaBaza wieza = col.GetComponent<WiezaBaza>()
+                               ?? col.GetComponentInParent<WiezaBaza>();
+                if (wieza != null && wieza.gameObject.activeInHierarchy)
+                    wieza.TakeDamage(damage);
+            }
+        }
+        else if (onMyMap)
+        {
+            // ── MP + własna plansza: nalot na WIEŻE, zsynchronizowany przez serwer ──
+            // Serwer wyśle ClientRpc do obu klientów → identyczne zniszczenie bez NetworkIdentity.
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
+                ?.CmdApplySpecialPower("airstrike", center, true, radius, damage, 0f);
+        }
+        else
+        {
+            // ── MP + plansza wroga: nalot na POJAZDY, zsynchronizowany przez serwer ──
+            // RPC zabija realne pojazdy u rzucającego + duchy u przeciwnika jednocześnie.
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
+                ?.CmdApplySpecialPower("airstrike_vehicles", center, false, radius, damage, 0f);
         }
 
         GameStatistics.Instance?.RegisterAbility("airstrike");
@@ -167,10 +222,33 @@ public class TacticalAbilities : MonoBehaviour
             duration += DecreeManager.Instance.ShieldDurationBonus;
         }
 
-        foreach (var col in Physics.OverlapSphere(center, radius))
+        bool onMyMap = IsOnMyMap(center);
+        bool isMP    = NetworkMatchManager.Instance != null;
+
+        if (!isMP)
         {
-            pojazd p = col.GetComponent<pojazd>();
-            p?.AktywujTarcze(duration);
+            // ── SP: lokalny efekt na pojazdy (oryginalne zachowanie) ──────────
+            foreach (var col in Physics.OverlapSphere(center, radius))
+            {
+                pojazd p = col.GetComponent<pojazd>();
+                if (p != null && !p.isGhost) p.AktywujTarcze(duration);
+            }
+        }
+        else if (onMyMap)
+        {
+            // ── MP + własna plansza: tarcza dla pojazdów w strefie ───────────
+            // Na własnej mapie są duchy wroga (isGhost=true) — chronimy je wizualnie.
+            foreach (var col in Physics.OverlapSphere(center, radius))
+            {
+                pojazd p = col.GetComponent<pojazd>();
+                if (p != null) p.AktywujTarcze(duration);
+            }
+        }
+        else
+        {
+            // ── MP + plansza wroga: tarcza dla WIEŻ, zsynchronizowana przez serwer ──
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
+                ?.CmdApplySpecialPower("shield_towers", center, false, radius, duration, 0f);
         }
 
         GameStatistics.Instance?.RegisterAbility("shield");
@@ -192,10 +270,32 @@ public class TacticalAbilities : MonoBehaviour
             duration += DecreeManager.Instance.BoostDurationBonus;
         }
 
-        foreach (var col in Physics.OverlapSphere(center, boostRadius))
+        bool onMyMap = IsOnMyMap(center);
+        bool isMP    = NetworkMatchManager.Instance != null;
+
+        if (!isMP)
         {
-            pojazd p = col.GetComponent<pojazd>();
-            p?.DoladujPredkosc(flat, duration);
+            // ── SP: lokalny boost pojazdów (oryginalne zachowanie) ───────────
+            foreach (var col in Physics.OverlapSphere(center, boostRadius))
+            {
+                pojazd p = col.GetComponent<pojazd>();
+                if (p != null && !p.isGhost) p.DoladujPredkosc(flat, duration);
+            }
+        }
+        else if (onMyMap)
+        {
+            // ── MP + własna plansza: boost pojazdów — zsynchronizowany przez serwer ──
+            // RPC przyspiesza realne pojazdy u rzucającego + duchy u przeciwnika jednocześnie.
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
+                ?.CmdApplySpecialPower("boost_vehicles", center, true, boostRadius, flat, duration);
+        }
+        else
+        {
+            // ── MP + plansza wroga: boost WIEŻ (szybkość ataku), zsynchronizowany ──
+            // flat/boostFlatBonus: domyślnie 5/5 = 2x szybkość ataku (mnożnik 2.0)
+            float speedMult = 1f + flat / boostFlatBonus;
+            NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
+                ?.CmdApplySpecialPower("boost_towers", center, false, boostRadius, speedMult, duration);
         }
 
         GameStatistics.Instance?.RegisterAbility("boost");

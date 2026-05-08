@@ -33,6 +33,11 @@ public class NetworkMatchManager : NetworkBehaviour
     private int  _currentRound        = 1;
     private Coroutine _timerCoroutine;
 
+    // Synchronizacja końca fali — zlicza graczy którzy zgłosili zakończenie walki
+    private int _waveFinishedCount = 0;
+    private int _p1WaveEscaped     = -1;
+    private int _p2WaveEscaped     = -1;
+
     private int[]     _p1QueueIndices;
     private int[]     _p2QueueIndices;
     private bool      _earlyStartCounting = false;
@@ -69,6 +74,9 @@ public class NetworkMatchManager : NetworkBehaviour
         _p2QueueIndices     = null;
         _earlyStartCounting = false;
         _ghostsSpawned      = false;
+        _waveFinishedCount  = 0;
+        _p1WaveEscaped      = -1;
+        _p2WaveEscaped      = -1;
         Debug.Log($"[NetworkMatchManager] Seed: {matchSeed}");
     }
 
@@ -159,6 +167,7 @@ public class NetworkMatchManager : NetworkBehaviour
     {
         Debug.Log($"[NetworkMatchManager] RPC: Generuję mapy seedem {seed}.");
         GenerateBothMaps(seed, 1);
+        GameplayUIManager.Instance?.ShowPlanningUIForFirstRound();
     }
 
     void GenerateBothMaps(int seed, int round = 1)
@@ -193,6 +202,46 @@ public class NetworkMatchManager : NetworkBehaviour
 
     // ── Wyniki rundy (zbierane z obu klientów) ────────────────────────────
 
+    /// Nowy przepływ synchronizacji: klient zgłasza koniec fali natychmiast po jej zakończeniu.
+    /// Szybszy gracz czeka (obserwuje) aż serwer odbierze raport od obu — dopiero wtedy obaj
+    /// widzą panel Dekretów w tej samej chwili.
+    [Server]
+    public void OnWaveFinishedReceived(int playerIdx, int escaped)
+    {
+        if      (playerIdx == 1) _p1WaveEscaped = escaped;
+        else if (playerIdx == 2) _p2WaveEscaped = escaped;
+
+        _waveFinishedCount++;
+        if (_waveFinishedCount < 2) return;
+
+        bool p1Failed = _p1WaveEscaped == 0;
+        bool p2Failed = _p2WaveEscaped == 0;
+
+        if (p1Failed) player1HP = Mathf.Max(0, player1HP - 1);
+        if (p2Failed) player2HP = Mathf.Max(0, player2HP - 1);
+
+        _waveFinishedCount = 0;
+        _p1WaveEscaped     = -1;
+        _p2WaveEscaped     = -1;
+
+        bool p1Dead = player1HP <= 0;
+        bool p2Dead = player2HP <= 0;
+
+        if (p1Dead || p2Dead)
+        {
+            int winner = (p1Dead && p2Dead) ? 0 : (p1Dead ? 2 : 1);
+            RpcTriggerEndGame(winner);
+            return;
+        }
+
+        _currentRound++;
+        int nextSeed = matchSeed + _currentRound;
+        ResetForNextRound();
+        RpcStartDecreePhase(nextSeed, _currentRound);
+        StartPreparationTimer(60f);
+    }
+
+    /// Stary handler zachowany dla kompatybilności — nowy przepływ używa OnWaveFinishedReceived.
     [Server]
     public void OnRoundResultReceived(int playerIdx, int escaped)
     {
@@ -217,7 +266,6 @@ public class NetworkMatchManager : NetworkBehaviour
 
         if (p1Dead || p2Dead)
         {
-            // 0 = remis, 1 = wygrywa gracz 1, 2 = wygrywa gracz 2
             int winner = (p1Dead && p2Dead) ? 0 : (p1Dead ? 2 : 1);
             RpcTriggerEndGame(winner);
             return;
@@ -226,6 +274,7 @@ public class NetworkMatchManager : NetworkBehaviour
         _currentRound++;
         int nextSeed = matchSeed + _currentRound;
         ResetForNextRound();
+        RpcCleanupBoard();
         RpcPrepareNextRound(nextSeed, _currentRound);
         StartPreparationTimer(60f);
     }
@@ -245,11 +294,117 @@ public class NetworkMatchManager : NetworkBehaviour
             GameManager.Instance?.TriggerDefeat();
     }
 
+    // ── Czyszczenie planszy ───────────────────────────────────────────────
+
+    void CleanupBoardLocal()
+    {
+        foreach (var p in FindObjectsByType<pojazd>(FindObjectsSortMode.None))
+            if (p != null) Destroy(p.gameObject);
+
+        foreach (var k in FindObjectsByType<Kolec>(FindObjectsSortMode.None))
+            if (k != null) Destroy(k.gameObject);
+
+        foreach (var p in FindObjectsByType<Pocisk>(FindObjectsSortMode.None))
+            if (p != null) Destroy(p.gameObject);
+
+        foreach (var p in FindObjectsByType<PociskArmatni>(FindObjectsSortMode.None))
+            if (p != null) Destroy(p.gameObject);
+    }
+
+    [ClientRpc]
+    public void RpcCleanupBoard()
+    {
+        CleanupBoardLocal();
+        MultiplayerCameraSwitcher.Instance?.ResetCameraToOwnBoard();
+    }
+
+    // ── Synchronizacja efektów Mocy Specjalnych ───────────────────────────
+
+    // Efekty na wieżach są ZSYNCHRONIZOWANE przez ClientRpc — wieże nie mają NetworkIdentity
+    // (generowane lokalnie z seeda), więc NetworkServer.Destroy nie może ich dotknąć.
+    // ClientRpc odpala identyczny kod na obu klientach → identyczny wynik, brak widmowych wież.
+
+    [ClientRpc]
+    public void RpcApplyAirstrikeOnTowers(Vector3 center, float radius, float damage)
+    {
+        foreach (var col in Physics.OverlapSphere(center, radius))
+        {
+            WiezaBaza wieza = col.GetComponent<WiezaBaza>()
+                           ?? col.GetComponentInParent<WiezaBaza>();
+            if (wieza != null && wieza.gameObject.activeInHierarchy)
+                wieza.TakeDamage(damage);
+        }
+    }
+
+    // Nalot na pojazdy: RPC trafia oba klienty.
+    // U rzucającego zabija realne pojazdy (isGhost=false) → game state OK.
+    // U przeciwnika zabija duchy (isGhost=true) → Smierc() pomija OnVehicleRemoved → tylko wizualne.
+    [ClientRpc]
+    public void RpcApplyAirstrikeOnVehicles(Vector3 center, float radius, float damage)
+    {
+        foreach (var col in Physics.OverlapSphere(center, radius))
+        {
+            pojazd p = col.GetComponent<pojazd>();
+            if (p != null && p.gameObject.activeInHierarchy)
+                p.OdejmijHp(damage, przebijaPancerz: true);
+        }
+    }
+
+    [ClientRpc]
+    public void RpcApplyShieldOnTowers(Vector3 center, float radius, float duration)
+    {
+        foreach (var col in Physics.OverlapSphere(center, radius))
+        {
+            WiezaBaza wieza = col.GetComponent<WiezaBaza>()
+                           ?? col.GetComponentInParent<WiezaBaza>();
+            if (wieza != null && wieza.gameObject.activeInHierarchy)
+                wieza.AktywujTarcze(duration);
+        }
+    }
+
+    [ClientRpc]
+    public void RpcApplyBoostOnTowers(Vector3 center, float radius, float speedMult, float duration)
+    {
+        foreach (var col in Physics.OverlapSphere(center, radius))
+        {
+            WiezaBaza wieza = col.GetComponent<WiezaBaza>()
+                           ?? col.GetComponentInParent<WiezaBaza>();
+            if (wieza != null && wieza.gameObject.activeInHierarchy)
+                wieza.BoostAttackSpeed(speedMult, duration);
+        }
+    }
+
+    // Boost pojazdów: RPC trafia oba klienty.
+    // U rzucającego przyspiesza realne pojazdy (isGhost=false) → game state OK.
+    // U przeciwnika przyspiesza duchy (isGhost=true) → tylko wizualne.
+    [ClientRpc]
+    public void RpcApplyBoostOnVehicles(Vector3 center, float radius, float flat, float duration)
+    {
+        foreach (var col in Physics.OverlapSphere(center, radius))
+        {
+            pojazd p = col.GetComponent<pojazd>();
+            if (p != null && p.gameObject.activeInHierarchy)
+                p.DoladujPredkosc(flat, duration);
+        }
+    }
+
     [ClientRpc]
     void RpcPrepareNextRound(int seed, int round)
     {
         GenerateBothMaps(seed, round);
         GameplayUIManager.Instance?.PrepareNextNetworkRound(round);
+    }
+
+    /// Nowy RPC: czyści planszę, resetuje kamerę, generuje mapy nowej rundy,
+    /// a potem u obu klientów jednocześnie pokazuje panel Dekretów.
+    /// Szybszy gracz przestaje czekać i widzi dekrety w tej samej chwili co wolniejszy.
+    [ClientRpc]
+    void RpcStartDecreePhase(int seed, int round)
+    {
+        CleanupBoardLocal();
+        MultiplayerCameraSwitcher.Instance?.ResetCameraToOwnBoard();
+        GenerateBothMaps(seed, round);
+        GameplayUIManager.Instance?.ShowDecreePhaseMP(round);
     }
 
     [Server]
@@ -260,6 +415,9 @@ public class NetworkMatchManager : NetworkBehaviour
         _p2QueueIndices     = null;
         _earlyStartCounting = false;
         _ghostsSpawned      = false;
+        _waveFinishedCount  = 0;
+        _p1WaveEscaped      = -1;
+        _p2WaveEscaped      = -1;
         if (_earlyStartCoroutine != null) { StopCoroutine(_earlyStartCoroutine); _earlyStartCoroutine = null; }
         Debug.Log("[NetworkMatchManager] Reset dla następnej rundy.");
     }

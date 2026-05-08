@@ -20,6 +20,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/mapy/multi/mapy/Teren1_Multiplayer/Teren1_Multiplayer.unity
     guid: 0d323d33ebfb09140bb718389decfc51
+  - enabled: 1
+    path: Assets/mapy/multi/mapy/Teren2_Multiplayer/Teren2_Multiplayer.unity
+    guid: 1556174ef60f8684ab2cc70053348e5f
+  - enabled: 1
+    path: Assets/mapy/multi/mapy/Teren3_Multiplayer/Teren3_Multiplayer.unity
+    guid: a727e1de635850f4eb980f6db65e1855
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   m_UseUCBPForAssetBundles: 0

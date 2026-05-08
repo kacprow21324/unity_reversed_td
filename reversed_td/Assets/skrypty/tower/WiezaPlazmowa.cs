@@ -111,7 +111,7 @@ public class WiezaPlazmowa : WiezaBaza
             _lr.startColor = Color.Lerp(new Color(0.7f, 0f, 1f), new Color(1f, 0.8f, 0f), t);
             _lr.endColor = Color.Lerp(new Color(1f, 0.2f, 0.8f), new Color(1f, 0.3f, 0f), t);
 
-            yield return new WaitForSeconds(tickRate);
+            yield return new WaitForSeconds(tickRate / attackSpeedMultiplier);
         }
 
         _lr.enabled = false;

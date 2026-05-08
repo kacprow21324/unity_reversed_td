@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -7,6 +8,9 @@ public abstract class WiezaBaza : MonoBehaviour
     [Header("Zdrowie Wieży")]
     public float maxHP = 100f;
     public int nagrodaZlota = 50;
+
+    [HideInInspector] public bool  isInvulnerable       = false;
+    [HideInInspector] public float attackSpeedMultiplier = 1f;
 
     protected float currentHP;
     private TextMeshPro _hpText;
@@ -22,7 +26,9 @@ public abstract class WiezaBaza : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        currentHP = maxHP;
+        currentHP             = maxHP;
+        isInvulnerable        = false;
+        attackSpeedMultiplier = 1f;
         UpdateHPDisplay();
     }
 
@@ -34,6 +40,7 @@ public abstract class WiezaBaza : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        if (isInvulnerable) return;
         currentHP = Mathf.Max(currentHP - amount, 0f);
 
         if (_hpText != null)
@@ -56,6 +63,30 @@ public abstract class WiezaBaza : MonoBehaviour
     }
 
     protected virtual void OnZniszcz() { }
+
+    public void AktywujTarcze(float czas)
+    {
+        StartCoroutine(TarczaWiezyKoroutyna(czas));
+    }
+
+    IEnumerator TarczaWiezyKoroutyna(float czas)
+    {
+        isInvulnerable = true;
+        yield return new WaitForSeconds(czas);
+        isInvulnerable = false;
+    }
+
+    public void BoostAttackSpeed(float multiplier, float duration)
+    {
+        StartCoroutine(BoostAttackSpeedKoroutyna(multiplier, duration));
+    }
+
+    IEnumerator BoostAttackSpeedKoroutyna(float multiplier, float duration)
+    {
+        attackSpeedMultiplier *= multiplier;
+        yield return new WaitForSeconds(duration);
+        if (this != null) attackSpeedMultiplier /= multiplier;
+    }
 
     protected void UtworzKragZasiegu(float promien, Color kolor)
     {
