@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3323917054097440974
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2463195251650633888}
+  - component: {fileID: 5367885333876570100}
+  m_Layer: 0
+  m_Name: poczatekTrasy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2463195251650633888
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3323917054097440974}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 145.017, y: 0.523, z: 139.569}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5367885333876570100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3323917054097440974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1f60292573bd2546b66f381face27d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VehicleSpawner
+  spawnPoint: {fileID: 2463195251650633888}
+  vehiclePrefabs:
+  - {fileID: 6496483028081193415, guid: 81aa0e62a8e6a82439b0904d9281c092, type: 3}
+  - {fileID: 6496483028081193415, guid: b9f1d2bd3d048c54a86c76de7a8b39f8, type: 3}
+  - {fileID: 6496483028081193415, guid: 852a89bf2aff78e4baeeccaea984e260, type: 3}
+  - {fileID: 6496483028081193415, guid: 378e96694d53c804bb3fac8a08fd82c9, type: 3}
+  - {fileID: 6496483028081193415, guid: aabd969f5f0f1314d82c5c60d12a5fbb, type: 3}
