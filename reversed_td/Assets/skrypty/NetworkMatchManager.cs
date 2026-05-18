@@ -202,9 +202,15 @@ public class NetworkMatchManager : NetworkBehaviour
 
     // ── Wyniki rundy (zbierane z obu klientów) ────────────────────────────
 
+    [TargetRpc]
+    void RpcShowWaitingOverlay(NetworkConnection target)
+    {
+        GameplayUIManager.Instance?.ShowWaitingForOpponent();
+    }
+
     /// Nowy przepływ synchronizacji: klient zgłasza koniec fali natychmiast po jej zakończeniu.
-    /// Szybszy gracz czeka (obserwuje) aż serwer odbierze raport od obu — dopiero wtedy obaj
-    /// widzą panel Dekretów w tej samej chwili.
+    /// Serwer decyduje, który gracz naprawdę czeka, i wysyła mu overlay przez TargetRpc.
+    /// Dopiero gdy obaj zgłoszą koniec, serwer wysyła RpcStartDecreePhase do obu.
     [Server]
     public void OnWaveFinishedReceived(int playerIdx, int escaped)
     {
@@ -212,7 +218,20 @@ public class NetworkMatchManager : NetworkBehaviour
         else if (playerIdx == 2) _p2WaveEscaped = escaped;
 
         _waveFinishedCount++;
-        if (_waveFinishedCount < 2) return;
+        if (_waveFinishedCount < 2)
+        {
+            // Tylko ten gracz skończył – pokaż mu overlay "Oczekiwanie".
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+            foreach (var p in players)
+            {
+                if (p.playerIndex == playerIdx && p.connectionToClient != null)
+                {
+                    RpcShowWaitingOverlay(p.connectionToClient);
+                    break;
+                }
+            }
+            return;
+        }
 
         bool p1Failed = _p1WaveEscaped == 0;
         bool p2Failed = _p2WaveEscaped == 0;
@@ -463,10 +482,10 @@ public class NetworkMatchManager : NetworkBehaviour
         if (localPlayer == null) return;
         if (ownerPlayerIdx == localPlayer.playerIndex) return; // własne pojazdy – już zspawnowane lokalnie
 
-        // Duchy wroga pojawiają się na WŁASNEJ mapie lokalnego gracza (tam gdzie jego wieże).
-        // Gracz 1 → vehicleSpawnerMap1 / finishLine1, Gracz 2 → vehicleSpawnerMap2 / finishLine2.
-        VehicleSpawner ghostSpawner = localPlayer.playerIndex == 1 ? vehicleSpawnerMap1 : vehicleSpawnerMap2;
-        FinishLine     ghostFinish  = localPlayer.playerIndex == 1 ? finishLine1        : finishLine2;
+        // Duchy pojawiają się na mapie WŁAŚCICIELA pojazdów (tam gdzie jego własne prawdziwe pojazdy).
+        // ownerPlayerIdx 1 → vehicleSpawnerMap1 / finishLine1, 2 → vehicleSpawnerMap2 / finishLine2.
+        VehicleSpawner ghostSpawner = ownerPlayerIdx == 1 ? vehicleSpawnerMap1 : vehicleSpawnerMap2;
+        FinishLine     ghostFinish  = ownerPlayerIdx == 1 ? finishLine1        : finishLine2;
 
         if (ghostSpawner != null && ghostFinish != null)
             ghostSpawner.StartSpawningGhosts(vehicleIndices, ghostFinish);

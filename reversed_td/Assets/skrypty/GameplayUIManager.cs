@@ -86,6 +86,7 @@ public class GameplayUIManager : MonoBehaviour
     private bool _spawningComplete = false;
     private int  _activeVehicles   = 0;
     private int  _escapedThisRound = 0;
+    private bool _waveReported     = false;
 
     private readonly List<QueueEntry> _queue          = new List<QueueEntry>();
     private readonly List<GameObject> _queueItems     = new List<GameObject>();
@@ -280,6 +281,7 @@ public class GameplayUIManager : MonoBehaviour
         _spawningComplete = false;
         _activeVehicles   = 0;
         _escapedThisRound = 0;
+        _waveReported     = false;
 
         Time.timeScale = 1f;
 
@@ -303,8 +305,8 @@ public class GameplayUIManager : MonoBehaviour
             if (lp != null)
             {
                 bool isP1 = lp.playerIndex == 1;
-                spawner   = isP1 ? nmm.vehicleSpawnerMap2 : nmm.vehicleSpawnerMap1;
-                finishCel = isP1 ? nmm.finishLine2        : nmm.finishLine1;
+                spawner   = isP1 ? nmm.vehicleSpawnerMap1 : nmm.vehicleSpawnerMap2;
+                finishCel = isP1 ? nmm.finishLine1        : nmm.finishLine2;
             }
         }
         spawner.StartSpawning(new List<QueueEntry>(_queue), finishCel);
@@ -438,7 +440,7 @@ public class GameplayUIManager : MonoBehaviour
             PrepareNextNetworkRound(round);
     }
 
-    void ShowWaitingForOpponent()
+    public void ShowWaitingForOpponent()
     {
         if (abilitiesPanel != null) abilitiesPanel.SetActive(false);
 
@@ -734,15 +736,17 @@ public class GameplayUIManager : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
 
         // Multiplayer: zgłaszamy koniec fali do serwera i CZEKAMY.
-        // Serwer zbierze wyniki obu graczy, przetworzy HP, i wyśle RpcStartDecreePhase jednocześnie
-        // do obu — dopiero wtedy obaj zobaczą ekran Dekretów w tej samej klatce.
+        // Serwer zdecyduje, który gracz faktycznie czeka, i wyśle mu TargetRpc z overlayem.
+        // Dopiero gdy obaj zgłoszą koniec, serwer wyśle RpcStartDecreePhase do obu.
         if (NetworkMatchManager.Instance != null)
         {
+            if (_waveReported) return;
+            _waveReported = true;
+
             if (config != null)
                 AddGold(config.goldPerWin + config.goldPerRoundMultiplier * _currentRound);
 
             CleanupBattlefield();
-            ShowWaitingForOpponent();
 
             NetworkClient.localPlayer?.GetComponent<NetworkPlayer>()
                 ?.CmdReportWaveFinished(_escapedThisRound);
@@ -793,6 +797,7 @@ public class GameplayUIManager : MonoBehaviour
         _spawningComplete = false;
         _activeVehicles   = 0;
         _escapedThisRound = 0;
+        _waveReported     = false;
         _currentRound     = round;
 
         if (GameStatistics.Instance != null)
