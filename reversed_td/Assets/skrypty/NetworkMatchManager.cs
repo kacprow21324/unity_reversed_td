@@ -202,6 +202,14 @@ public class NetworkMatchManager : NetworkBehaviour
 
     // ── Wyniki rundy (zbierane z obu klientów) ────────────────────────────
 
+    /// Gracz o podanym indeksie poddaje się — drugi wygrywa natychmiast.
+    [Server]
+    public void HandleForfeit(int forfeitingPlayerIndex)
+    {
+        int winner = forfeitingPlayerIndex == 1 ? 2 : 1;
+        RpcTriggerEndGame(winner);
+    }
+
     [TargetRpc]
     void RpcShowWaitingOverlay(NetworkConnection target)
     {

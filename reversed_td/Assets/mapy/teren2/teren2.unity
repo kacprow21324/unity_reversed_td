@@ -1885,35 +1885,35 @@ PrefabInstance:
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: defeatPanel
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396888}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: victoryPanel
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396884}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: defeatStatsText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396887}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: defeatMenuButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396886}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: victoryStatsText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396883}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: victoryMenuButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396882}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: defeatRestartButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396885}
     - target: {fileID: 4807081088420385150, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: victoryRestartButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1544396881}
     - target: {fileID: 8514591693647516046, guid: e5d081638d9fcaa409a2388f9f26541f, type: 3}
       propertyPath: m_Name
       value: gamemenager
@@ -2236,6 +2236,82 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+--- !u!114 &1544396881 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5115452149514791990, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &1544396882 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2008079492589690237, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &1544396883 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1438050734110994422, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1 &1544396884 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1970062082724831182, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1544396885 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6472449656005493116, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &1544396886 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8963083474245506733, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &1544396887 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7919028655723877801, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1 &1544396888 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6038270716735443733, guid: f6677c25fcb04be43a4b8ecb47158bda, type: 3}
+  m_PrefabInstance: {fileID: 1544396880}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1672319496
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2293,6 +2369,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+--- !u!1001 &1704290914
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 24.02107
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 24.02104
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 222880065073439755, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8874979437861276011, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
+      propertyPath: m_Name
+      value: esc
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 51a088e8e5fb94141818b0a8e60c68d1, type: 3}
 --- !u!1 &1745488451
 GameObject:
   m_ObjectHideFlags: 0
@@ -3219,6 +3352,7 @@ SceneRoots:
   - {fileID: 1745488454}
   - {fileID: 360907792}
   - {fileID: 1811718685}
+  - {fileID: 1704290914}
   - {fileID: 107796485}
   - {fileID: 939990343}
   - {fileID: 1953874639}

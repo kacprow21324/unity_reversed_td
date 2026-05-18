@@ -279,6 +279,10 @@ public class LobbyPanelUI : MonoBehaviour
         // Tekst statusu
         if (statusText == null)
             statusText = BuildStatusText();
+
+        // Przycisk wyjścia do menu głównego
+        if (transform.Find("ExitLobbyButton") == null)
+            BuildExitButton();
     }
 
     void EnsureRows(int count)
@@ -578,6 +582,44 @@ public class LobbyPanelUI : MonoBehaviour
 
         labelTxt = txt;
         return btn;
+    }
+
+    void BuildExitButton()
+    {
+        var go = new GameObject("ExitLobbyButton");
+        go.transform.SetParent(transform, false);
+
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.04f, 0.91f);
+        rt.anchorMax = new Vector2(0.32f, 0.98f);
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+        var img = go.AddComponent<Image>();
+        img.color = new Color(0.28f, 0.10f, 0.10f);
+
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        var cols = btn.colors;
+        cols.normalColor      = new Color(0.28f, 0.10f, 0.10f);
+        cols.highlightedColor = new Color(0.40f, 0.14f, 0.14f);
+        cols.pressedColor     = new Color(0.18f, 0.07f, 0.07f);
+        btn.colors = cols;
+        btn.onClick.AddListener(OnExitLobbyClicked);
+
+        var textGO = new GameObject("Text");
+        textGO.transform.SetParent(go.transform, false);
+        StretchChild(textGO, Vector2.zero, Vector2.zero);
+        var txt = textGO.AddComponent<TextMeshProUGUI>();
+        txt.text = "Wyjdź do menu";
+        txt.fontSize = 13f;
+        txt.fontStyle = FontStyles.Bold;
+        txt.color = Color.white;
+        txt.alignment = TextAlignmentOptions.Center;
+    }
+
+    void OnExitLobbyClicked()
+    {
+        FindFirstObjectByType<MultiplayerLobbyUI>()?.Disconnect();
     }
 
     TextMeshProUGUI BuildStatusText()

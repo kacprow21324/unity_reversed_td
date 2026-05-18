@@ -133,6 +133,13 @@ public class NetworkPlayer : NetworkBehaviour
         NetworkMatchManager.Instance?.OnWaveFinishedReceived(playerIndex, escaped);
     }
 
+    /// Gracz poddaje się — serwer natychmiast przyznaje zwycięstwo drugiemu.
+    [Command]
+    public void CmdForfeit()
+    {
+        NetworkMatchManager.Instance?.HandleForfeit(playerIndex);
+    }
+
     /// Stara komenda — zachowana dla kompatybilności.
     [Command]
     public void CmdReportRoundResult(int escaped)

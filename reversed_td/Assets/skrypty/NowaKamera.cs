@@ -116,7 +116,8 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void Start()
     {
-        _cam       = GetComponent<Camera>();
+        InputBindings.Load();
+        _cam        = GetComponent<Camera>();
         _defaultFOV = _cam.fieldOfView;
 
         _targetZoom       = startZoomDistance;
@@ -182,6 +183,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void LateUpdate()
     {
+        if (EscMenuManager.IsAnyMenuOpen) return;
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
         HandleModeSwitch();
@@ -204,7 +206,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleModeSwitch()
     {
-        if (Input.GetKeyDown(KeyCode.Q) && mode == CameraMode.Orbit)
+        if (Input.GetKeyDown(InputBindings.Get("CamFreeFly")) && mode == CameraMode.Orbit)
         {
             mode = CameraMode.FreeFly;
             _returningToOrbit = false;
@@ -215,7 +217,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
             _flyPitch = euler.x > 180f ? euler.x - 360f : euler.x;
         }
 
-        if (Input.GetKeyDown(KeyCode.E) && mode == CameraMode.FreeFly)
+        if (Input.GetKeyDown(InputBindings.Get("CamOrbit")) && mode == CameraMode.FreeFly)
         {
             mode = CameraMode.Orbit;
             _returningToOrbit = true;
@@ -242,12 +244,12 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleOrbitRotation()
     {
-        if (!Input.GetMouseButton(1)) return;
+        if (!InputBindings.GetMouseHeld("CamRotate")) return;
 
         float mouseX  = Input.GetAxis("Mouse X");
         float mouseY  = Input.GetAxis("Mouse Y");
-        float mult    = GetSpeedMultiplier();
-        float dt      = Time.unscaledDeltaTime;
+        float mult = GetSpeedMultiplier();
+        float dt   = Time.unscaledDeltaTime;
 
         _targetRotationY += mouseX * rotationSpeed * mult * dt;
 
@@ -266,12 +268,12 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleOrbit()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(InputBindings.Get("CamReset")))
         {
             _targetZoom = startZoomDistance;
             _targetTilt = startTiltAngle;
         }
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(InputBindings.Get("CamTiltReset")))
             _targetTilt = startTiltAngle;
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
@@ -300,7 +302,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleFreeFlyLook()
     {
-        if (!Input.GetMouseButton(1)) return;
+        if (!InputBindings.GetMouseHeld("CamRotate")) return;
 
         _flyYaw   += Input.GetAxis("Mouse X") * lookSensitivity;
         _flyPitch -= Input.GetAxis("Mouse Y") * lookSensitivity;
@@ -313,8 +315,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleFreeFly()
     {
-        float mult  = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                      ? freeFlyTurboMultiplier : 1f;
+        float mult = Input.GetKey(InputBindings.Get("CamTurbo")) ? freeFlyTurboMultiplier : 1f;
         float speed = freeFlySpeed * mult * Time.unscaledDeltaTime;
 
         // Ruch w płaszczyźnie XZ względem orientacji kamery (bez zmiany Y)
@@ -322,10 +323,10 @@ public class AIEnhancedRTSCamera : MonoBehaviour
         Vector3 right   = transform.right;   right.y   = 0f; right.Normalize();
 
         Vector3 move = Vector3.zero;
-        if (Input.GetKey(KeyCode.W)) move += forward;
-        if (Input.GetKey(KeyCode.S)) move -= forward;
-        if (Input.GetKey(KeyCode.D)) move += right;
-        if (Input.GetKey(KeyCode.A)) move -= right;
+        if (Input.GetKey(InputBindings.Get("CamForward")))  move += forward;
+        if (Input.GetKey(InputBindings.Get("CamBackward"))) move -= forward;
+        if (Input.GetKey(InputBindings.Get("CamRight")))    move += right;
+        if (Input.GetKey(InputBindings.Get("CamLeft")))     move -= right;
 
         transform.position += move * speed;
 
@@ -359,7 +360,7 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     void HandleOptifineZoom()
     {
-        float target = Input.GetKey(KeyCode.C) ? zoomedFOV : _defaultFOV;
+        float target = Input.GetKey(InputBindings.Get("CamZoom")) ? zoomedFOV : _defaultFOV;
         _cam.fieldOfView = Mathf.Lerp(_cam.fieldOfView, target, Time.unscaledDeltaTime * fovSmoothing);
     }
 
@@ -369,8 +370,8 @@ public class AIEnhancedRTSCamera : MonoBehaviour
 
     float GetSpeedMultiplier()
     {
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) return turboMultiplier;
-        if (Input.GetKey(KeyCode.LeftAlt)   || Input.GetKey(KeyCode.RightAlt))   return slowMultiplier;
+        if (Input.GetKey(InputBindings.Get("CamTurbo"))) return turboMultiplier;
+        if (Input.GetKey(InputBindings.Get("CamSlow")))  return slowMultiplier;
         return 1f;
     }
 

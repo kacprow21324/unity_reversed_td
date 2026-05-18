@@ -66,7 +66,7 @@ public class MultiplayerCameraSwitcher : MonoBehaviour
     void Update()
     {
         if (_myCam == null || _enemyCam == null) return;
-        if (!Input.GetKeyDown(KeyCode.Tab)) return;
+        if (!Input.GetKeyDown(InputBindings.Get("CamSwitch"))) return;
 
         bool showingMine = _myCam.enabled;
         SetCameraActive(_myCam,    _myListener,    !showingMine);
