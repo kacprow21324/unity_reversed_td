@@ -1067,6 +1067,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 062dd0d7a2d730140985724518d7b2fc, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1279,6 +1283,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (10)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 062dd0d7a2d730140985724518d7b2fc, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1734,6 +1742,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (11)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1978,6 +1990,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4089,7 +4105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000010737657962, guid: aca4c3cf28c5f5a428fb19299881807f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 65.23
+      value: 64.592
       objectReference: {fileID: 0}
     - target: {fileID: 4000010737657962, guid: aca4c3cf28c5f5a428fb19299881807f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4269,6 +4285,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4406,6 +4426,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4505,6 +4529,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5194,6 +5222,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5332,7 +5364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000010230679374, guid: fee6e1da33beae9409089ab8a832464f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 63.94
+      value: 63.334
       objectReference: {fileID: 0}
     - target: {fileID: 4000010230679374, guid: fee6e1da33beae9409089ab8a832464f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -8347,6 +8379,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (12)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8718,6 +8754,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (13)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9700,6 +9740,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10509,7 +10553,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000010737657962, guid: aca4c3cf28c5f5a428fb19299881807f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 65.21
+      value: 64.67
       objectReference: {fileID: 0}
     - target: {fileID: 4000010737657962, guid: aca4c3cf28c5f5a428fb19299881807f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -10689,6 +10733,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11891,6 +11939,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (9)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 82a401d59b7ebce4ba58a254bbf3d760, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -12079,7 +12131,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000014133883218, guid: 60cf315f432990a41b67cef3d41a92f4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 69.25
+      value: 69
       objectReference: {fileID: 0}
     - target: {fileID: 4000014133883218, guid: 60cf315f432990a41b67cef3d41a92f4, type: 3}
       propertyPath: m_LocalRotation.w
