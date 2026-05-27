@@ -26,11 +26,8 @@ public class NetworkMatchManager : NetworkBehaviour
 
     // ── Flagi serwera ─────────────────────────────────────────────────────
 
-    private bool _isMapGenerated     = false;
-    private int  _p1EscapedThisRound = -1;
-    private int  _p2EscapedThisRound = -1;
-    private int  _pendingRoundResults = 0;
-    private int  _currentRound        = 1;
+    private bool _isMapGenerated = false;
+    private int  _currentRound   = 1;
     private Coroutine _timerCoroutine;
 
     // Synchronizacja końca fali — zlicza graczy którzy zgłosili zakończenie walki
@@ -268,44 +265,6 @@ public class NetworkMatchManager : NetworkBehaviour
         StartPreparationTimer(60f);
     }
 
-    /// Stary handler zachowany dla kompatybilności — nowy przepływ używa OnWaveFinishedReceived.
-    [Server]
-    public void OnRoundResultReceived(int playerIdx, int escaped)
-    {
-        if      (playerIdx == 1) _p1EscapedThisRound = escaped;
-        else if (playerIdx == 2) _p2EscapedThisRound = escaped;
-
-        _pendingRoundResults++;
-        if (_pendingRoundResults < 2) return;
-
-        bool p1Failed = _p1EscapedThisRound == 0;
-        bool p2Failed = _p2EscapedThisRound == 0;
-
-        if (p1Failed) player1HP = Mathf.Max(0, player1HP - 1);
-        if (p2Failed) player2HP = Mathf.Max(0, player2HP - 1);
-
-        _pendingRoundResults  = 0;
-        _p1EscapedThisRound   = -1;
-        _p2EscapedThisRound   = -1;
-
-        bool p1Dead = player1HP <= 0;
-        bool p2Dead = player2HP <= 0;
-
-        if (p1Dead || p2Dead)
-        {
-            int winner = (p1Dead && p2Dead) ? 0 : (p1Dead ? 2 : 1);
-            RpcTriggerEndGame(winner);
-            return;
-        }
-
-        _currentRound++;
-        int nextSeed = matchSeed + _currentRound;
-        ResetForNextRound();
-        RpcCleanupBoard();
-        RpcPrepareNextRound(nextSeed, _currentRound);
-        StartPreparationTimer(60f);
-    }
-
     [ClientRpc]
     void RpcTriggerEndGame(int winnerPlayerIndex)
     {
@@ -336,13 +295,6 @@ public class NetworkMatchManager : NetworkBehaviour
 
         foreach (var p in FindObjectsByType<PociskArmatni>(FindObjectsSortMode.None))
             if (p != null) Destroy(p.gameObject);
-    }
-
-    [ClientRpc]
-    public void RpcCleanupBoard()
-    {
-        CleanupBoardLocal();
-        MultiplayerCameraSwitcher.Instance?.ResetCameraToOwnBoard();
     }
 
     // ── Synchronizacja efektów Mocy Specjalnych ───────────────────────────
@@ -413,13 +365,6 @@ public class NetworkMatchManager : NetworkBehaviour
             if (p != null && p.gameObject.activeInHierarchy)
                 p.DoladujPredkosc(flat, duration);
         }
-    }
-
-    [ClientRpc]
-    void RpcPrepareNextRound(int seed, int round)
-    {
-        GenerateBothMaps(seed, round);
-        GameplayUIManager.Instance?.PrepareNextNetworkRound(round);
     }
 
     /// Nowy RPC: czyści planszę, resetuje kamerę, generuje mapy nowej rundy,

@@ -3,7 +3,13 @@
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Kacper\\\\Desktop\\\\unity_reversed_td\" -Filter *.cs -Recurse -File)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "Bash(Remove-Item \"C:\\\\Repozytoria\\\\unity_reversed_td\\\\reversed_td\\\\Assets\\\\skrypty\\\\Ruch.cs\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Repozytoria\\\\unity_reversed_td\\\\reversed_td\\\\Assets\\\\skrypty\\\\Ruch.cs.meta\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item \"C:\\\\Repozytoria\\\\unity_reversed_td\\\\reversed_td\\\\Assets\\\\skrypty\\\\FreeFlyCamera.cs\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Repozytoria\\\\unity_reversed_td\\\\reversed_td\\\\Assets\\\\skrypty\\\\FreeFlyCamera.cs.meta\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(Write-Host \"Usunieto Ruch.cs i FreeFlyCamera.cs\")",
+      "PowerShell(New-Item *)"
     ]
   }
 }

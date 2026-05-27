@@ -6,11 +6,6 @@ public class PojazdLustro : pojazd
 {
     protected override void Start()
     {
-        if (DecreeManager.Instance != null)
-        {
-            maxHp   = DecreeManager.Instance.FinalHP("Lustro", maxHp);
-            pancerz = DecreeManager.Instance.FinalArmor("Lustro", pancerz);
-        }
         base.Start();
         if (DecreeManager.Instance != null)
             _agent.speed = DecreeManager.Instance.FinalSpeed("Lustro", _agent.speed);

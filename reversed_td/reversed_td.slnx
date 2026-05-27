@@ -11,7 +11,7 @@
   <Project Path="kcp2k.csproj" />
   <Project Path="Telepathy.csproj" />
   <Project Path="SimpleWebTransport.csproj" />
-  <Project Path="Mirror.Authenticators.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Mirror.Authenticators.csproj" />
   <Project Path="EncryptionTransportEditor.csproj" />
 </Solution>

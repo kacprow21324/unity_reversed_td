@@ -64,6 +64,12 @@ public class MultiplayerLobbyUI : MonoBehaviour
         // z pominięciem całego lobby — dlatego czyścimy ją przed startem.
         NetworkManager.singleton.onlineScene = string.Empty;
 
+        // Zabezpieczenie: rozłącz stare połączenie (np. powrót z poprzedniej gry MP)
+        if (NetworkServer.active)
+            NetworkManager.singleton.StopHost();
+        else if (NetworkClient.active)
+            NetworkManager.singleton.StopClient();
+
         NetworkManager.singleton.StartHost();
         ShowWaitingPanel();
         SetStatus("Hosting... czekam na gracza.");
@@ -82,6 +88,12 @@ public class MultiplayerLobbyUI : MonoBehaviour
         // Analogicznie jak HostGame — blokujemy auto-scenę.
         NetworkManager.singleton.onlineScene = string.Empty;
 
+        // Zabezpieczenie: rozłącz stare połączenie (np. powrót z poprzedniej gry MP)
+        if (NetworkServer.active)
+            NetworkManager.singleton.StopHost();
+        else if (NetworkClient.active)
+            NetworkManager.singleton.StopClient();
+
         string ip = string.IsNullOrWhiteSpace(ipAddress) ? "localhost" : ipAddress.Trim();
         NetworkManager.singleton.networkAddress = ip;
         NetworkManager.singleton.StartClient();
@@ -97,9 +109,9 @@ public class MultiplayerLobbyUI : MonoBehaviour
 
     public void Disconnect()
     {
-        if (NetworkServer.active && NetworkClient.isConnected)
+        if (NetworkServer.active)
             NetworkManager.singleton.StopHost();
-        else if (NetworkClient.isConnected)
+        else if (NetworkClient.active)
             NetworkManager.singleton.StopClient();
 
         _lobbyShown = false;

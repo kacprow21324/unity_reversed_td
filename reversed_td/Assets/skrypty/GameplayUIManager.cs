@@ -790,7 +790,7 @@ public class GameplayUIManager : MonoBehaviour
         SyncStartButton();
     }
 
-    /// Wywoływane przez RpcPrepareNextRound: regeneruje wieże i wchodzi w planowanie.
+    /// Wywoływane po fazie Dekretów w MP: resetuje stan rundy i wchodzi w planowanie.
     public void PrepareNextNetworkRound(int round)
     {
         _isPlanning       = true;

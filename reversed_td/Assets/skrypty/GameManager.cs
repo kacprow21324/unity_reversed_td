@@ -124,6 +124,12 @@ public class GameManager : MonoBehaviour
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
         if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
         Destroy(gameObject);
+
+        if (NetworkServer.active)
+            NetworkManager.singleton.StopHost();
+        else if (NetworkClient.active)
+            NetworkManager.singleton.StopClient();
+
         SceneManager.LoadScene(0, LoadSceneMode.Single);
     }
 
@@ -148,9 +154,9 @@ public class GameManager : MonoBehaviour
         if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
         Destroy(gameObject);
 
-        if (NetworkServer.active && NetworkClient.isConnected)
+        if (NetworkServer.active)
             NetworkManager.singleton.StopHost();
-        else if (NetworkClient.isConnected)
+        else if (NetworkClient.active)
             NetworkManager.singleton.StopClient();
 
         SceneManager.LoadScene(0, LoadSceneMode.Single);

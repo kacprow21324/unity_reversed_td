@@ -38,20 +38,34 @@ public class WiezaKolcowa : WiezaBaza
 
     void RozstawKolce()
     {
+        // Seed deterministyczny z lokalnej pozycji TowerPlate (rodzica wieży).
+        // Pozycja lokalna jest identyczna na obu klientach MP niezależnie od offsetu mapRoot,
+        // dlatego układ kolców jest zawsze taki sam na obu mapach przy tym samym seedzie.
+        // Używamy System.Random zamiast Unity.Random, żeby nie zaburzać globalnego stanu RNG
+        // i uniezależnić się od kolejności wywołań Start().
+        Vector3 lp = transform.parent != null
+            ? transform.parent.localPosition
+            : transform.localPosition;
+        int sx = Mathf.RoundToInt(lp.x * 137f);
+        int sz = Mathf.RoundToInt(lp.z * 173f);
+        var rng = new System.Random(sx * 100003 + sz);
+
         int rozmieszczono = 0;
-        int maxProb = iloscKolcow * 40; 
+        int maxProb = iloscKolcow * 40;
 
         for (int proba = 0; proba < maxProb && rozmieszczono < iloscKolcow; proba++)
         {
-            Vector2 offset2D = Random.insideUnitCircle * promienRozmieszczenia;
-         
+            double angle    = rng.NextDouble() * System.Math.PI * 2.0;
+            double r        = System.Math.Sqrt(rng.NextDouble()) * promienRozmieszczenia;
+            var    offset2D = new Vector2((float)(System.Math.Cos(angle) * r), (float)(System.Math.Sin(angle) * r));
+
             Vector3 kandydat = new Vector3(transform.position.x + offset2D.x, 0f, transform.position.z + offset2D.y);
 
             NavMeshHit hit;
             if (!NavMesh.SamplePosition(kandydat, out hit, 20f, NavMesh.AllAreas)) continue;
             Vector2 pozycjaWiezy2D = new Vector2(transform.position.x, transform.position.z);
-            Vector2 pozycjaHita2D = new Vector2(hit.position.x, hit.position.z);
-            
+            Vector2 pozycjaHita2D  = new Vector2(hit.position.x, hit.position.z);
+
             if (Vector2.Distance(pozycjaWiezy2D, pozycjaHita2D) > promienRozmieszczenia + 1f) continue;
 
             _kolce.Add(UtworzKolec(hit.position + Vector3.up * 0.4f));

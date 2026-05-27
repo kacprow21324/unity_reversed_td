@@ -1015,19 +1015,6 @@ public class SettingsManager : MonoBehaviour
         lTMP.alignment = TextAlignmentOptions.MidlineLeft;
     }
 
-    static void AddInfoLabel(Transform parent, string text)
-    {
-        var go = new GameObject("Info");
-        go.transform.SetParent(parent, false);
-        var le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = 28f;
-        var tmp = go.AddComponent<TextMeshProUGUI>();
-        tmp.text = "ⓘ  " + text;
-        tmp.fontSize = 12f;
-        tmp.color = new Color(0.55f, 0.55f, 0.60f);
-        tmp.alignment = TextAlignmentOptions.MidlineLeft;
-    }
-
     // ── Nakładka jasności (DontDestroyOnLoad) ─────────────────────────────
 
     void BuildBrightnessOverlay()

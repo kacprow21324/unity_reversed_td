@@ -14,10 +14,10 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 0
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_Fog: 1
+  m_FogColor: {r: 0.72, g: 0.72, b: 0.72, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.01
+  m_FogDensity: 0.004
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: f2b5f3f20933f434e850db1b710542fd, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -171,6 +171,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (18)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -233,6 +237,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (15)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -295,6 +303,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (11)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -357,6 +369,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (12)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -468,6 +484,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (11)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -623,6 +643,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -685,6 +709,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -747,6 +775,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (13)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -814,6 +846,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2006,8 +2042,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Color: {r: 0.88, g: 0.88, b: 0.85, a: 1}
+  m_Intensity: 0.75
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -2069,7 +2105,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 360907790}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.16172902, y: 0.8373192, z: -0.34682903, w: 0.39044833}
   m_LocalPosition: {x: -185, y: 29.11, z: 50.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2156,7 +2192,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2240,6 +2276,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2349,6 +2389,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2444,6 +2488,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2534,7 +2582,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2682,6 +2730,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2772,7 +2824,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2982,6 +3034,7 @@ Transform:
   - {fileID: 1766708869}
   - {fileID: 1672319497}
   - {fileID: 1118255495}
+  - {fileID: 1659746912}
   - {fileID: 1358552535}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3208,6 +3261,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3347,6 +3404,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (17)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3522,6 +3583,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3584,6 +3649,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3844,6 +3913,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (16)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3906,6 +3979,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3968,6 +4045,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4107,6 +4188,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (17)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4202,6 +4287,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4264,6 +4353,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (13)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4385,7 +4478,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4469,6 +4562,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4531,6 +4628,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4593,6 +4694,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (18)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4748,6 +4853,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (10)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5000,6 +5109,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5009,6 +5122,68 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2495230186114692374, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
   m_PrefabInstance: {fileID: 1526884891}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1659746911
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 686067364}
+    m_Modifications:
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -55.009995
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.19335788
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -23.36
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6926126738570053734, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_Name
+      value: dekoracje
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+--- !u!4 &1659746912 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+  m_PrefabInstance: {fileID: 1659746911}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1672319496
 PrefabInstance:
@@ -5062,6 +5237,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (16)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5181,6 +5360,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5271,7 +5454,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5516,7 +5699,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5600,6 +5783,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (15)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5700,6 +5887,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5762,6 +5953,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (9)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5852,7 +6047,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5936,6 +6131,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (14)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5998,6 +6197,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (10)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6206,6 +6409,7 @@ Transform:
   - {fileID: 1007700429}
   - {fileID: 862118386}
   - {fileID: 20833237}
+  - {fileID: 1980692142}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1953874639
@@ -6317,6 +6521,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (12)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6326,6 +6534,68 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2495230186114692374, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
   m_PrefabInstance: {fileID: 1973080848}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1980692141
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1924754415}
+    m_Modifications:
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -55.009995
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.19335788
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -23.619995
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6926126738570053734, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+      propertyPath: m_Name
+      value: dekoracje (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+--- !u!4 &1980692142 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2892706090766196628, guid: 3ea2f561e581b554d830e3ffd696d1d8, type: 3}
+  m_PrefabInstance: {fileID: 1980692141}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1985064396
 PrefabInstance:
@@ -6444,6 +6714,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (14)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6534,7 +6808,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 097586868c1d614459e784ce767458fd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6796,6 +7070,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wkladka (9)
       objectReference: {fileID: 0}
+    - target: {fileID: 8436974080583120520, guid: bb72951d04c50584d88a227a3e09b45d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 392107797f05caf47a756487b1f2ff58, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

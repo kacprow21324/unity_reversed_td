@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class PojazdTank : pojazd
 {
-    [Header("Parametry Tauntera")]
-    public float promienTauntu = 20f;
-
     protected override void Start()
     {
         if (DecreeManager.Instance != null)

@@ -16,7 +16,6 @@ public class PojazdKamikaze : pojazd
     {
         if (DecreeManager.Instance != null)
         {
-            maxHp            = DecreeManager.Instance.FinalHP("Kamikaze", maxHp);
             promienWybuchu  *= (1f + DecreeManager.Instance.KamikazeRadiusBonus);
             obrazeniaWybuchu += DecreeManager.Instance.KamikazeDamageBonus;
         }

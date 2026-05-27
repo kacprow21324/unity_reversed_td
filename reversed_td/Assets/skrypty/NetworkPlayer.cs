@@ -5,9 +5,6 @@ public class NetworkPlayer : NetworkBehaviour
 {
     // ── Gra ───────────────────────────────────────────────────────────────
 
-    [SyncVar] public int playerGold  = 1000;
-    [SyncVar] public int playerLives = 5;
-
     [SyncVar(hook = nameof(OnReadyChanged))]
     public bool isReady = false;
 
@@ -138,13 +135,6 @@ public class NetworkPlayer : NetworkBehaviour
     public void CmdForfeit()
     {
         NetworkMatchManager.Instance?.HandleForfeit(playerIndex);
-    }
-
-    /// Stara komenda — zachowana dla kompatybilności.
-    [Command]
-    public void CmdReportRoundResult(int escaped)
-    {
-        NetworkMatchManager.Instance?.OnRoundResultReceived(playerIndex, escaped);
     }
 
     // ── Synchronizacja Mocy Specjalnych ───────────────────────────────────

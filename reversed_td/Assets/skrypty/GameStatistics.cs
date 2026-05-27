@@ -77,18 +77,4 @@ public class GameStatistics : MonoBehaviour
     }
 
     public float GetGameDuration() => Time.realtimeSinceStartup - gameStartTime;
-
-    public void ResetStats()
-    {
-        deployedUnits.Clear();
-        destroyedTowers.Clear();
-        totalGoldSpent       = 0;
-        wavesSurvived        = 0;
-        totalDeployedUnits   = 0;
-        totalDestroyedTowers = 0;
-        airstrikeUsed        = 0;
-        shieldUsed           = 0;
-        boostUsed            = 0;
-        gameStartTime        = Time.realtimeSinceStartup;
-    }
 }
