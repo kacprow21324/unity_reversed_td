@@ -123,14 +123,7 @@ public class GameManager : MonoBehaviour
         if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
         if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
-        Destroy(gameObject);
-
-        if (NetworkServer.active)
-            NetworkManager.singleton.StopHost();
-        else if (NetworkClient.active)
-            NetworkManager.singleton.StopClient();
-
-        SceneManager.LoadScene(0, LoadSceneMode.Single);
+        StartCoroutine(DisconnectAndLoad(0));
     }
 
     public void RestartScene()
@@ -152,14 +145,44 @@ public class GameManager : MonoBehaviour
         if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
         if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
-        Destroy(gameObject);
+        StartCoroutine(DisconnectAndLoad(0));
+    }
 
-        if (NetworkServer.active)
-            NetworkManager.singleton.StopHost();
-        else if (NetworkClient.active)
-            NetworkManager.singleton.StopClient();
+    /// Zatrzymuje sieć Mirror (jeśli aktywna), niszczy NetworkManager,
+    /// a następnie ładuje wskazaną scenę.
+    ///
+    /// Dlaczego niszczymy NetworkManager:
+    ///   NetworkManager ma DontDestroyOnLoad i żyje przez cały czas działania gry.
+    ///   Po wielu sesjach (SP + MP, wielokrotny restart) jego wewnętrzny stan
+    ///   transportu i Mirror staje się nieaktualny. Zniszczenie go przed powrotem
+    ///   do menu gwarantuje, że scena menu zainicjuje świeżą instancję z inspektora
+    ///   — bez resztek poprzedniej sesji. Działa też po SP (brak sieci → niszczy
+    ///   tylko obiekt, Mirror nie był aktywny).
+    ///
+    /// Dlaczego dwa yield return null:
+    ///   Pierwszy daje transport czas na faktyczne zamknięcie socketu OS.
+    ///   Drugi zapewnia że Destroy(nm) z pierwszego yield-a w pełni się przetworzy
+    ///   zanim LoadScene ruszy.
+    System.Collections.IEnumerator DisconnectAndLoad(int sceneIndex)
+    {
+        var nm = NetworkManager.singleton;
+        if (nm != null)
+        {
+            nm.offlineScene = string.Empty; // blokuj Mirror-owy auto-load sceny
+            nm.onlineScene  = string.Empty;
 
-        SceneManager.LoadScene(0, LoadSceneMode.Single);
+            if (NetworkServer.active)      nm.StopHost();
+            else if (NetworkClient.active) nm.StopClient();
+
+            yield return null; // transport zamyka socket
+
+            Destroy(nm.gameObject); // usuń NetworkManager — menu stworzy świeżą instancję
+        }
+
+        yield return null; // klatka po zniszczeniu NM
+
+        Destroy(gameObject); // GameManager
+        SceneManager.LoadScene(sceneIndex, LoadSceneMode.Single);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────

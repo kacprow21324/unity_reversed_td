@@ -135,6 +135,7 @@ public class EscMenuManager : MonoBehaviour
         Time.timeScale = 1f;
         GameManager.Instance?.TriggerDefeat();
         yield return new WaitForSecondsRealtime(2.5f);
+        Time.timeScale = 1f; // TriggerDefeat ustawia timeScale = 0 — resetujemy przed powrotem do menu
         if (GameStatistics.Instance != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
         if (DecreeManager.Instance != null) Destroy(DecreeManager.Instance.gameObject);

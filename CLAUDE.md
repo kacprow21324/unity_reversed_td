@@ -70,9 +70,11 @@ Klasa bazowa `WiezaBaza` (HP display auto-tworzone TextMeshPro, nagroda złota, 
 |---|---|
 | `WiezaPodstawowa` | Śledzenie jednego celu; priorytet dla tauntów |
 | `WiezaArmatnia` | `PociskArmatni` — AoE przy trafieniu |
-| `WiezaKolcowa` | Area of effect kolce (OnTrigger) |
+| `WiezaKolcowa` | Rozkłada kolce-pułapki (OnTrigger) na NavMeshu w zasięgu; przeładowanie po zużyciu wszystkich |
 | `WiezaPlazmowa` | Laser; `ReflektujLaser()` przed `OdejmijHp` — Lustro może odesłać |
 | `WiezaSonar` | Brak obrażeń; debuff mnożnik 1.5×; max 2 na mapie; `ActiveRadarsCount` globalne |
+
+**WiezaKolcowa — MP:** `RozstawKolce()` używa `System.Random` seedowanego lokalną pozycją TowerPlate (rodzica wieży), nie globalnego `Unity.Random`. Dzięki temu układ kolców jest identyczny na obu klientach niezależnie od kolejności wywołań `Start()` i offsetu `mapRoot`.
 
 ### Multiplayer (Mirror)
 
@@ -89,6 +91,8 @@ Klasa bazowa `WiezaBaza` (HP display auto-tworzone TextMeshPro, nagroda złota, 
 
 **Złoto między scenami:** `LobbySettings.StartGold` (statyczna klasa) przenosi wartość przez `RpcSyncStartGold` tuż przed `ServerChangeScene`.
 
+**Teardown sieci przy wyjściu:** `GameManager.GoToMainMenu()` i `ReturnToLobby()` oraz `MultiplayerLobbyUI.Disconnect()` zawsze wywołują `StopHost()` lub `StopClient()` przed załadowaniem sceny menu. Sprawdzanie przez `NetworkServer.active` / `NetworkClient.active` (nie `.isConnected`) — obsługuje przypadek gdy jedna strona już się rozłączyła. `HostGame()` i `JoinGame()` mają identyczny guard przed `StartHost()`/`StartClient()`, żeby stare połączenie nie blokowało portu.
+
 ### Dekrety
 
 `DecreeManager` buduje pulę 21 dekretów w `BuildPool()`. `SetQueueFilter(int[])` wyklucza bezsensowne dekrety (np. Pancerz Artylerii, która ma pancerz = 0). W MP każdy klient losuje dekrety niezależnie (`System.Random` z `TickCount + instanceID`).
@@ -104,6 +108,12 @@ Klasa bazowa `WiezaBaza` (HP display auto-tworzone TextMeshPro, nagroda złota, 
 
 - SP: `NowaKamera` (orbit/freelook)
 - MP: `MultiplayerCameraSwitcher` — toggle między własną planszą a planszą przeciwnika
+
+### Tła scen (AllSkyFree)
+
+Skybox i oświetlenie ustawia się przez **Tools → Skybox i Oswietlenie** w Unity Editor (skrypt `Assets/Editor/SkyboxSetupTool.cs`). Trzy warianty: Overcast Low, Night MoonBurst, Space AnotherPlanet. Narzędzie ustawia materiał skyboxa, tryb ambient, mgłę i Directional Light — wystarczy otworzyć scenę, wybrać wariant i zapisać (Ctrl+S). Nie wymaga żadnego runtime kodu.
+
+Materiały AllSkyFree: `Assets/Grafiki3d/AllSkyFree/` — statyczne PNG, nie są animowane.
 
 ## Ważne konwencje
 

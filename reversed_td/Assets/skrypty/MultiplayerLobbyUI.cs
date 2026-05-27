@@ -1,3 +1,4 @@
+using System.Collections;
 using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,6 +36,36 @@ public class MultiplayerLobbyUI : MonoBehaviour
     void Awake()
     {
         NicknameManager.EnsureExists();
+        // Klient może wrócić do menu automatycznie przez Mirror's offlineScene
+        // (gdy host rozłączy się) — bez przejścia przez GameManager.DisconnectAndLoad.
+        // W takim razie NetworkManager jest wciąż DDOL z brudnym stanem.
+        // Niszczymy go tutaj, żeby StartHostDelayed/StartClientDelayed dostały świeżą instancję
+        // z własnej sceny menu.
+        StartCoroutine(CleanupStaleNetworkManager());
+    }
+
+    System.Collections.IEnumerator CleanupStaleNetworkManager()
+    {
+        // Czekamy jedną klatkę — Mirror kończy swoje callbacki po powrocie offlineScene
+        yield return null;
+
+        var nm = NetworkManager.singleton;
+        if (nm == null) yield break;
+
+        // Jeśli sieć jest nieaktywna i NM pochodzi z poprzedniej sesji (jest DDOL),
+        // niszczymy go żeby scena menu stworzyła świeżą instancję.
+        // Rozpoznajemy "brudny" NM po tym, że jest DDOL (nie należy do aktywnej sceny).
+        if (!NetworkServer.active && !NetworkClient.active)
+        {
+            bool isInActiveScene = nm.gameObject.scene ==
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (!isInActiveScene)
+            {
+                // DDOL NetworkManager — zniszcz, żeby scena menu zainicjowała nowy
+                Destroy(nm.gameObject);
+                yield return null; // klatka na Destroy
+            }
+        }
     }
 
     void Update()
@@ -56,23 +87,8 @@ public class MultiplayerLobbyUI : MonoBehaviour
             Debug.LogError("[MultiplayerLobbyUI] Brak NetworkManager w scenie!");
             return;
         }
-
         SaveNicknameFromField();
-
-        // Lobby zarządza zmianą sceny ręcznie przez CmdTryStartMatch → ServerChangeScene.
-        // Jeśli onlineScene jest ustawiona, Mirror załaduje ją natychmiast po połączeniu
-        // z pominięciem całego lobby — dlatego czyścimy ją przed startem.
-        NetworkManager.singleton.onlineScene = string.Empty;
-
-        // Zabezpieczenie: rozłącz stare połączenie (np. powrót z poprzedniej gry MP)
-        if (NetworkServer.active)
-            NetworkManager.singleton.StopHost();
-        else if (NetworkClient.active)
-            NetworkManager.singleton.StopClient();
-
-        NetworkManager.singleton.StartHost();
-        ShowWaitingPanel();
-        SetStatus("Hosting... czekam na gracza.");
+        StartCoroutine(StartHostDelayed());
     }
 
     public void JoinGame(string ipAddress)
@@ -82,29 +98,70 @@ public class MultiplayerLobbyUI : MonoBehaviour
             Debug.LogError("[MultiplayerLobbyUI] Brak NetworkManager w scenie!");
             return;
         }
-
         SaveNicknameFromField();
-
-        // Analogicznie jak HostGame — blokujemy auto-scenę.
-        NetworkManager.singleton.onlineScene = string.Empty;
-
-        // Zabezpieczenie: rozłącz stare połączenie (np. powrót z poprzedniej gry MP)
-        if (NetworkServer.active)
-            NetworkManager.singleton.StopHost();
-        else if (NetworkClient.active)
-            NetworkManager.singleton.StopClient();
-
         string ip = string.IsNullOrWhiteSpace(ipAddress) ? "localhost" : ipAddress.Trim();
-        NetworkManager.singleton.networkAddress = ip;
-        NetworkManager.singleton.StartClient();
-        ShowWaitingPanel();
-        SetStatus($"Łączenie z {ip}...");
+        StartCoroutine(StartClientDelayed(ip));
     }
 
     public void JoinGameFromInput()
     {
         string ip = ipInputField != null ? ipInputField.text : "localhost";
         JoinGame(ip);
+    }
+
+    // ── Coroutines startu sieci ────────────────────────────────────────────
+
+    /// Startuje host po jednej klatce przerwy.
+    /// NetworkManager jest zawsze świeży (zniszczony przez GameManager.DisconnectAndLoad),
+    /// więc nie ma czego zatrzymywać — wystarczy zabezpieczenie na wypadek
+    /// wielokrotnego kliknięcia przycisku.
+    IEnumerator StartHostDelayed()
+    {
+        var nm = NetworkManager.singleton;
+        if (nm == null)
+        {
+            Debug.LogError("[MultiplayerLobbyUI] NetworkManager jest NULL. " +
+                           "Upewnij się że obiekt NetworkManager jest w scenie menu.");
+            yield break;
+        }
+
+        nm.offlineScene = string.Empty; // lobby zarządza scenami ręcznie
+        nm.onlineScene  = string.Empty;
+
+        // Zabezpieczenie przed podwójnym kliknięciem
+        if (NetworkServer.active)      { nm.StopHost();   yield return null; }
+        else if (NetworkClient.active) { nm.StopClient(); yield return null; }
+
+        yield return null;
+
+        nm.StartHost();
+        ShowWaitingPanel();
+        SetStatus("Hosting... czekam na gracza.");
+    }
+
+    /// Analogicznie dla klienta.
+    IEnumerator StartClientDelayed(string ip)
+    {
+        var nm = NetworkManager.singleton;
+        if (nm == null)
+        {
+            Debug.LogError("[MultiplayerLobbyUI] NetworkManager jest NULL. " +
+                           "Upewnij się że obiekt NetworkManager jest w scenie menu.");
+            yield break;
+        }
+
+        nm.offlineScene = string.Empty;
+        nm.onlineScene  = string.Empty;
+
+        if (NetworkServer.active)      { nm.StopHost();   yield return null; }
+        else if (NetworkClient.active) { nm.StopClient(); yield return null; }
+
+        yield return null;
+
+        nm.networkAddress = ip;
+        nm.StartClient();
+        ShowWaitingPanel();
+        SetStatus($"Łączenie z {ip}...");
     }
 
     public void Disconnect()

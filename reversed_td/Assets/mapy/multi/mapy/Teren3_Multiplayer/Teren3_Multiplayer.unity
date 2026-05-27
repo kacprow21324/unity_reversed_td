@@ -3335,19 +3335,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1426075736}
     m_Modifications:
     - target: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -441.1
+      value: -52.5
       objectReference: {fileID: 0}
     - target: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.40000004
+      value: -0.6
       objectReference: {fileID: 0}
     - target: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 75
+      value: 37.3
       objectReference: {fileID: 0}
     - target: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3386,6 +3386,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49818c645e9a15b41983750c13cda575, type: 3}
+--- !u!4 &1312018923 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
+  m_PrefabInstance: {fileID: 1312018922}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1334824719
 GameObject:
   m_ObjectHideFlags: 0
@@ -3868,6 +3873,7 @@ Transform:
   - {fileID: 470760002}
   - {fileID: 540778778}
   - {fileID: 1522606736}
+  - {fileID: 1312018923}
   - {fileID: 1770796765}
   - {fileID: 238438361}
   - {fileID: 1338419415}
@@ -4796,7 +4802,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 37.69998
+      value: 37.3
       objectReference: {fileID: 0}
     - target: {fileID: 1769493029327110479, guid: 49818c645e9a15b41983750c13cda575, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6692,4 +6698,3 @@ SceneRoots:
   - {fileID: 676545718}
   - {fileID: 2031761676}
   - {fileID: 16385603}
-  - {fileID: 1312018922}
