@@ -129,9 +129,10 @@ public class EscMenuManager : MonoBehaviour
         {
             CloseMenu();
             Time.timeScale = 1f;
-            // Używamy GoToMainMenu zamiast własnego coroutine — prawidłowo czyści
-            // singletony i Mirror (DisconnectAndLoad), bez ukrytego timera 2.5s.
-            GameManager.Instance?.GoToMainMenu();
+            // TriggerDefeat pokazuje panel porażki z przyciskiem "Wyjście do menu".
+            // Gracz sam klika — brak ukrytego timera 2.5s.
+            // Nawigacja do menu odbywa się przez GameManager.GoToMainMenu() na przycisku.
+            GameManager.Instance?.TriggerDefeat();
         }
     }
 

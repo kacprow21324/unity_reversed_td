@@ -105,6 +105,8 @@ public class TowerSpawner : MonoBehaviour
     void DestroyExistingTowers()
     {
         foreach (var t in _activeTowers)
+            if (t != null) t.SetActive(false); // SetActive(false) wywołuje OnDisable natychmiast
+        foreach (var t in _activeTowers)
             if (t != null) Destroy(t);
         _activeTowers.Clear();
     }

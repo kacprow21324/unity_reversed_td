@@ -50,7 +50,20 @@ public class LobbyPanelUI : MonoBehaviour
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            // Duplikat z przeładowania sceny — ukryj cały root Canvas.
+            // (Jeśli LobbyPanelUI jest na tym samym Canvas co MultiplayerLobbyUI,
+            //  ten root jest już ukryty — to wywołanie jest no-op.)
+            transform.root.gameObject.SetActive(false);
+            return;
+        }
+
         Instance = this;
+        _rows.Clear();
+
+        // Uczyń trwałym — wspólny root z MultiplayerLobbyUI (lub osobny Canvas) idzie do DDOL.
+        DontDestroyOnLoad(transform.root.gameObject);
     }
 
     void OnDestroy()
@@ -72,6 +85,9 @@ public class LobbyPanelUI : MonoBehaviour
     public void OnLobbyOpened()
     {
         _myLobbyReady = false;
+        // Wyczyść wiersze przed odbudową — poprzednia sesja mogła zostawić stale wpisy
+        _rows.Clear();
+        EnsureAllElements();
         SetupHostControls();
         RefreshPlayerList();
     }
@@ -287,7 +303,10 @@ public class LobbyPanelUI : MonoBehaviour
 
     void EnsureRows(int count)
     {
-        // Zbierz istniejące wiersze z playerListRoot
+        // Usuń stale wpisy (zniszczone obiekty z poprzedniej sesji)
+        _rows.RemoveAll(r => r.name == null || r.status == null);
+
+        // Zbierz istniejące wiersze z playerListRoot (tylko jeśli lista jest pusta)
         if (_rows.Count == 0 && playerListRoot != null)
         {
             for (int i = 0; i < playerListRoot.childCount; i++)
