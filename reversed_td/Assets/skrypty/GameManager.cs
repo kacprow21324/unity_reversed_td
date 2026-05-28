@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         IsGameOver = false;
+        LobbySettings.Reset(); // usuń złoto MP — następna sesja SP użyje GameConfig
         if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
         if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
@@ -142,6 +143,7 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         IsGameOver = false;
+        LobbySettings.Reset(); // wyczyść złoto MP przed powrotem do lobby
         if (GameStatistics.Instance    != null) Destroy(GameStatistics.Instance.gameObject);
         if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
         if (DecreeManager.Instance     != null) Destroy(DecreeManager.Instance.gameObject);
@@ -181,8 +183,10 @@ public class GameManager : MonoBehaviour
 
         yield return null; // klatka po zniszczeniu NM
 
-        Destroy(gameObject); // GameManager
+        // LoadScene kolejkujemy PRZED Destroy — coroutine działa na tym gameObject,
+        // więc zniszczenie go przed kolejkowaniem sceny mogłoby przerwać wykonanie.
         SceneManager.LoadScene(sceneIndex, LoadSceneMode.Single);
+        Destroy(gameObject); // GameManager
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────

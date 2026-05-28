@@ -284,6 +284,11 @@ public class NetworkMatchManager : NetworkBehaviour
 
     void CleanupBoardLocal()
     {
+        // Zatrzymaj spawner zanim zniszczymy pojazdy — inaczej WaitUntil w GhostSpawnCoroutine
+        // spełnia się natychmiast po zniszczeniu pojazdów i spawnuje duchy na początku nowej rundy.
+        vehicleSpawnerMap1?.StopSpawning();
+        vehicleSpawnerMap2?.StopSpawning();
+
         foreach (var p in FindObjectsByType<pojazd>(FindObjectsSortMode.None))
             if (p != null) Destroy(p.gameObject);
 

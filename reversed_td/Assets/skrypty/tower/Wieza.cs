@@ -12,6 +12,9 @@ public abstract class WiezaBaza : MonoBehaviour
     [HideInInspector] public bool  isInvulnerable       = false;
     [HideInInspector] public float attackSpeedMultiplier = 1f;
 
+    /// Stosunek aktualnego HP do maksymalnego (0–1). Używany przez LowHPSmoke.
+    public float HPRatio => maxHP > 0f ? currentHP / maxHP : 1f;
+
     protected float currentHP;
     private TextMeshPro _hpText;
     private Transform _kamera;

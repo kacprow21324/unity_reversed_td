@@ -50,7 +50,20 @@ public class LobbyPanelUI : MonoBehaviour
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            // Duplikat z przeładowania sceny — ukryj cały root Canvas.
+            // (Jeśli LobbyPanelUI jest na tym samym Canvas co MultiplayerLobbyUI,
+            //  ten root jest już ukryty — to wywołanie jest no-op.)
+            transform.root.gameObject.SetActive(false);
+            return;
+        }
+
         Instance = this;
+        _rows.Clear();
+
+        // Uczyń trwałym — wspólny root z MultiplayerLobbyUI (lub osobny Canvas) idzie do DDOL.
+        DontDestroyOnLoad(transform.root.gameObject);
     }
 
     void OnDestroy()
@@ -72,6 +85,9 @@ public class LobbyPanelUI : MonoBehaviour
     public void OnLobbyOpened()
     {
         _myLobbyReady = false;
+        // Wyczyść wiersze przed odbudową — poprzednia sesja mogła zostawić stale wpisy
+        _rows.Clear();
+        EnsureAllElements();
         SetupHostControls();
         RefreshPlayerList();
     }
@@ -80,7 +96,25 @@ public class LobbyPanelUI : MonoBehaviour
 
     public void RefreshPlayerList()
     {
-        var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+        // Używa rejestru Mirror zamiast FindObjectsByType — niezawodne niezależnie od timing spawnu
+        var list = new List<NetworkPlayer>();
+
+        if (NetworkClient.active)
+        {
+            foreach (var identity in NetworkClient.spawned.Values)
+            {
+                if (identity == null) continue;
+                var np = identity.GetComponent<NetworkPlayer>();
+                if (np != null) list.Add(np);
+            }
+        }
+
+        // Fallback: FindObjectsByType (single-player lub host-only bez aktywnego klienta)
+        if (list.Count == 0)
+            list.AddRange(FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None));
+
+        var players = list.ToArray();
+        Debug.Log($"[Lobby] RefreshPlayerList: znaleziono {players.Length} graczy (spawned={NetworkClient.spawned.Count}), isServer={NetworkServer.active}, isClient={NetworkClient.active}");
         System.Array.Sort(players, (a, b) => a.playerIndex.CompareTo(b.playerIndex));
 
         EnsureRows(2);
@@ -287,7 +321,10 @@ public class LobbyPanelUI : MonoBehaviour
 
     void EnsureRows(int count)
     {
-        // Zbierz istniejące wiersze z playerListRoot
+        // Usuń stale wpisy (zniszczone obiekty z poprzedniej sesji)
+        _rows.RemoveAll(r => r.name == null || r.status == null);
+
+        // Zbierz istniejące wiersze z playerListRoot (tylko jeśli lista jest pusta)
         if (_rows.Count == 0 && playerListRoot != null)
         {
             for (int i = 0; i < playerListRoot.childCount; i++)

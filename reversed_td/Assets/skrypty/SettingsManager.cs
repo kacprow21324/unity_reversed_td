@@ -85,13 +85,24 @@ public class SettingsManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            // Niszczymy tylko KOMPONENT — nie cały GameObject.
+            // Gdyby SettingsManager siedział na Canvas menu, Destroy(gameObject) zniszczyłby
+            // cały Canvas wraz z multiPanel, lobbyPanel itd. → "Missing Game Object" w lobby.
+            Destroy(this);
+            return;
+        }
         Instance = this;
+        // Odepnij od rodzica zanim pójdziemy do DDOL — Canvas (ani żaden inny rodzic)
+        // nie powinien trafiać do DontDestroyOnLoad razem z SettingsManagerem.
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }
 
     void Start()
     {
+        if (Instance != this) return; // duplikat zniszczony w Awake — nie twórz drugiego canvas DDOL
         BuildBrightnessOverlay();
         LoadAndApply();
         BuildUI();

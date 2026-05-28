@@ -126,21 +126,14 @@ public class EscMenuManager : MonoBehaviour
         if (_isMultiplayer)
             ForfeitMultiplayer();
         else
-            StartCoroutine(QuitSinglePlayer());
-    }
-
-    IEnumerator QuitSinglePlayer()
-    {
-        CloseMenu();
-        Time.timeScale = 1f;
-        GameManager.Instance?.TriggerDefeat();
-        yield return new WaitForSecondsRealtime(2.5f);
-        Time.timeScale = 1f; // TriggerDefeat ustawia timeScale = 0 — resetujemy przed powrotem do menu
-        if (GameStatistics.Instance != null) Destroy(GameStatistics.Instance.gameObject);
-        if (GameplayUIManager.Instance != null) Destroy(GameplayUIManager.Instance.gameObject);
-        if (DecreeManager.Instance != null) Destroy(DecreeManager.Instance.gameObject);
-        Destroy(gameObject);
-        SceneManager.LoadScene(0, LoadSceneMode.Single);
+        {
+            CloseMenu();
+            Time.timeScale = 1f;
+            // TriggerDefeat pokazuje panel porażki z przyciskiem "Wyjście do menu".
+            // Gracz sam klika — brak ukrytego timera 2.5s.
+            // Nawigacja do menu odbywa się przez GameManager.GoToMainMenu() na przycisku.
+            GameManager.Instance?.TriggerDefeat();
+        }
     }
 
     void ForfeitMultiplayer()
