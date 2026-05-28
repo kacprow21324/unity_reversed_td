@@ -31,12 +31,28 @@ public class NetworkPlayer : NetworkBehaviour
     {
         // connectionId == 0 → własne połączenie hosta
         playerIndex = connectionToClient?.connectionId == 0 ? 1 : 2;
+        // Odśwież lobby na hoście gdy dołącza nowy gracz
+        LobbyPanelUI.Instance?.RefreshPlayerList();
     }
 
     public override void OnStartLocalPlayer()
     {
         NicknameManager.EnsureExists();
         CmdSetNickname(NicknameManager.LocalNickname);
+    }
+
+    // Odpala się na każdym kliencie gdy JAKIKOLWIEK NetworkPlayer pojawi się w scenie.
+    // Gwarantuje odświeżenie lobby niezależnie od tego czy SyncVary się zmieniły.
+    public override void OnStartClient()
+    {
+        Debug.Log($"[NP] OnStartClient: playerIndex={playerIndex} isLocal={isLocalPlayer} nick={playerNickname}");
+        LobbyPanelUI.Instance?.RefreshPlayerList();
+    }
+
+    public override void OnStopClient()
+    {
+        Debug.Log($"[NP] OnStopClient: playerIndex={playerIndex}");
+        LobbyPanelUI.Instance?.RefreshPlayerList();
     }
 
     // ── Haki SyncVar ──────────────────────────────────────────────────────

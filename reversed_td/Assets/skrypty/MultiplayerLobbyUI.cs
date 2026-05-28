@@ -34,7 +34,10 @@ public class MultiplayerLobbyUI : MonoBehaviour
 
     // ── Stan wewnętrzny ────────────────────────────────────────────────────
 
-    bool _lobbyShown;
+    bool       _lobbyShown;
+    float      _lobbyRefreshTimer;
+    int        _localPlayerFrameCount;
+    GameObject _uiCanvasRoot; // root Canvas zawierający lobbyPanel / waitingPanel / multiplayerPanel
 
     // ── Unity lifecycle ────────────────────────────────────────────────────
 
@@ -42,8 +45,7 @@ public class MultiplayerLobbyUI : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            // Scena załadowała duplikat Canvas — ukryj cały nowy root.
-            // Oryginalna instancja DDOL nadal działa i zachowuje wszystkie referencje.
+            // Duplikat — wyłącz i pomiń (oryginalny DDOL obiekt nadal działa).
             transform.root.gameObject.SetActive(false);
             return;
         }
@@ -51,13 +53,21 @@ public class MultiplayerLobbyUI : MonoBehaviour
         Instance = this;
         _lobbyShown = false;
 
-        // Uczyń cały Canvas (panele, pola IP/nick, itp.) trwałym między scenami.
-        // Referencje inspektora nigdy nie znikną — obiekty nie są niszczone przy przeładowaniu.
+        // LobbyManager (ten obiekt) → DDOL
         DontDestroyOnLoad(transform.root.gameObject);
-        SceneManager.sceneLoaded += OnSceneLoaded;
 
+        // Canvas z panelami UI → również DDOL.
+        // Dzięki temu referencje inspektora LobbyPanelUI (playerListRoot, dropdown itp.)
+        // nigdy nie stają się stale po przeładowaniu sceny.
+        if (lobbyPanel != null)
+        {
+            _uiCanvasRoot = lobbyPanel.transform.root.gameObject;
+            if (_uiCanvasRoot != transform.root.gameObject)
+                DontDestroyOnLoad(_uiCanvasRoot);
+        }
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
         NicknameManager.EnsureExists();
-        StartCoroutine(CleanupStaleNetworkManager());
     }
 
     void OnDestroy()
@@ -73,44 +83,37 @@ public class MultiplayerLobbyUI : MonoBehaviour
     {
         if (scene.name == "menu")
         {
-            // Powrót do menu — pokaż Canvas.
-            // NIE nawigujemy ręcznie do żadnego panelu: DDOL zachował stan z poprzedniej wizyty.
-            // Chowamy tylko panele sieciowe, które nie mają sensu po rozłączeniu.
             transform.root.gameObject.SetActive(true);
+
+            // Po przeładowaniu menu scena tworzy duplikat Canvas — zniszcz go.
+            // Nasz DDOL Canvas zawiera właściwe referencje inspektora.
+            DestroyDuplicateCanvas(scene);
+            _uiCanvasRoot?.SetActive(true);
+
             _lobbyShown = false;
+            _localPlayerFrameCount = 0;
             if (waitingPanel) waitingPanel.SetActive(false);
             if (lobbyPanel)   lobbyPanel.SetActive(false);
-            StartCoroutine(CleanupStaleNetworkManager());
+            ShowMultiplayerPanel();
         }
         else
         {
-            // Wejście do sceny gry — ukryj cały Canvas lobby.
+            // Scena gry — ukryj całe UI lobby.
             transform.root.gameObject.SetActive(false);
+            _uiCanvasRoot?.SetActive(false);
         }
     }
 
-    System.Collections.IEnumerator CleanupStaleNetworkManager()
+    void DestroyDuplicateCanvas(Scene menuScene)
     {
-        // Czekamy jedną klatkę — Mirror kończy swoje callbacki po powrocie offlineScene
-        yield return null;
-
-        var nm = NetworkManager.singleton;
-        if (nm == null) yield break;
-
-        // Mirror z dontDestroyOnLoad=true (domyślne) zawsze umieszcza NM w DontDestroyOnLoad,
-        // więc sprawdzanie "isInActiveScene" byłoby zawsze false i zniszczyłoby świeży NM.
-        // Zamiast niszczyć: wystarczy zatrzymać aktywne połączenie jeśli istnieje
-        // (edge case: Mirror offlineScene przerzucił nas do menu z aktywną siecią).
-        // NM sam w sobie jest nadal zdatny do użycia po StopHost/StopClient.
-        if (NetworkServer.active)
+        if (_uiCanvasRoot == null) return;
+        foreach (var root in menuScene.GetRootGameObjects())
         {
-            nm.StopHost();
-            yield return null; // klatka na zamknięcie socketu
-        }
-        else if (NetworkClient.active)
-        {
-            nm.StopClient();
-            yield return null;
+            if (root != _uiCanvasRoot && root.name == _uiCanvasRoot.name)
+            {
+                Destroy(root);
+                return;
+            }
         }
     }
 
@@ -121,20 +124,45 @@ public class MultiplayerLobbyUI : MonoBehaviour
 
     void Update()
     {
-        // Przejście WaitingPanel → LobbyPanel gdy lokalny NetworkPlayer jest gotowy
-        if (_lobbyShown) return;
-        if (!NetworkClient.active && !NetworkServer.active) return;
-        if (NetworkClient.localPlayer == null) return;
+        // ── Wykryj nieoczekiwane rozłączenie ──────────────────────────────
+        bool inNetworkMode = _lobbyShown || (waitingPanel != null && waitingPanel.activeSelf);
+        if (inNetworkMode && !NetworkClient.active && !NetworkServer.active)
+        {
+            _lobbyShown = false;
+            _localPlayerFrameCount = 0;
+            ShowMultiplayerPanel();
+            SetStatus("Rozłączono.");
+            return;
+        }
+
+        // ── Timer odświeżania listy graczy w lobby ────────────────────────
+        if (_lobbyShown)
+        {
+            _lobbyRefreshTimer += Time.unscaledDeltaTime;
+            if (_lobbyRefreshTimer >= 1f)
+            {
+                _lobbyRefreshTimer = 0f;
+                LobbyPanelUI.Instance?.RefreshPlayerList();
+            }
+            return;
+        }
+
+        // ── Przejście waiting → lobby gdy localPlayer gotowy ──────────────
+        if (!NetworkClient.active && !NetworkServer.active) { _localPlayerFrameCount = 0; return; }
+        if (NetworkClient.localPlayer == null)              { _localPlayerFrameCount = 0; return; }
+
+        // Czekaj kilka klatek — Mirror musi dostarczyć początkowe SyncVary
+        // (nick, playerIndex) zanim odświeżymy listę graczy.
+        _localPlayerFrameCount++;
+        if (_localPlayerFrameCount < 5) return;
 
         ShowLobbyPanel();
     }
 
     // ── Przyciski nawigacyjne ──────────────────────────────────────────────
 
-    /// Tworzy przyciski "Wstecz" i "Anuluj" na panelach lobby jeśli jeszcze nie istnieją.
     void BudujPrzyciskiWstecz()
     {
-        // multiplayerPanel → "← Wstecz" (wróć do głównego menu)
         if (multiplayerPanel != null &&
             multiplayerPanel.transform.Find("Btn_← Wstecz") == null)
         {
@@ -152,7 +180,6 @@ public class MultiplayerLobbyUI : MonoBehaviour
             rt.anchoredPosition = new Vector2(10f, -10f);
         }
 
-        // waitingPanel → "Anuluj" (rozłącz i wróć)
         if (waitingPanel != null &&
             waitingPanel.transform.Find("Btn_Anuluj") == null)
         {
@@ -209,52 +236,53 @@ public class MultiplayerLobbyUI : MonoBehaviour
 
     // ── Coroutines startu sieci ────────────────────────────────────────────
 
-    /// Startuje host po jednej klatce przerwy.
-    /// NetworkManager jest zawsze świeży (zniszczony przez GameManager.DisconnectAndLoad),
-    /// więc nie ma czego zatrzymywać — wystarczy zabezpieczenie na wypadek
-    /// wielokrotnego kliknięcia przycisku.
     IEnumerator StartHostDelayed()
     {
         var nm = NetworkManager.singleton;
-        if (nm == null)
-        {
-            Debug.LogError("[MultiplayerLobbyUI] NetworkManager jest NULL. " +
-                           "Upewnij się że obiekt NetworkManager jest w scenie menu.");
-            yield break;
-        }
+        if (nm == null) yield break;
 
-        nm.offlineScene = string.Empty; // lobby zarządza scenami ręcznie
+        nm.offlineScene = string.Empty;
         nm.onlineScene  = string.Empty;
 
-        // Zabezpieczenie przed podwójnym kliknięciem
-        if (NetworkServer.active)      { nm.StopHost();   yield return null; }
-        else if (NetworkClient.active) { nm.StopClient(); yield return null; }
+        if (NetworkServer.active)
+        {
+            nm.StopHost();
+            // KCP (UDP) potrzebuje czasu na zamknięcie socketu — jedna klatka to za mało
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+        else if (NetworkClient.active)
+        {
+            nm.StopClient();
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
 
-        yield return null;
+        yield return new WaitForSecondsRealtime(0.1f);
 
         nm.StartHost();
         ShowWaitingPanel();
         SetStatus("Hosting... czekam na gracza.");
     }
 
-    /// Analogicznie dla klienta.
     IEnumerator StartClientDelayed(string ip)
     {
         var nm = NetworkManager.singleton;
-        if (nm == null)
-        {
-            Debug.LogError("[MultiplayerLobbyUI] NetworkManager jest NULL. " +
-                           "Upewnij się że obiekt NetworkManager jest w scenie menu.");
-            yield break;
-        }
+        if (nm == null) yield break;
 
         nm.offlineScene = string.Empty;
         nm.onlineScene  = string.Empty;
 
-        if (NetworkServer.active)      { nm.StopHost();   yield return null; }
-        else if (NetworkClient.active) { nm.StopClient(); yield return null; }
+        if (NetworkServer.active)
+        {
+            nm.StopHost();
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+        else if (NetworkClient.active)
+        {
+            nm.StopClient();
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
 
-        yield return null;
+        yield return new WaitForSecondsRealtime(0.1f);
 
         nm.networkAddress = ip;
         nm.StartClient();
@@ -270,6 +298,7 @@ public class MultiplayerLobbyUI : MonoBehaviour
             NetworkManager.singleton.StopClient();
 
         _lobbyShown = false;
+        _localPlayerFrameCount = 0;
         ShowMultiplayerPanel();
         SetStatus("");
     }
@@ -285,11 +314,12 @@ public class MultiplayerLobbyUI : MonoBehaviour
     void ShowLobbyPanel()
     {
         _lobbyShown = true;
+        _lobbyRefreshTimer = 0f;
 
         if (waitingPanel)     waitingPanel.SetActive(false);
         if (multiplayerPanel) multiplayerPanel.SetActive(false);
 
-        // Fallback: jeśli referencja inspektora jest stale/null, szukaj w scenie
+        // Fallback jeśli referencja inspektora jest stale/null
         if (lobbyPanel == null)
             lobbyPanel = FindFirstObjectByType<LobbyPanelUI>(FindObjectsInactive.Include)?.gameObject;
 
@@ -310,6 +340,7 @@ public class MultiplayerLobbyUI : MonoBehaviour
     void ShowWaitingPanel()
     {
         _lobbyShown = false;
+        _localPlayerFrameCount = 0;
         if (multiplayerPanel) multiplayerPanel.SetActive(false);
         if (waitingPanel)     waitingPanel.SetActive(true);
         if (lobbyPanel)       lobbyPanel.SetActive(false);

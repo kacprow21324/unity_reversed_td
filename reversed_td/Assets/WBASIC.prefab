@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1952750444940240062}
   - component: {fileID: 5552292435469724230}
-  - component: {fileID: 6239834969971031815}
   m_Layer: 0
   m_Name: WBASIC
   m_TagString: Untagged
@@ -83,29 +82,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &6239834969971031815
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 297420494903486130}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!1001 &7450438094228013790
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -194,6 +170,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4c0ae9d9fd3ac7043bc0c9a1b1f456da, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1257499784836249334}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4c0ae9d9fd3ac7043bc0c9a1b1f456da, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5988406544037679755}
   m_SourcePrefab: {fileID: 100100000, guid: 4c0ae9d9fd3ac7043bc0c9a1b1f456da, type: 3}
 --- !u!4 &1202035383592834104 stripped
 Transform:
@@ -243,7 +222,7 @@ MonoBehaviour:
   nagrodaZlota: 30
   isInvulnerable: 0
   attackSpeedMultiplier: 1
-  zasieg: 18
+  zasieg: 20
   szybkoscAtaku: 2
   obrazenia: 25
   warstwaWroga:
@@ -265,12 +244,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TurretRotation
   "czasWyg\u0142adzania": 0.12
   maxPredkosc: 360
-  offsetKata: 0
+  offsetKata: 180
   warstwaWroga:
     serializedVersion: 2
     m_Bits: 128
-  zasieg: 15
-  marginesUtraty: 2
+  zasieg: 20
+  marginesUtraty: 3
 --- !u!114 &1257499784836249334
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,3 +264,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LowHPSmoke
   smokeEffect: {fileID: 198000012204298494, guid: 96a94de897daf7249a824fb908bb12a2, type: 3}
   progHP: 0.35
+--- !u!136 &5988406544037679755
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7756373013371748239}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
