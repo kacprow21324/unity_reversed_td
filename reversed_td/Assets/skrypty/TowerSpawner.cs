@@ -113,16 +113,28 @@ public class TowerSpawner : MonoBehaviour
 
     static void UstawWysokoscWiezy(GameObject tower, float targetBottomY)
     {
-        // Zbierz granice wszystkich rendererów dziecka, by znaleźć dno modelu
+        // Zbierz granice wszystkich rendererów dziecka, by znaleźć dno modelu.
+        // LineRenderer (kółko zasięgu) ma zerowe bounds — pomijamy go.
         Renderer[] renderers = tower.GetComponentsInChildren<Renderer>();
-        if (renderers.Length == 0) return;
+        float minY = float.MaxValue;
+        foreach (var r in renderers)
+        {
+            if (r is LineRenderer) continue;
+            if (r.bounds.size == Vector3.zero) continue;
+            if (r.bounds.min.y < minY) minY = r.bounds.min.y;
+        }
 
-        Bounds b = renderers[0].bounds;
-        for (int i = 1; i < renderers.Length; i++)
-            b.Encapsulate(renderers[i].bounds);
+        if (minY == float.MaxValue)
+        {
+            // Brak rendererów z siatką — ustaw pivot wieży bezpośrednio na targetBottomY
+            var pos = tower.transform.position;
+            pos.y = targetBottomY;
+            tower.transform.position = pos;
+            return;
+        }
 
         // Przesuń wieżę tak, żeby jej dno znalazło się na targetBottomY
-        tower.transform.position += Vector3.up * (targetBottomY - b.min.y);
+        tower.transform.position += Vector3.up * (targetBottomY - minY);
     }
 
     static void Shuffle<T>(T[] array)

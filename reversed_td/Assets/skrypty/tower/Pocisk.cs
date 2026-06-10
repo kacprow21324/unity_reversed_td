@@ -73,15 +73,12 @@ public class Pocisk : MonoBehaviour
     {
         if (odbity) return;
 
-        if (other.gameObject.layer == LayerMask.NameToLayer("POJAZD"))
-        {
-            pojazd p = other.GetComponent<pojazd>();
-            if (p != null)
-                p.OdejmijHp(obrazenia, DamageType.Basic, this);
+        pojazd p = other.GetComponent<pojazd>();
+        if (p == null || p.isGhost) return;
 
-            // Jeśli OdejmijHp ustawił odbity=true (PojazdLustrzany), pocisk żyje dalej.
-            if (!odbity)
-                Destroy(gameObject);
-        }
+        p.OdejmijHp(obrazenia, DamageType.Basic, this);
+
+        if (!odbity)
+            Destroy(gameObject);
     }
 }

@@ -608,6 +608,7 @@ public class LobbyPanelUI : MonoBehaviour
         btn.colors = cols;
 
         var textGO = new GameObject("Text");
+        textGO.AddComponent<RectTransform>();
         textGO.transform.SetParent(go.transform, false);
         StretchChild(textGO, Vector2.zero, Vector2.zero);
         var txt = textGO.AddComponent<TextMeshProUGUI>();
@@ -644,6 +645,7 @@ public class LobbyPanelUI : MonoBehaviour
         btn.onClick.AddListener(OnExitLobbyClicked);
 
         var textGO = new GameObject("Text");
+        textGO.AddComponent<RectTransform>();
         textGO.transform.SetParent(go.transform, false);
         StretchChild(textGO, Vector2.zero, Vector2.zero);
         var txt = textGO.AddComponent<TextMeshProUGUI>();
@@ -680,7 +682,8 @@ public class LobbyPanelUI : MonoBehaviour
 
     static void SetAnchors(GameObject go, Vector2 anchorMin, Vector2 anchorMax)
     {
-        var rt = go.GetComponent<RectTransform>() ?? go.AddComponent<RectTransform>();
+        var rt = go.GetComponent<RectTransform>();
+        if (rt == null) rt = go.AddComponent<RectTransform>();
         rt.anchorMin = anchorMin;
         rt.anchorMax = anchorMax;
         rt.offsetMin = rt.offsetMax = Vector2.zero;
@@ -688,7 +691,8 @@ public class LobbyPanelUI : MonoBehaviour
 
     static void StretchChild(GameObject go, Vector2 offsetMin, Vector2 offsetMax)
     {
-        var rt = go.GetComponent<RectTransform>() ?? go.AddComponent<RectTransform>();
+        var rt = go.GetComponent<RectTransform>();
+        if (rt == null) rt = go.AddComponent<RectTransform>();
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.one;
         rt.offsetMin = offsetMin;

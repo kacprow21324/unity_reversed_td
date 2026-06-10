@@ -12,6 +12,9 @@ public class WiezaKolcowa : WiezaBaza
     public float obrazeniaKolca = 30f;
     public float cooldownPrzeladowania = 8f;
 
+    [Header("Prefab Kolca (opcjonalnie — jeśli pusty, użyje żółtej kapsuły)")]
+    public GameObject prefabKolca;
+
     private readonly List<GameObject> _kolce = new List<GameObject>();
     private bool _przeladowuje = false;
 
@@ -38,11 +41,7 @@ public class WiezaKolcowa : WiezaBaza
 
     void RozstawKolce()
     {
-        // Seed deterministyczny z lokalnej pozycji TowerPlate (rodzica wieży).
-        // Pozycja lokalna jest identyczna na obu klientach MP niezależnie od offsetu mapRoot,
-        // dlatego układ kolców jest zawsze taki sam na obu mapach przy tym samym seedzie.
-        // Używamy System.Random zamiast Unity.Random, żeby nie zaburzać globalnego stanu RNG
-        // i uniezależnić się od kolejności wywołań Start().
+        // Seed deterministyczny z lokalnej pozycji TowerPlate.
         Vector3 lp = transform.parent != null
             ? transform.parent.localPosition
             : transform.localPosition;
@@ -50,45 +49,73 @@ public class WiezaKolcowa : WiezaBaza
         int sz = Mathf.RoundToInt(lp.z * 173f);
         var rng = new System.Random(sx * 100003 + sz);
 
+        // Szukamy NavMesh w bliskim sąsiedztwie punktu kandydatowego.
+        // Promień wyszukiwania = promienRozmieszczenia, żeby nie wyciągać kolców
+        // poza obszar wieży. Y kandydata = wysokość wieży (nie hardkodowane 0).
+        float szukajPromien = promienRozmieszczenia;
+        float wiezaY        = transform.position.y;
+
         int rozmieszczono = 0;
-        int maxProb = iloscKolcow * 40;
+        int maxProb       = iloscKolcow * 60;
 
         for (int proba = 0; proba < maxProb && rozmieszczono < iloscKolcow; proba++)
         {
             double angle    = rng.NextDouble() * System.Math.PI * 2.0;
             double r        = System.Math.Sqrt(rng.NextDouble()) * promienRozmieszczenia;
-            var    offset2D = new Vector2((float)(System.Math.Cos(angle) * r), (float)(System.Math.Sin(angle) * r));
+            var    offset2D = new Vector2(
+                (float)(System.Math.Cos(angle) * r),
+                (float)(System.Math.Sin(angle) * r));
 
-            Vector3 kandydat = new Vector3(transform.position.x + offset2D.x, 0f, transform.position.z + offset2D.y);
+            // Kandydat na poziomie wieży — prawidłowa wysokość dla SamplePosition
+            Vector3 kandydat = new Vector3(
+                transform.position.x + offset2D.x,
+                wiezaY,
+                transform.position.z + offset2D.y);
 
             NavMeshHit hit;
-            if (!NavMesh.SamplePosition(kandydat, out hit, 20f, NavMesh.AllAreas)) continue;
-            Vector2 pozycjaWiezy2D = new Vector2(transform.position.x, transform.position.z);
-            Vector2 pozycjaHita2D  = new Vector2(hit.position.x, hit.position.z);
+            if (!NavMesh.SamplePosition(kandydat, out hit, szukajPromien, NavMesh.AllAreas))
+                continue;
 
-            if (Vector2.Distance(pozycjaWiezy2D, pozycjaHita2D) > promienRozmieszczenia + 1f) continue;
-
+            // Akceptujemy każdy punkt znaleziony w promieniu SamplePosition — drugi
+            // filtr XZ jest zbędny skoro promień wyszukiwania = promienRozmieszczenia.
             _kolce.Add(UtworzKolec(hit.position + Vector3.up * 0.4f));
             rozmieszczono++;
         }
+
+        if (rozmieszczono == 0)
+            Debug.LogWarning($"[WiezaKolcowa] Nie znaleziono NavMesh w promieniu {szukajPromien}m od {transform.position}. Sprawdź czy NavMesh jest wypalony przy TowerPlate.");
     }
 
     GameObject UtworzKolec(Vector3 pozycja)
     {
-        GameObject kolcGO = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        kolcGO.name = "Kolec";
-        
-        // BARDZO WAŻNE: Kolce NIE są dziećmi wieży!
-        kolcGO.transform.SetParent(null); 
-        
-        kolcGO.transform.position = pozycja;
-        kolcGO.transform.localScale = new Vector3(0.25f, 0.5f, 0.25f);
+        GameObject kolcGO;
 
-        kolcGO.GetComponent<CapsuleCollider>().isTrigger = true;
-        kolcGO.GetComponent<Renderer>().material.color = Color.yellow;
+        if (prefabKolca != null)
+        {
+            // BARDZO WAŻNE: Kolce NIE są dziećmi wieży!
+            kolcGO = Instantiate(prefabKolca, pozycja, Quaternion.identity);
+            kolcGO.name = "Kolec";
+            kolcGO.transform.SetParent(null);
 
-        Kolec skrypt = kolcGO.AddComponent<Kolec>();
-        skrypt.obrazenia = obrazeniaKolca;
+            var col = kolcGO.GetComponent<Collider>();
+            if (col != null) col.isTrigger = true;
+
+            Kolec skrypt = kolcGO.GetComponent<Kolec>() ?? kolcGO.AddComponent<Kolec>();
+            skrypt.obrazenia = obrazeniaKolca;
+        }
+        else
+        {
+            // Fallback: żółta kapsuła (placeholder do czasu przypisania prefabu)
+            kolcGO = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            kolcGO.name = "Kolec";
+            kolcGO.transform.SetParent(null);
+            kolcGO.transform.position = pozycja;
+            kolcGO.transform.localScale = new Vector3(0.25f, 0.5f, 0.25f);
+            kolcGO.GetComponent<CapsuleCollider>().isTrigger = true;
+            kolcGO.GetComponent<Renderer>().material.color = Color.yellow;
+            Kolec skrypt = kolcGO.AddComponent<Kolec>();
+            skrypt.obrazenia = obrazeniaKolca;
+        }
 
         return kolcGO;
     }

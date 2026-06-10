@@ -121,7 +121,7 @@ public class DecreeManager : MonoBehaviour
 
     void BuildPool()
     {
-        _pool = new List<DecreeData>(21);
+        _pool = new List<DecreeData>(20);
 
         // PODSTAWOWY (0-2)
         Add(0, "Woz Podstawowy: Max HP (+20%)",
@@ -165,11 +165,6 @@ public class DecreeManager : MonoBehaviour
             () => (BASE_ALT_SPD + ArtileriaSpeed).ToString("F1"),
             () => (BASE_ALT_SPD + ArtileriaSpeed + 0.5f).ToString("F1"),
             () => { ArtileriaSpeed += 0.5f; });
-
-        Add(8, "Woz Dalekosiez.: Pancerz (+10%)",
-            () => Mathf.RoundToInt(BASE_ALT_ARM * (1f + ArtileriaArmor)).ToString(),
-            () => Mathf.RoundToInt(BASE_ALT_ARM * (1f + ArtileriaArmor + 0.10f)).ToString(),
-            () => { ArtileriaArmor += 0.10f; });
 
         // LUSTRO (10 – tylko prędkość; HP i Pancerz usunięte z puli)
         Add(10, "Woz Lustrzany: Predkosc +0.5",
@@ -245,12 +240,6 @@ public class DecreeManager : MonoBehaviour
     public void SetQueueFilter(int[] vehicleIndices)
     {
         _queueFilter.Clear();
-        if (vehicleIndices == null) return;
-        foreach (int idx in vehicleIndices)
-        {
-            // Artyleria (index 2) ma Pancerz = 0 → dekret ID 8 jest bezużyteczny
-            if (idx == 2) _queueFilter.Add(8);
-        }
     }
 
     public List<DecreeData> GetRandomThree()

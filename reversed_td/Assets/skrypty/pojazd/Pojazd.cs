@@ -7,6 +7,21 @@ public enum DamageType { Generic, Basic, Laser }
 [RequireComponent(typeof(NavMeshAgent))]
 public class pojazd : MonoBehaviour
 {
+    protected virtual void Awake()
+    {
+        // Kinematyczny Rigidbody jest wymagany, żeby triggery (Pocisk, FinishLine, Kolec)
+        // wykrywały pojazdy poruszane przez NavMeshAgent (brak fizyki własnej).
+        // Bez Rigidbody silnik fizyki traktuje pojazd jako obiekt statyczny
+        // i OnTriggerEnter nie odpala na żadnym z triggerów po drodze.
+        var rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity  = false;
+        }
+    }
+
     [Header("Ustawienia Zdrowia")]
     public float maxHp = 100f;
 
@@ -172,6 +187,9 @@ public class pojazd : MonoBehaviour
     // Pomocnik dla wież: zwraca pojazd priorytetyzując taunterów.
     public static pojazd ZnajdzCelWZasiegu(Vector3 pozycja, float zasieg, LayerMask warstwa)
     {
+        // Fallback: jeśli warstwaWroga nie jest skonfigurowana (wartość 0),
+        // szukaj na wszystkich warstwach — filtr i tak jest przez GetComponent<pojazd>.
+        if (warstwa.value == 0) warstwa = ~0;
         Collider[] wrogowie = Physics.OverlapSphere(pozycja, zasieg, warstwa);
         pojazd priorytet = null;
         pojazd pierwszy = null;

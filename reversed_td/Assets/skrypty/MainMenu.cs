@@ -18,8 +18,8 @@ public class MainMenuLogic : MonoBehaviour
 
     public void OnClickSinglePlayer() => ShowOnlyOnePanel(mapSelectionPanel);
     public void OnClickMultiplayer() => ShowOnlyOnePanel(multiPanel);
-    public void OnClickSettings() => ShowOnlyOnePanel(settingsPanel);
-    public void OnClickTutorial() => ShowOnlyOnePanel(tutorialPanel);
+    public void OnClickSettings() => SettingsManager.Instance?.OpenFromMainMenu();
+    public void OnClickTutorial() => TutorialManager.Instance?.OpenTutorial();
     public void OnClickBack() => ShowOnlyOnePanel(mainMenuPanel);
 
     public void OnClickShutDown()

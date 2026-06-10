@@ -46,6 +46,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        AutoFindIfNull();
+
         if (victoryPanel != null) victoryPanel.SetActive(false);
         if (defeatPanel  != null) defeatPanel.SetActive(false);
         if (drawPanel    != null) drawPanel.SetActive(false);
@@ -56,16 +58,13 @@ public class GameManager : MonoBehaviour
 
         bool isMP = SceneManager.GetActiveScene().name.Contains("Multiplayer");
 
-        // Restart — tylko SP
         if (victoryRestartButton != null) victoryRestartButton.gameObject.SetActive(!isMP);
         if (defeatRestartButton  != null) defeatRestartButton.gameObject.SetActive(!isMP);
 
-        // Lobby — tylko MP
         if (victoryLobbyButton != null) victoryLobbyButton.gameObject.SetActive(isMP);
         if (defeatLobbyButton  != null) defeatLobbyButton.gameObject.SetActive(isMP);
         if (drawLobbyButton    != null) drawLobbyButton.gameObject.SetActive(isMP);
 
-        // Fallback wire-up: tylko jeśli Tools nie dodały jeszcze persistent listenera
         WireIfEmpty(victoryRestartButton, RestartScene);
         WireIfEmpty(defeatRestartButton,  RestartScene);
         WireIfEmpty(victoryMenuButton,    GoToMainMenu);
@@ -74,6 +73,66 @@ public class GameManager : MonoBehaviour
         WireIfEmpty(victoryLobbyButton,   ReturnToLobby);
         WireIfEmpty(defeatLobbyButton,    ReturnToLobby);
         WireIfEmpty(drawLobbyButton,      ReturnToLobby);
+    }
+
+    // Automatycznie wypełnia puste pola szukając obiektów po nazwie w scenie.
+    // Działa na każdej scenie bez ręcznego przypisywania w Inspektorze.
+    void AutoFindIfNull()
+    {
+        if (victoryPanel == null) victoryPanel = FindInScene("VictoryPanel");
+        if (defeatPanel  == null) defeatPanel  = FindInScene("DefeatPanel");
+
+        if (victoryPanel != null)
+        {
+            if (victoryRestartButton == null)
+                victoryRestartButton = FindButtonIn(victoryPanel.transform, "BtnRestart");
+            if (victoryMenuButton == null)
+                victoryMenuButton    = FindButtonIn(victoryPanel.transform, "BtnMenu");
+            if (victoryStatsText == null)
+                victoryStatsText     = FindTMPIn(victoryPanel.transform, "StatsText");
+        }
+
+        if (defeatPanel != null)
+        {
+            if (defeatRestartButton == null)
+                defeatRestartButton  = FindButtonIn(defeatPanel.transform, "BtnRestart");
+            if (defeatMenuButton == null)
+                defeatMenuButton     = FindButtonIn(defeatPanel.transform, "BtnMenu");
+            if (defeatStatsText == null)
+                defeatStatsText      = FindTMPIn(defeatPanel.transform, "StatsText");
+        }
+    }
+
+    // Szuka GameObject po nazwie włącznie z nieaktywnymi obiektami sceny
+    static GameObject FindInScene(string name)
+    {
+        foreach (var t in FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            if (t.name == name && t.gameObject.scene.IsValid())
+                return t.gameObject;
+        return null;
+    }
+
+    static Button FindButtonIn(Transform root, string name)
+    {
+        var t = FindDeep(root, name);
+        return t != null ? t.GetComponent<Button>() : null;
+    }
+
+    static TextMeshProUGUI FindTMPIn(Transform root, string name)
+    {
+        var t = FindDeep(root, name);
+        return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
+    }
+
+    static Transform FindDeep(Transform root, string name)
+    {
+        foreach (Transform child in root)
+        {
+            if (child.name == name) return child;
+            var found = FindDeep(child, name);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     void EnsureDecreeManager()

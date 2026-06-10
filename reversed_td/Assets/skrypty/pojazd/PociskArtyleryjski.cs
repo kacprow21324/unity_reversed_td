@@ -7,7 +7,12 @@ public class PociskArtyleryjski : MonoBehaviour
     public float obrazenia = 40f;
     public float czasZycia = 8f;
 
+    [Header("Efekty")]
+    public ParticleSystem smokePrefab;      // efekt dymu/ogona — assign prefab lub ParticleSystem dziecka
+    public GameObject explosionPrefab;      // efekt eksplozji przy trafieniu
+
     private Transform _cel;
+    private ParticleSystem _smokeInstance;
 
     public void UstawCel(Transform nowyCel)
     {
@@ -17,6 +22,13 @@ public class PociskArtyleryjski : MonoBehaviour
     void Start()
     {
         Destroy(gameObject, czasZycia);
+
+        if (smokePrefab != null)
+        {
+            _smokeInstance = Instantiate(smokePrefab, transform.position, Quaternion.identity);
+            _smokeInstance.transform.SetParent(transform);
+            _smokeInstance.Play();
+        }
     }
 
     void Update()
@@ -40,6 +52,12 @@ public class PociskArtyleryjski : MonoBehaviour
 
     void Trafil()
     {
+        if (explosionPrefab != null)
+        {
+            GameObject fx = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            Destroy(fx, 3f);
+        }
+
         WiezaBaza w = _cel.GetComponent<WiezaBaza>();
         w?.TakeDamage(obrazenia);
         Destroy(gameObject);

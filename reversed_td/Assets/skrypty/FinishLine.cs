@@ -4,10 +4,10 @@ public class FinishLine : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("POJAZD")) return;
-
         pojazd p = other.GetComponent<pojazd>();
-        if (p != null && p.isGhost)
+        if (p == null) return;
+
+        if (p.isGhost)
         {
             Destroy(other.gameObject);
             return;

@@ -30,6 +30,14 @@ public class SettingsManager : MonoBehaviour
 
     Resolution[] _resolutions;
 
+    // ── Snapshot — stan przy otwarciu (Powrót przywraca) ──────────────────
+    float _snapMusicVol;
+    float _snapSfxVol;
+    float _snapBrightness;
+    bool  _snapFullscreen;
+    int   _snapResIndex;
+    Dictionary<string, KeyCode> _snapBindings;
+
     // ── UI refs ───────────────────────────────────────────────────────────
 
     Canvas _canvas;
@@ -140,9 +148,27 @@ public class SettingsManager : MonoBehaviour
             Time.timeScale = 0f;
     }
 
+    // Powrót — odrzuca zmiany i przywraca stan sprzed otwarcia
     public void Close()
     {
         if (_rebindCoroutine != null) { StopCoroutine(_rebindCoroutine); _rebindCoroutine = null; _rebindingAction = null; RefreshBindLabels(); }
+        RestoreSnapshot();
+        ClosePanel();
+    }
+
+    // ── Wewnętrzne ─────────────────────────────────────────────────────────
+
+    void Open()
+    {
+        TakeSnapshot();
+        SyncUIFromValues();
+        _panel.SetActive(true);
+        _overlay.SetActive(true);
+        ShowTab(_tabNames[0]);
+    }
+
+    void ClosePanel()
+    {
         _panel.SetActive(false);
         _overlay.SetActive(false);
 
@@ -152,14 +178,33 @@ public class SettingsManager : MonoBehaviour
             ShowMainMenuPanel(true);
     }
 
-    // ── Wewnętrzne ─────────────────────────────────────────────────────────
-
-    void Open()
+    void TakeSnapshot()
     {
+        _snapMusicVol   = _musicVol;
+        _snapSfxVol     = _sfxVol;
+        _snapBrightness = _brightness;
+        _snapFullscreen = _fullscreen;
+        _snapResIndex   = _resIndex;
+        _snapBindings   = new Dictionary<string, KeyCode>();
+        foreach (var a in InputBindings.AllActions)
+            _snapBindings[a] = InputBindings.Get(a);
+    }
+
+    void RestoreSnapshot()
+    {
+        _musicVol   = _snapMusicVol;
+        _sfxVol     = _snapSfxVol;
+        _brightness = _snapBrightness;
+        _fullscreen = _snapFullscreen;
+        _resIndex   = _snapResIndex;
+
+        if (_snapBindings != null)
+            foreach (var kv in _snapBindings)
+                InputBindings.Set(kv.Key, kv.Value);
+
+        ApplyAudio();
+        ApplyBrightness(_brightness);
         SyncUIFromValues();
-        _panel.SetActive(true);
-        _overlay.SetActive(true);
-        ShowTab(_tabNames[0]);
     }
 
     void ShowMainMenuPanel(bool show)
@@ -187,8 +232,8 @@ public class SettingsManager : MonoBehaviour
 
     void ApplyAudio()
     {
-        // Master = average muzyki i sfx; dokładny podział wymaga AudioMixera
         AudioListener.volume = Mathf.Max(_musicVol, _sfxVol);
+        MusicManager.Instance?.UstawGlosnosc(_musicVol);
     }
 
     void ApplyBrightness(float v)
@@ -301,7 +346,7 @@ public class SettingsManager : MonoBehaviour
         var sc = cGO.AddComponent<CanvasScaler>();
         sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         sc.referenceResolution = new Vector2(1920f, 1080f);
-        sc.matchWidthOrHeight = 0.5f;
+        sc.matchWidthOrHeight = 0.45f;
 
         cGO.AddComponent<GraphicRaycaster>();
 
@@ -309,11 +354,13 @@ public class SettingsManager : MonoBehaviour
         _overlay = UIHelper.MakeImage("SettingsOverlay", cGO.transform, C_BG);
         UIHelper.Stretch(_overlay.GetComponent<RectTransform>());
 
-        // Panel główny
+        // Panel główny — responsywny, 90% szerokości × 88% wysokości ekranu
         _panel = UIHelper.MakeImage("SettingsPanel", _overlay.transform, C_PANEL);
         var pRT = _panel.GetComponent<RectTransform>();
-        pRT.anchorMin = pRT.anchorMax = pRT.pivot = new Vector2(0.5f, 0.5f);
-        pRT.sizeDelta = new Vector2(900f, 660f);
+        pRT.anchorMin = new Vector2(0.05f, 0.06f);
+        pRT.anchorMax = new Vector2(0.95f, 0.94f);
+        pRT.pivot     = new Vector2(0.5f, 0.5f);
+        pRT.offsetMin = pRT.offsetMax = Vector2.zero;
 
         BuildHeader();
         BuildTabBar();
@@ -515,7 +562,7 @@ public class SettingsManager : MonoBehaviour
         _tabContents["DŹWIĘK"] = p;
 
         var vlg = p.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 14f;
+        vlg.spacing = 20f;
         vlg.childAlignment = TextAnchor.UpperLeft;
         vlg.childForceExpandWidth = true;
         vlg.childForceExpandHeight = false;
@@ -539,7 +586,7 @@ public class SettingsManager : MonoBehaviour
         _tabContents["GRAFIKA"] = p;
 
         var vlg = p.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 14f;
+        vlg.spacing = 20f;
         vlg.childAlignment = TextAnchor.UpperLeft;
         vlg.childForceExpandWidth = true;
         vlg.childForceExpandHeight = false;
@@ -548,7 +595,7 @@ public class SettingsManager : MonoBehaviour
         vlg.padding = new RectOffset(0, 0, 10, 0);
 
         // Rozdzielczość
-        var rowRes = UIHelper.MakeRow("RowRes", p.transform, 54f);
+        var rowRes = UIHelper.MakeRow("RowRes", p.transform, 56f);
         AddRowLabel(rowRes.transform, "Rozdzielczość");
         _resDropdown = BuildResDropdown(rowRes.transform);
 
@@ -568,7 +615,7 @@ public class SettingsManager : MonoBehaviour
 
         var le = go.AddComponent<LayoutElement>();
         le.preferredWidth = 280f;
-        le.preferredHeight = 36f;
+        le.preferredHeight = 44f;
         le.flexibleWidth = 1f;
 
         var img = go.AddComponent<Image>();
@@ -586,7 +633,7 @@ public class SettingsManager : MonoBehaviour
         lRT.offsetMin = lRT.offsetMax = Vector2.zero;
         var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
         lTMP.color = C_TEXT;
-        lTMP.fontSize = 14f;
+        lTMP.fontSize = 17f;
         lTMP.alignment = TextAlignmentOptions.MidlineLeft;
         dd.captionText = lTMP;
 
@@ -600,7 +647,7 @@ public class SettingsManager : MonoBehaviour
         var aTMP = arrowGO.AddComponent<TextMeshProUGUI>();
         aTMP.text = "▼";
         aTMP.color = C_TEXT_DIM;
-        aTMP.fontSize = 12f;
+        aTMP.fontSize = 15f;
         aTMP.alignment = TextAlignmentOptions.Center;
 
         // Template (wymagane przez TMP_Dropdown)
@@ -846,26 +893,26 @@ public class SettingsManager : MonoBehaviour
         fRT.offsetMin = fRT.offsetMax = Vector2.zero;
 
         var hlg = foot.AddComponent<HorizontalLayoutGroup>();
-        hlg.spacing = 14f;
-        hlg.childAlignment = TextAnchor.MiddleRight;
+        hlg.spacing = 20f;
+        hlg.childAlignment = TextAnchor.MiddleCenter;
         hlg.childForceExpandHeight = true;
-        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandWidth  = false;
         hlg.childControlHeight = true;
-        hlg.childControlWidth = true;
-        hlg.padding = new RectOffset(0, 0, 4, 4);
+        hlg.childControlWidth  = true;
+        hlg.padding = new RectOffset(0, 0, 6, 6);
 
-        // Wypychacz
-        var spacer = new GameObject("Spacer");
-        spacer.transform.SetParent(foot.transform, false);
-        var sLE = spacer.AddComponent<LayoutElement>();
-        sLE.flexibleWidth = 1f;
-        spacer.AddComponent<RectTransform>();
+        var saveBtn = UIHelper.MakeButton(foot.transform, "Zapisz", C_SAVE, C_SAVE_H, C_BTN_P, C_TEXT, OnSave, height: 46f);
+        var saveLE  = saveBtn.gameObject.GetComponent<LayoutElement>();
+        saveLE.preferredWidth = 200f;
+        saveLE.flexibleWidth  = 0f;
 
-        UIHelper.MakeButton(foot.transform, "Zapisz", C_SAVE, C_SAVE_H, C_BTN_P, C_TEXT, OnSave, height: 42f);
-        UIHelper.MakeButton(foot.transform, "Powrót", C_BTN, C_BTN_H, C_BTN_P, C_TEXT, Close, height: 42f);
+        var backBtn = UIHelper.MakeButton(foot.transform, "Powrót", C_BTN, C_BTN_H, C_BTN_P, C_TEXT, Close, height: 46f);
+        var backLE  = backBtn.gameObject.GetComponent<LayoutElement>();
+        backLE.preferredWidth = 200f;
+        backLE.flexibleWidth  = 0f;
     }
 
-    void OnSave() { SaveSettings(); Close(); }
+    void OnSave() { SaveSettings(); ClosePanel(); }
 
     // ── Zakładki ───────────────────────────────────────────────────────────
 
@@ -896,7 +943,7 @@ public class SettingsManager : MonoBehaviour
     Slider AddSliderRow(Transform parent, string label, float min, float max, float val,
         System.Action<float> onChange)
     {
-        var row = UIHelper.MakeRow("Row_" + label, parent, 30f);
+        var row = UIHelper.MakeRow("Row_" + label, parent, 48f);
 
         AddRowLabel(row.transform, label);
 
@@ -904,9 +951,9 @@ public class SettingsManager : MonoBehaviour
         var pctGO = new GameObject("Pct");
         pctGO.transform.SetParent(row.transform, false);
         var pctLE = pctGO.AddComponent<LayoutElement>();
-        pctLE.preferredWidth = 46f;
+        pctLE.preferredWidth = 56f;
         var pctTMP = pctGO.AddComponent<TextMeshProUGUI>();
-        pctTMP.fontSize = 13f;
+        pctTMP.fontSize = 16f;
         pctTMP.color = C_TEXT_DIM;
         pctTMP.alignment = TextAlignmentOptions.MidlineRight;
 
@@ -947,7 +994,7 @@ public class SettingsManager : MonoBehaviour
         var handle = new GameObject("Handle");
         handle.transform.SetParent(handleArea.transform, false);
         var hRT = handle.AddComponent<RectTransform>();
-        hRT.sizeDelta = new Vector2(12f, 14f);
+        hRT.sizeDelta = new Vector2(16f, 22f);
         handle.AddComponent<Image>().color = Color.white;
 
         var slider = sGO.AddComponent<Slider>();
@@ -971,21 +1018,22 @@ public class SettingsManager : MonoBehaviour
 
     Toggle AddToggleRow(Transform parent, string label, bool initVal, System.Action<bool> onChange)
     {
-        var row = UIHelper.MakeRow("Row_" + label, parent, 36f);
+        var row = UIHelper.MakeRow("Row_" + label, parent, 60f);
         AddRowLabel(row.transform, label);
 
         var tGO = new GameObject("Toggle");
         tGO.transform.SetParent(row.transform, false);
         var tLE = tGO.AddComponent<LayoutElement>();
-        tLE.preferredWidth = 20f;
-        tLE.preferredHeight = 20f;
-        tLE.flexibleWidth = 0f;
+        tLE.preferredWidth  = 40f;
+        tLE.preferredHeight = 40f;
+        tLE.flexibleWidth   = 0f;
+        tLE.flexibleHeight  = 0f;
 
         var bgImg = tGO.AddComponent<Image>();
         bgImg.color = C_SLIDER_BG;
         var outline = tGO.AddComponent<Outline>();
-        outline.effectColor = C_SEP;
-        outline.effectDistance = new Vector2(1.5f, -1.5f);
+        outline.effectColor    = C_SEP;
+        outline.effectDistance = new Vector2(2f, -2f);
 
         var toggle = tGO.AddComponent<Toggle>();
         toggle.targetGraphic = bgImg;
@@ -1017,13 +1065,15 @@ public class SettingsManager : MonoBehaviour
         var lGO = new GameObject("Lbl");
         lGO.transform.SetParent(parent, false);
         var lLE = lGO.AddComponent<LayoutElement>();
-        lLE.preferredWidth = 220f;
-        lLE.flexibleWidth = 0f;
+        lLE.preferredWidth = 360f;
+        lLE.flexibleWidth  = 0f;
         var lTMP = lGO.AddComponent<TextMeshProUGUI>();
-        lTMP.text = text;
-        lTMP.fontSize = 15f;
-        lTMP.color = new Color(0.88f, 0.88f, 0.91f);
-        lTMP.alignment = TextAlignmentOptions.MidlineLeft;
+        lTMP.text                = text;
+        lTMP.fontSize            = 18f;
+        lTMP.color               = new Color(0.88f, 0.88f, 0.91f);
+        lTMP.alignment           = TextAlignmentOptions.MidlineLeft;
+        lTMP.overflowMode        = TextOverflowModes.Overflow;
+        lTMP.textWrappingMode = TextWrappingModes.NoWrap;
     }
 
     // ── Nakładka jasności (DontDestroyOnLoad) ─────────────────────────────

@@ -104,15 +104,25 @@ public abstract class WiezaBaza : MonoBehaviour
         lr.loop = true;
         lr.widthMultiplier = 0.12f;
         lr.positionCount = punkty;
-        var mat = new Material(Shader.Find("Sprites/Default"));
-        mat.renderQueue = 4000;
-        mat.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
-        lr.material = mat;
+
+        // Szukamy shadera kompatybilnego z aktywnym pipeline (Built-in / URP / HDRP)
+        Shader sh = Shader.Find("Sprites/Default");
+        if (sh == null) sh = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (sh == null) sh = Shader.Find("Unlit/Color");
+        if (sh == null) sh = Shader.Find("Hidden/Internal-Colored");
+
+        if (sh != null)
+        {
+            var mat = new Material(sh);
+            mat.renderQueue = 4000;
+            lr.material = mat;
+        }
+
         lr.startColor = kolor;
-        lr.endColor = kolor;
+        lr.endColor   = kolor;
         lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        lr.receiveShadows = false;
-        lr.sortingOrder = 10;
+        lr.receiveShadows    = false;
+        lr.sortingOrder      = 10;
 
         for (int i = 0; i < punkty; i++)
         {
@@ -125,16 +135,33 @@ public abstract class WiezaBaza : MonoBehaviour
     {
         var hpObj = new GameObject("HP_Display");
         hpObj.transform.SetParent(transform);
-        hpObj.transform.localPosition = new Vector3(0f, 4f, 0f);
         hpObj.transform.localRotation = Quaternion.identity;
+
+        // Pozycja w world space — zawsze 0.6 m nad szczytem modelu, niezależnie od skali prefabu
+        hpObj.transform.position = new Vector3(
+            transform.position.x,
+            GetModelTopY() + 0.6f,
+            transform.position.z);
 
         _hpText = hpObj.AddComponent<TextMeshPro>();
         _hpText.fontSize = 7f;
         _hpText.alignment = TextAlignmentOptions.Center;
         _hpText.fontStyle = FontStyles.Bold;
         _hpText.color = Color.green;
-        _hpText.fontMaterial.SetFloat("_ZTestMode", 8f); // 8 = CompareFunction.Always
+        _hpText.fontMaterial.SetFloat("_ZTestMode", 8f);
         _hpText.sortingOrder = 10;
+    }
+
+    float GetModelTopY()
+    {
+        float maxY = transform.position.y + 1f; // fallback gdy brak rendererów
+        foreach (var r in GetComponentsInChildren<Renderer>())
+        {
+            if (r is LineRenderer) continue;
+            if (r.bounds.size == Vector3.zero) continue;
+            if (r.bounds.max.y > maxY) maxY = r.bounds.max.y;
+        }
+        return maxY;
     }
 
     void UpdateHPDisplay()
