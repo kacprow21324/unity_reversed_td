@@ -29,3 +29,7 @@ Projekt w silniku Unity odwraca klasyczne założenia Tower Defense, oddając gr
 * Michał Lepak
 * Kacper Woszczyło
 * Magdalena Czyżewska
+
+### Wersje skompilowaną można pobrać pod adresem:
+
+https://www.mediafire.com/file/bqffrb552sjdg0t/RAMPAGE.7z/file
