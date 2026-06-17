@@ -721,7 +721,7 @@ public class TutorialManager : MonoBehaviour
     void BuildCard(Transform parent, CardData d)
     {
         var card = UIHelper.MakeImage("Card_" + d.Name, parent, C_CARD);
-        var outline = card.AddComponent<Outline>();
+        var outline = card.AddComponent<UnityEngine.UI.Outline>();
         outline.effectColor    = new Color(d.Accent.r, d.Accent.g, d.Accent.b, 0.40f);
         outline.effectDistance = new Vector2(1.5f, -1.5f);
 

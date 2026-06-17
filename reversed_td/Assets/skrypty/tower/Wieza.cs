@@ -18,6 +18,8 @@ public abstract class WiezaBaza : MonoBehaviour
     protected float currentHP;
     private TextMeshPro _hpText;
     private Transform _kamera;
+    private GameObject  _kragZasiegu;
+    private TowerOutline _towerOutline;
 
     protected virtual void Start()
     {
@@ -91,12 +93,28 @@ public abstract class WiezaBaza : MonoBehaviour
         if (this != null) attackSpeedMultiplier /= multiplier;
     }
 
+    public void PokazZasieg()  => _kragZasiegu?.SetActive(true);
+    public void UkryjZasieg() => _kragZasiegu?.SetActive(false);
+
+    public void PokazPodswietlenie()
+    {
+        if (_towerOutline == null)
+            _towerOutline = gameObject.AddComponent<TowerOutline>();
+        _towerOutline.Pokaz();
+    }
+
+    public void UkryjPodswietlenie()
+    {
+        _towerOutline?.Ukryj();
+    }
+
     protected void UtworzKragZasiegu(float promien, Color kolor)
     {
         var go = new GameObject("KragZasiegu");
         go.transform.SetParent(transform);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
+        _kragZasiegu = go;
 
         const int punkty = 64;
         var lr = go.AddComponent<LineRenderer>();
@@ -129,6 +147,8 @@ public abstract class WiezaBaza : MonoBehaviour
             float kat = i / (float)punkty * Mathf.PI * 2f;
             lr.SetPosition(i, new Vector3(Mathf.Cos(kat) * promien, 0.08f, Mathf.Sin(kat) * promien));
         }
+
+        go.SetActive(false);
     }
 
     void CreateHPDisplay()

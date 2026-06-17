@@ -2583,6 +2583,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: metaGracz1
+      value: 
+      objectReference: {fileID: 271347757}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: metaGracz2
+      value: 
+      objectReference: {fileID: 1811881776}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: startGracz1
+      value: 
+      objectReference: {fileID: 1420842793}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: startGracz2
+      value: 
+      objectReference: {fileID: 1430755476}
     - target: {fileID: 2074742628722823057, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

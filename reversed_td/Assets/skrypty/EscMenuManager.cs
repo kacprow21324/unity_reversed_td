@@ -170,7 +170,7 @@ public class EscMenuManager : MonoBehaviour
         pRT.anchorMin = pRT.anchorMax = pRT.pivot = new Vector2(0.5f, 0.5f);
         pRT.sizeDelta = new Vector2(340f, 300f);
 
-        var outline = _panel.AddComponent<Outline>();
+        var outline = _panel.AddComponent<UnityEngine.UI.Outline>();
         outline.effectColor = C_SEP;
         outline.effectDistance = new Vector2(1f, -1f);
 

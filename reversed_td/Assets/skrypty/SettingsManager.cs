@@ -1031,7 +1031,7 @@ public class SettingsManager : MonoBehaviour
 
         var bgImg = tGO.AddComponent<Image>();
         bgImg.color = C_SLIDER_BG;
-        var outline = tGO.AddComponent<Outline>();
+        var outline = tGO.AddComponent<UnityEngine.UI.Outline>();
         outline.effectColor    = C_SEP;
         outline.effectDistance = new Vector2(2f, -2f);
 

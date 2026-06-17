@@ -335,7 +335,7 @@ public static class UIGeneratorEditor
         pRT.anchorMin = pRT.anchorMax = pRT.pivot = new Vector2(0.5f, 0.5f);
         pRT.sizeDelta = new Vector2(340f, 300f);
 
-        var ol = panel.AddComponent<Outline>();
+        var ol = panel.AddComponent<UnityEngine.UI.Outline>();
         ol.effectColor    = C_SEP;
         ol.effectDistance = new Vector2(1f, -1f);
 
@@ -460,7 +460,7 @@ public static class UIGeneratorEditor
 
         var bgImg = tGO.AddComponent<Image>();
         bgImg.color = C_SLIDER_BG;
-        var outl = tGO.AddComponent<Outline>();
+        var outl = tGO.AddComponent<UnityEngine.UI.Outline>();
         outl.effectColor    = C_SEP;
         outl.effectDistance = new Vector2(1.5f, -1.5f);
 

@@ -5208,6 +5208,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: metaGracz1
+      value: 
+      objectReference: {fileID: 2426966184857260960}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: metaGracz2
+      value: 
+      objectReference: {fileID: 1378068359}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: startGracz1
+      value: 
+      objectReference: {fileID: 266038331619915056}
+    - target: {fileID: 1872279534434121462, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
+      propertyPath: startGracz2
+      value: 
+      objectReference: {fileID: 1408025923}
     - target: {fileID: 2074742628722823057, guid: a1a6b0c105e2c4340a9b700ebb738323, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -6217,9 +6233,9 @@ SceneRoots:
   - {fileID: 1497616085}
   - {fileID: 1104683962}
   - {fileID: 1135482624}
-  - {fileID: 3398969657705361917}
   - {fileID: 1551502468}
   - {fileID: 6590925323616306324}
   - {fileID: 6788342388585624687}
   - {fileID: 1704290914}
   - {fileID: 2535218798102420735}
+  - {fileID: 3398969657705361917}

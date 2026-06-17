@@ -87,7 +87,7 @@ public static class SkyboxSetupTool
         DynamicGI.UpdateEnvironment();
 
         // Directional Light
-        Light[] lights = Object.FindObjectsOfType<Light>();
+        Light[] lights = Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
         Light sun = null;
         foreach (Light l in lights)
             if (l.type == LightType.Directional) { sun = l; break; }

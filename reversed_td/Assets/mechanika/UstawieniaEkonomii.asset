@@ -19,16 +19,16 @@ MonoBehaviour:
   vehicles:
   - vehicleName: "W\xF3z Tank"
     cost: 50
-    icon: {fileID: 21300000, guid: a734eccac0ad8bc49950dd4fbee58611, type: 3}
+    icon: {fileID: 21300000, guid: 9b7afa97fe210a147a93161c718e2b89, type: 3}
   - vehicleName: "W\xF3z Dalekosi\u0119\u017Cny"
     cost: 25
-    icon: {fileID: 21300000, guid: b2f9adc22d0fa0647880b18b89bf0872, type: 3}
+    icon: {fileID: 21300000, guid: 386c0f51e77d64e488ffc54e066172b4, type: 3}
   - vehicleName: "W\xF3z Zasadzka"
     cost: 30
-    icon: {fileID: 21300000, guid: 881f73f964cf5104abc91a5f657615a8, type: 3}
+    icon: {fileID: 21300000, guid: e600b90ad40b15f4386bf18e9dcee3bc, type: 3}
   - vehicleName: "W\xF3z Lustrzany"
     cost: 45
-    icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+    icon: {fileID: 21300000, guid: 982aff6192f788c46a03efbc065f29c0, type: 3}
   - vehicleName: "W\xF3z Podstawowy"
     cost: 20
-    icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+    icon: {fileID: 21300000, guid: 8a68a819d13e75644a627b6dc7eaf628, type: 3}
