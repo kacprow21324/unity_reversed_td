@@ -30,6 +30,9 @@ Projekt w silniku Unity odwraca klasyczne założenia Tower Defense, oddając gr
 * Kacper Woszczyło
 * Magdalena Czyżewska
 
-### Wersje skompilowaną można pobrać pod adresem:
+### Wersje skompilowaną 1.0 można pobrać pod adresem:
 
 https://www.mediafire.com/file/bqffrb552sjdg0t/RAMPAGE.7z/file
+
+### Wersje skompilowaną 1.1 można pobrać pod adresem:
+https://www.mediafire.com/file/dorhzdbudjy05bx/RAMPAGE_1.1.7z/file
