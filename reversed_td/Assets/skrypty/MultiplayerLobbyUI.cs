@@ -28,6 +28,9 @@ public class MultiplayerLobbyUI : MonoBehaviour
     [Header("Lobby Panel UI")]
     public LobbyPanelUI lobbyPanelUI;
 
+    [Header("Przyciski nawigacyjne (opcjonalne — generowane jeśli brak)")]
+    public Button backFromMultiplayerButton;
+
     // ── Singleton ──────────────────────────────────────────────────────────
 
     public static MultiplayerLobbyUI Instance { get; private set; }
@@ -163,7 +166,12 @@ public class MultiplayerLobbyUI : MonoBehaviour
 
     void BudujPrzyciskiWstecz()
     {
-        if (multiplayerPanel != null &&
+        if (backFromMultiplayerButton != null)
+        {
+            backFromMultiplayerButton.onClick.RemoveAllListeners();
+            backFromMultiplayerButton.onClick.AddListener(OnBackFromMultiplayerPanel);
+        }
+        else if (multiplayerPanel != null &&
             multiplayerPanel.transform.Find("Btn_← Wstecz") == null)
         {
             var btn = UIHelper.MakeButton(

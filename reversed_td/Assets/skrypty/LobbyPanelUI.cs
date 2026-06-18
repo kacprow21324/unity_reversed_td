@@ -27,6 +27,7 @@ public class LobbyPanelUI : MonoBehaviour
     [Header("Przyciski")]
     public Button            readyButton;
     public Button            startMatchButton;
+    public Button            exitLobbyButton;
     public TextMeshProUGUI   readyButtonText;
     public TextMeshProUGUI   statusText;
 
@@ -315,7 +316,9 @@ public class LobbyPanelUI : MonoBehaviour
             statusText = BuildStatusText();
 
         // Przycisk wyjścia do menu głównego
-        if (transform.Find("ExitLobbyButton") == null)
+        if (exitLobbyButton != null)
+            exitLobbyButton.onClick.AddListener(OnExitLobbyClicked);
+        else if (transform.Find("ExitLobbyButton") == null)
             BuildExitButton();
     }
 
@@ -625,7 +628,9 @@ public class LobbyPanelUI : MonoBehaviour
     void BuildExitButton()
     {
         var go = new GameObject("ExitLobbyButton");
-        go.transform.SetParent(transform, false);
+        // Parent do panelu lobby (Canvas), nie do LobbyManager (plain Transform)
+        var parent = playerListRoot != null ? playerListRoot.parent : transform;
+        go.transform.SetParent(parent, false);
 
         var rt = go.AddComponent<RectTransform>();
         rt.anchorMin = new Vector2(0.04f, 0.91f);
@@ -654,11 +659,14 @@ public class LobbyPanelUI : MonoBehaviour
         txt.fontStyle = FontStyles.Bold;
         txt.color = Color.white;
         txt.alignment = TextAlignmentOptions.Center;
+
+        exitLobbyButton = btn;
     }
 
     void OnExitLobbyClicked()
     {
         FindFirstObjectByType<MultiplayerLobbyUI>()?.Disconnect();
+        FindFirstObjectByType<MainMenuLogic>()?.OnClickBack();
     }
 
     TextMeshProUGUI BuildStatusText()
